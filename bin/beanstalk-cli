@@ -1,0 +1,16 @@
+#!/usr/bin/env php
+<?php
+
+require_once dirname(__DIR__) . '/vendor/autoload.php';
+
+use Phlib\Beanstalk\Console\StatsCommand;
+use Phlib\Beanstalk\Console\TubesCommand;
+use Phlib\Beanstalk\Console\JobsCommand;
+use Phlib\Beanstalk\Console\SchedulerCommand;
+use Symfony\Component\Console\Application;
+
+$application = new Application();
+$application->add(new StatsCommand());
+$application->add(new TubesCommand());
+$application->add(new JobsCommand());
+$application->run();
