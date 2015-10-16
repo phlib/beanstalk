@@ -1,14 +1,23 @@
 #!/usr/bin/env php
 <?php
 
-require_once dirname(__DIR__) . '/vendor/autoload.php';
+// autoload
+$autoloadFiles = [__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php'];
+foreach ($autoloadFiles as $autoloadFile) {
+    if (file_exists($autoloadFile)) {
+        require_once $autoloadFile;
+        break;
+    }
+}
 
+// use
 use Phlib\Beanstalk\Console\StatsCommand;
 use Phlib\Beanstalk\Console\TubesCommand;
 use Phlib\Beanstalk\Console\JobsCommand;
 use Phlib\Beanstalk\Console\SchedulerCommand;
 use Symfony\Component\Console\Application;
 
+// lets go!
 $application = new Application();
 $application->add(new StatsCommand());
 $application->add(new TubesCommand());
