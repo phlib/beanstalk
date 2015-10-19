@@ -73,7 +73,7 @@ interface BeanstalkInterface
 
     /**
      * @param string $tube
-     * @return $this
+     * @return int|false Number of tubes being watched or false
      */
     public function ignore($tube);
 

@@ -241,20 +241,22 @@ class Beanstalk implements BeanstalkInterface
 
     /**
      * @param string $tube
-     * @return $this
+     * @return int|false
      * @throws Exception\CommandException
      */
     public function ignore($tube)
     {
-        if (!isset($this->watching[$tube])) {
-            return $this;
+        if (isset($this->watching[$tube])) {
+            if (count($this->watching) == 1) {
+                return false;
+            }
+
+            (new Command\Ignore($tube))
+                ->process($this->getSocket());
+            unset($this->watching[$tube]);
         }
 
-        (new Command\Ignore($tube))
-            ->process($this->getSocket());
-        unset($this->watching[$tube]);
-
-        return $this;
+        return count($this->watching);
     }
 
     /**
