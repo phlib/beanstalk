@@ -78,11 +78,10 @@ class BeanstalkPool implements BeanstalkInterface
     {
         $startTime = time();
         do {
-            $connections = $this->getRandomisedConnections();
-            foreach ($connections as $connection) {
+            foreach ($this->randomKeys() as $key) {
                 try {
-                    $result = $connection->reserve(0);
-                    if ($result['response']) {
+                    $result = $this->sendToExact($key, 'reserve', [0]);
+                    if (is_array($result) && isset($result['response'])) {
                         return $result['response'];
                     }
                 } catch (\Exception $e) {
@@ -148,25 +147,28 @@ class BeanstalkPool implements BeanstalkInterface
      */
     public function watch($tube)
     {
-        if (!in_array($tube, $this->watching)) {
+        if (!isset($this->watching[$tube])) {
             $this->sendToAll('watch', [$tube]);
-            $this->watching[] = $tube;
+            $this->watching[$tube] = true;
         }
         return $this;
     }
 
     /**
      * @param string $tube
-     * @return $this
+     * @return int|false
      */
     public function ignore($tube)
     {
         $index = array_search($tube, $this->watching);
         if ($index !== false) {
+            if (count($this->watching) == 1) {
+                return false;
+            }
             $this->sendToAll('ignore', [$tube]);
             unset($this->watching[$index]);
         }
-        return $this;
+        return count($this->watching);
     }
 
     /**
@@ -176,7 +178,7 @@ class BeanstalkPool implements BeanstalkInterface
     public function peek($id)
     {
         list($key, $jobId) = $this->splitId($id);
-        return $this->sendToExact($key, 'peek', [$jobId]);
+        return $this->sendToExact($key, 'peek', [$jobId])['response'];
     }
 
     /**
@@ -184,7 +186,7 @@ class BeanstalkPool implements BeanstalkInterface
      */
     public function peekReady()
     {
-        return $this->pullFromRandom('peekReady');
+        return $this->sendToRandom('peekReady')['response'];
     }
 
     /**
@@ -192,7 +194,7 @@ class BeanstalkPool implements BeanstalkInterface
      */
     public function peekDelayed()
     {
-        return $this->pullFromRandom('peekDelayed');
+        return $this->sendToRandom('peekDelayed')['response'];
     }
 
     /**
@@ -200,7 +202,7 @@ class BeanstalkPool implements BeanstalkInterface
      */
     public function peekBuried()
     {
-        return $this->pullFromRandom('peekBuried');
+        return $this->sendToRandom('peekBuried')['response'];
     }
 
     /**
@@ -214,19 +216,19 @@ class BeanstalkPool implements BeanstalkInterface
             try {
                 $result = $this->sendToExact($key, 'statsTube', [$this->using]);
 
-                $buriedJobs = isset($result['current-jobs-buried'])
-                    ? $result['current-jobs-buried'] : 0;
+                $stats = $result['response'];
+                $buriedJobs = isset($stats['current-jobs-buried'])
+                    ? $stats['current-jobs-buried'] : 0;
 
                 if ($buriedJobs > 0) {
                     $kick   = min($buriedJobs, $quantity - $kicked);
                     $result = $this->sendToExact($key, 'kick', [$kick]);
-                    $kicked += (int)$result;
+                    $kicked += (int)$result['response'];
 
                     if ($kicked >= $quantity) {
                         break;
                     }
                 }
-
             } catch (\Exception $e) {
                 // ignore
             }
@@ -239,7 +241,58 @@ class BeanstalkPool implements BeanstalkInterface
      */
     public function stats()
     {
-        // TODO: Implement stats() method.
+        $stats = array();
+        $results = $this->sendToAll('stats');
+        foreach ($results as $result) {
+            if (!isset($result['response']) || !is_array($result['response'])) {
+                continue;
+            }
+            $stats = $this->statsCombine($stats, $result['response']);
+        }
+
+        if (is_array($stats)) {
+            $keys = array(
+                'current-jobs-urgent',
+                'current-jobs-ready',
+                'current-jobs-reserved',
+                'current-jobs-delayed',
+                'current-jobs-buried',
+                'cmd-put',
+                'cmd-peek',
+                'cmd-peek-ready',
+                'cmd-peek-delayed',
+                'cmd-peek-buried',
+                'cmd-reserve',
+                'cmd-reserve-with-timeout',
+                'cmd-delete',
+                'cmd-release',
+                'cmd-use',
+                'cmd-watch',
+                'cmd-ignore',
+                'cmd-bury',
+                'cmd-kick',
+                'cmd-touch',
+                'cmd-stats',
+                'cmd-stats-job',
+                'cmd-stats-tube',
+                'cmd-list-tubes',
+                'cmd-list-tube-used',
+                'cmd-list-tubes-watched',
+                'cmd-pause-tube',
+                'job-timeouts',
+                'total-jobs',
+                'current-tubes',
+                'current-connections',
+                'current-producers',
+                'current-workers',
+                'current-waiting',
+                'total-connections',
+            );
+
+            return array_intersect_key($stats, array_flip($keys));
+        }
+
+        return false;
     }
 
     /**
@@ -248,7 +301,8 @@ class BeanstalkPool implements BeanstalkInterface
      */
     public function statsJob($id)
     {
-        // TODO: Implement statsJob() method.
+        list($key, $jobId) = $this->splitId($id);
+        return $this->sendToExact($key, 'statsJob', [$jobId])['response'];
     }
 
     /**
@@ -257,7 +311,52 @@ class BeanstalkPool implements BeanstalkInterface
      */
     public function statsTube($tube)
     {
-        // TODO: Implement statsTube() method.
+        $stats = array();
+        $results = $this->sendToAll('statsTube', [$tube]);
+        foreach ($results as $result) {
+            if (!isset($result['response']) || !is_array($result['response'])) {
+                continue;
+            }
+            $stats = $this->statsCombine($stats, $result['response']);
+        }
+
+        if (empty($stats)) {
+            return false;
+        }
+
+        $keys = array(
+            'current-jobs-urgent',
+            'current-jobs-ready',
+            'current-jobs-reserved',
+            'current-jobs-delayed',
+            'current-jobs-buried',
+            'total-jobs',
+            'current-using',
+            'current-watching',
+            'current-waiting',
+            'cmd-delete',
+            'cmd-pause-tube',
+            'pause',
+            'pause-time-left',
+        );
+
+        return array_intersect_key($stats, array_flip($keys));
+    }
+
+    /**
+     * @param array $cumulative
+     * @param array $stats
+     * @return array
+     */
+    protected function statsCombine(array $cumulative, array $stats)
+    {
+        foreach ($stats as $name => $value) {
+            if (!array_key_exists($name, $cumulative)) {
+                $cumulative[$name] = 0;
+            }
+            $cumulative[$name] += $value;
+        }
+        return $cumulative;
     }
 
     /**
@@ -266,15 +365,10 @@ class BeanstalkPool implements BeanstalkInterface
     public function listTubes()
     {
         $tubes = [];
-        foreach ($this->randKeyList() as $key) {
-            try {
-                $listTubes = $this->formatResponse($this->sendCommand($key, 'listTubes'));
-                $tubes = array_merge($listTubes, $tubes);
-            } catch (\Exception $e) {
-                // ignore
-            }
+        $responses = $this->sendToAll('listTubes');
+        foreach ($responses as $response) {
+            $tubes = array_merge($response['response'], $tubes);
         }
-
         return array_unique($tubes);
     }
 
@@ -291,7 +385,7 @@ class BeanstalkPool implements BeanstalkInterface
      */
     public function listTubesWatched()
     {
-        return $this->watching;
+        return array_keys($this->watching);
     }
 
     /**
@@ -301,16 +395,19 @@ class BeanstalkPool implements BeanstalkInterface
      */
     protected function combineId(Beanstalk $connection, $id)
     {
-        $socket = $connection->getSocket();
-        return "{$socket->getUniqueIdentifier()}.{$id}";
+        return "{$connection->getUniqueIdentifier()}.{$id}";
     }
 
     /**
      * @param string $id
      * @return array Indexed array of key and id.
+     * @throws InvalidArgumentException
      */
     protected function splitId($id)
     {
+        if (strpos($id, '.') === false) {
+            throw new InvalidArgumentException('Job ID is not in expected pool format.');
+        }
         list($key, $jobId) = explode('.', $id, 3);
         return [$key, $jobId];
     }
@@ -337,22 +434,27 @@ class BeanstalkPool implements BeanstalkInterface
      * @param string $command
      * @param array  $arguments
      * @return mixed
+     * @throws \Exception
      * @throws RuntimeException
      */
-    public function sendToRandom($command, array $arguments)
+    public function sendToRandom($command, array $arguments = [])
     {
+        $e = null;
         foreach ($this->randomKeys() as $key) {
             try {
-                return $this->sendToExact($key, $command, $arguments);
+                $result = $this->sendToExact($key, $command, $arguments);
+                if ($result['response'] !== false) {
+                    return $result;
+                }
             } catch (RuntimeException $e) {
                 // ignore
             }
         }
 
-        if (!isset($e) || !$e instanceof \Exception) {
-            $e = new RuntimeException('Failed to execute command to a connection.');
+        if ($e instanceof \Exception) {
+            throw $e;
         }
-        throw $e;
+        return ['connection' => null, 'response' => false];
     }
 
     /**
@@ -360,7 +462,7 @@ class BeanstalkPool implements BeanstalkInterface
      * @param array  $arguments
      * @return array
      */
-    public function sendToAll($command, array $arguments)
+    public function sendToAll($command, array $arguments = [])
     {
         $results = [];
         $keys = array_keys($this->connections);
@@ -387,7 +489,12 @@ class BeanstalkPool implements BeanstalkInterface
             $connection = $this->getConnection($key);
             $result     = call_user_func_array([$connection, $command], $arguments);
             $this->connections[$key]['retry_at'] = false;
-            return $result;
+
+            if (is_array($result) and array_key_exists('id', $result)) {
+                $result['id'] = $this->combineId($connection, $result['id']);
+            }
+
+            return ['connection' => $connection, 'response' => $result];
         } catch (RuntimeException $e) {
             if ($this->connections[$key]['retry_at'] === false) {
                 $this->connections[$key]['retry_at'] = time() + 600; // 10 minutes
