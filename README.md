@@ -1,7 +1,7 @@
 # phlib/beanstalk
 
-[![Latest Version](https://img.shields.io/github/release/phlib/beanstalk.svg)](https://github.com/phlib/beanstalk/releases)
 [![Build Status](https://img.shields.io/travis/phlib/beanstalk/master.svg)](https://travis-ci.org/phlib/beanstalk)
+[![Latest Stable Version](https://img.shields.io/packagist/v/phlib/beanstalk.svg)](https://packagist.org/packages/phlib/beanstalk)
 [![Total Downloads](https://img.shields.io/packagist/dt/phlib/beanstalk.svg)](https://packagist.org/packages/phlib/beanstalk)
 
 Beanstalkd library implementation.
