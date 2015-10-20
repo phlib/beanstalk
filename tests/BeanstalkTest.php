@@ -43,6 +43,13 @@ class BeanstalkTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Phlib\Beanstalk\Socket', $this->beanstalk->getSocket());
     }
 
+    public function testGetUniqueIdentifierPassesThroughToSocket()
+    {
+        $this->socket->expects($this->once())
+            ->method('getUniqueIdentifier');
+        $this->beanstalk->getUniqueIdentifier();
+    }
+
     public function testDefaultJobPackager()
     {
         $this->assertInstanceOf('\Phlib\Beanstalk\JobPackager\Json', $this->beanstalk->getJobPackager());
@@ -142,6 +149,11 @@ class BeanstalkTest extends \PHPUnit_Framework_TestCase
         $this->beanstalk->ignore($tube);
     }
 
+    public function testIgnoreDoesNothingWhenOnlyHasOneTube()
+    {
+        $this->assertFalse($this->beanstalk->ignore('default'));
+    }
+
     public function testPeek()
     {
         $id = 245;
@@ -150,17 +162,17 @@ class BeanstalkTest extends \PHPUnit_Framework_TestCase
 
     public function testPeekReady()
     {
-        $this->execute("peek-ready", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekReady', []);
+        $this->execute("peek-ready", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekReady');
     }
 
     public function testPeekDelayed()
     {
-        $this->execute("peek-delayed", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekDelayed', []);
+        $this->execute("peek-delayed", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekDelayed');
     }
 
     public function testPeekBuried()
     {
-        $this->execute("peek-buried", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekBuried', []);
+        $this->execute("peek-buried", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekBuried');
     }
 
     /**
@@ -177,7 +189,7 @@ class BeanstalkTest extends \PHPUnit_Framework_TestCase
      */
     public function testPeekReadyNotFound()
     {
-        $this->execute("peek-ready", 'NOT_FOUND', 'peekReady', []);
+        $this->execute("peek-ready", 'NOT_FOUND', 'peekReady');
     }
 
     /**
@@ -185,7 +197,7 @@ class BeanstalkTest extends \PHPUnit_Framework_TestCase
      */
     public function testPeekDelayedNotFound()
     {
-        $this->execute("peek-delayed", 'NOT_FOUND', 'peekDelayed', []);
+        $this->execute("peek-delayed", 'NOT_FOUND', 'peekDelayed');
     }
 
     /**
@@ -193,7 +205,7 @@ class BeanstalkTest extends \PHPUnit_Framework_TestCase
      */
     public function testPeekBuriedNotFound()
     {
-        $this->execute("peek-buried", 'NOT_FOUND', 'peekBuried', []);
+        $this->execute("peek-buried", 'NOT_FOUND', 'peekBuried');
     }
 
     public function testKick()
@@ -220,7 +232,34 @@ class BeanstalkTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals('default', $this->beanstalk->listTubeUsed());
     }
 
-    protected function execute($command, $response, $method, array $arguments)
+    public function testStats()
+    {
+        $yaml  = 'key1: value1';
+        $stats = ['key1' => 'value1'];
+
+        $actual = $this->execute('stats', ["OK 1234\r\n", "---\n$yaml\r\n"], 'stats');
+        $this->assertEquals($stats, $actual);
+    }
+
+    public function testStatsJob()
+    {
+        $yaml  = 'key1: value1';
+        $stats = ['key1' => 'value1'];
+
+        $actual = $this->execute('stats-job', ["OK 1234\r\n", "---\n$yaml\r\n"], 'statsJob', [123]);
+        $this->assertEquals($stats, $actual);
+    }
+
+    public function testStatsTube()
+    {
+        $yaml  = 'key1: value1';
+        $stats = ['key1' => 'value1'];
+
+        $actual = $this->execute('stats-tube', ["OK 1234\r\n", "---\n$yaml\r\n"], 'statsTube', ['test-tube']);
+        $this->assertEquals($stats, $actual);
+    }
+
+    protected function execute($command, $response, $method, array $arguments = [])
     {
         $this->socket->expects($this->once())
             ->method('write')
