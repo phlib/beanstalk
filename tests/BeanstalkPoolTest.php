@@ -399,7 +399,7 @@ class BeanstalkPoolTest extends \PHPUnit_Framework_TestCase
                 ->willReturn(['current-jobs-buried' => $count]);
             $this->servers[$index]->expects($this->any())
                 ->method('kick')
-                ->willReturn($count);
+                ->will($this->returnArgument(0));
         }
         $this->assertSame($expected, $this->pool->kick($expected));
     }
