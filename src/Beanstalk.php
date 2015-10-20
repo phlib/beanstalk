@@ -59,7 +59,7 @@ class Beanstalk implements BeanstalkInterface
      * @param int    $port
      * @param array  $options
      */
-    public function __construct($host, $port = Socket::DEFAULT_PORT, array $options = array())
+    public function __construct($host, $port = Socket::DEFAULT_PORT, array $options = [])
     {
         $this->host    = $host;
         $this->port    = $port;

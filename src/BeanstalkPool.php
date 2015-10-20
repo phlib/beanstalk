@@ -241,7 +241,7 @@ class BeanstalkPool implements BeanstalkInterface
      */
     public function stats()
     {
-        $stats = array();
+        $stats = [];
         $results = $this->sendToAll('stats');
         foreach ($results as $result) {
             if (!isset($result['response']) || !is_array($result['response'])) {
@@ -251,7 +251,7 @@ class BeanstalkPool implements BeanstalkInterface
         }
 
         if (is_array($stats)) {
-            $keys = array(
+            $keys = [
                 'current-jobs-urgent',
                 'current-jobs-ready',
                 'current-jobs-reserved',
@@ -287,7 +287,7 @@ class BeanstalkPool implements BeanstalkInterface
                 'current-workers',
                 'current-waiting',
                 'total-connections',
-            );
+            ];
 
             return array_intersect_key($stats, array_flip($keys));
         }
@@ -311,7 +311,7 @@ class BeanstalkPool implements BeanstalkInterface
      */
     public function statsTube($tube)
     {
-        $stats = array();
+        $stats = [];
         $results = $this->sendToAll('statsTube', [$tube]);
         foreach ($results as $result) {
             if (!isset($result['response']) || !is_array($result['response'])) {
@@ -324,7 +324,7 @@ class BeanstalkPool implements BeanstalkInterface
             return false;
         }
 
-        $keys = array(
+        $keys = [
             'current-jobs-urgent',
             'current-jobs-ready',
             'current-jobs-reserved',
@@ -338,7 +338,7 @@ class BeanstalkPool implements BeanstalkInterface
             'cmd-pause-tube',
             'pause',
             'pause-time-left',
-        );
+        ];
 
         return array_intersect_key($stats, array_flip($keys));
     }
