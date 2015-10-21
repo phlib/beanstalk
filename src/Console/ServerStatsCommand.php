@@ -76,7 +76,7 @@ class ServerStatsCommand extends Command
 
     protected function outputServerStats(array $binlog, array $command, array $current, OutputInterface $output)
     {
-        $output->writeLn('<info>Server Stats:</info>');
+        $output->writeln('<info>Server Stats:</info>');
         $table = $this->getTable($output);
         $table->setHeaders(['Current', 'Stat', 'Command', 'Stat', 'Binlog', 'Stat']);
 
@@ -128,7 +128,7 @@ class ServerStatsCommand extends Command
     protected function outputAllTubeStats(array $stats, OutputInterface $output)
     {
 //        var_dump($stats); die;
-        $output->writeLn('<info>Tube Stats:</info>');
+        $output->writeln('<info>Tube Stats:</info>');
         $table = $this->getTable($output);
         $table->setHeaders($this->getTubeHeaders());
         foreach ($stats as $tubeStats) {
@@ -219,7 +219,7 @@ class ServerStatsCommand extends Command
         //        $formattedBlock = $formatter->formatBlock(['Some Beanstalk Title', 'Some version and pid information'], 'info');
         //        $output->writeLn($formattedBlock);
 
-        $output->writeLn('<info>Global</info>');
+        $output->writeln('<info>Global</info>');
         $table = $this->getTable($output);
         $table->setHeaders(['Name', 'Stat', 'Name', 'Stat', 'Name', 'Stat', 'Name', 'Stat']);
         $stats = $beanstalk->stats();
@@ -294,7 +294,7 @@ class ServerStatsCommand extends Command
     {
         $table = $this->getTable($output);
         $table->setHeaders(array_values($headers));
-        $output->writeLn('<info>Tubes</info>');
+        $output->writeln('<info>Tubes</info>');
         $tubes = $beanstalk->listTubes();
         foreach ($tubes as $tube) {
             $stats = $beanstalk->statsTube($tube);

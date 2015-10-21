@@ -24,6 +24,6 @@ class TubeStatsCommand extends Command
         if ($name) {
             $text .= ' ' . $name;
         }
-        $output->writeLn($text);
+        $output->writeln($text);
     }
 }
