@@ -83,7 +83,7 @@ class Peek implements CommandInterface
                 return ['id' => $id, 'body' => $body];
 
             case 'NOT_FOUND':
-                throw new NotFoundException("Peek failed find any jobs");
+                throw new NotFoundException("Peek failed to find any jobs");
 
             default:
                 throw new CommandException("Unknown peek response '$response'");

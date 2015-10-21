@@ -2,6 +2,7 @@
 
 namespace Phlib\Beanstalk;
 
+use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\JobPackager\PackagerInterface;
 
 /**
@@ -272,36 +273,48 @@ class Beanstalk implements BeanstalkInterface
     }
 
     /**
-     * @return array
+     * @return array|false
      */
     public function peekReady()
     {
-        $jobData = (new Command\Peek(Command\Peek::READY))
-            ->process($this->getSocket());
-        $jobData['body'] = $this->getJobPackager()->decode($jobData['body']);
-        return $jobData;
+        try {
+            $jobData = (new Command\Peek(Command\Peek::READY))
+                ->process($this->getSocket());
+            $jobData['body'] = $this->getJobPackager()->decode($jobData['body']);
+            return $jobData;
+        } catch (NotFoundException $e) {
+            return false;
+        }
     }
 
     /**
-     * @return array
+     * @return array|false
      */
     public function peekDelayed()
     {
-        $jobData = (new Command\Peek(Command\Peek::DELAYED))
-            ->process($this->getSocket());
-        $jobData['body'] = $this->getJobPackager()->decode($jobData['body']);
-        return $jobData;
+        try {
+            $jobData = (new Command\Peek(Command\Peek::DELAYED))
+                ->process($this->getSocket());
+            $jobData['body'] = $this->getJobPackager()->decode($jobData['body']);
+            return $jobData;
+        } catch (NotFoundException $e) {
+            return false;
+        }
     }
 
     /**
-     * @return array
+     * @return array|false
      */
     public function peekBuried()
     {
-        $jobData = (new Command\Peek(Command\Peek::BURIED))
-            ->process($this->getSocket());
-        $jobData['body'] = $this->getJobPackager()->decode($jobData['body']);
-        return $jobData;
+        try {
+            $jobData = (new Command\Peek(Command\Peek::BURIED))
+                ->process($this->getSocket());
+            $jobData['body'] = $this->getJobPackager()->decode($jobData['body']);
+            return $jobData;
+        } catch (NotFoundException $e) {
+            return false;
+        }
     }
 
     /**

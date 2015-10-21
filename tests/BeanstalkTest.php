@@ -181,31 +181,22 @@ class BeanstalkTest extends \PHPUnit_Framework_TestCase
     public function testPeekNotFound()
     {
         $id = 245;
-        $this->execute("peek $id", 'NOT_FOUND', 'peek', [$id]);
+        $this->assertFalse($this->execute("peek $id", 'NOT_FOUND', 'peek', [$id]));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testPeekReadyNotFound()
     {
-        $this->execute("peek-ready", 'NOT_FOUND', 'peekReady');
+        $this->assertFalse($this->execute("peek-ready", 'NOT_FOUND', 'peekReady'));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testPeekDelayedNotFound()
     {
-        $this->execute("peek-delayed", 'NOT_FOUND', 'peekDelayed');
+        $this->assertFalse($this->execute("peek-delayed", 'NOT_FOUND', 'peekDelayed'));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testPeekBuriedNotFound()
     {
-        $this->execute("peek-buried", 'NOT_FOUND', 'peekBuried');
+        $this->assertFalse($this->execute("peek-buried", 'NOT_FOUND', 'peekBuried'));
     }
 
     public function testKick()

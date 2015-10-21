@@ -182,7 +182,7 @@ class BeanstalkPool implements BeanstalkInterface
     }
 
     /**
-     * @return array|null
+     * @return array|false
      */
     public function peekReady()
     {
@@ -190,7 +190,7 @@ class BeanstalkPool implements BeanstalkInterface
     }
 
     /**
-     * @return array|null
+     * @return array|false
      */
     public function peekDelayed()
     {
@@ -198,7 +198,7 @@ class BeanstalkPool implements BeanstalkInterface
     }
 
     /**
-     * @return array|null
+     * @return array|false
      */
     public function peekBuried()
     {

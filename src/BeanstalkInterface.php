@@ -90,17 +90,17 @@ interface BeanstalkInterface
     public function statsJob($id);
 
     /**
-     * @return array|null
+     * @return array|false
      */
     public function peekReady();
 
     /**
-     * @return array|null
+     * @return array|false
      */
     public function peekDelayed();
 
     /**
-     * @return array|null
+     * @return array|false
      */
     public function peekBuried();
 
