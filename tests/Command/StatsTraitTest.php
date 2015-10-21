@@ -72,6 +72,10 @@ class StatsTraitTest extends CommandTestCase
         ];
     }
 
+    /**
+     * @param array $mockFns
+     * @return \Phlib\Beanstalk\Command\StatsTrait|\PHPUnit_Framework_MockObject_MockObject
+     */
     public function getMockStat(array $mockFns)
     {
         $availableFns = ['process', 'decode', 'getCommand'];

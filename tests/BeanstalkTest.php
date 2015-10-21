@@ -9,7 +9,7 @@ use Phlib\Beanstalk\Socket;
 class BeanstalkTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var Socket
+     * @var Socket|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $socket;
 

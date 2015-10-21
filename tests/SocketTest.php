@@ -131,6 +131,10 @@ class SocketTest extends \PHPUnit_Framework_TestCase
         $this->getMockSocket(['read'])->read();
     }
 
+    /**
+     * @param array $mockFns
+     * @return Socket|\PHPUnit_Framework_MockObject_MockObject
+     */
     protected function getMockSocket(array $mockFns)
     {
         $availableFns = ['connect', 'disconnect', 'read', 'write', 'getUniqueIdentifier'];

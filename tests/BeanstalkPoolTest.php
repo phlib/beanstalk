@@ -18,7 +18,7 @@ class BeanstalkPoolTest extends \PHPUnit_Framework_TestCase
     protected $pool;
 
     /**
-     * @var Beanstalk[]
+     * @var Beanstalk[]|\PHPUnit_Framework_MockObject_MockObject[]
      */
     protected $servers;
 
