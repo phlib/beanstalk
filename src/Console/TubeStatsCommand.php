@@ -10,6 +10,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class TubeStatsCommand extends Command
 {
+    use DefaultConfigureTrait;
+
     protected function configure()
     {
         $this->setName('tube:stats')
@@ -19,11 +21,8 @@ class TubeStatsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $name = $input->getArgument('name');
-        $text = 'Hello';
-        if ($name) {
-            $text .= ' ' . $name;
-        }
-        $output->writeln($text);
+        $stats = $this->getBeanstalk()
+            ->statsTube($input->getArgument('tube'));
+        $output->writeln(var_export($stats, true)); // TODO: this needs to be prettier?
     }
 }

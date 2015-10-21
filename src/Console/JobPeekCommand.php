@@ -10,6 +10,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class JobPeekCommand extends Command
 {
+    use DefaultConfigureTrait;
+
     protected function configure()
     {
         $this->setName('job:peek')
@@ -19,5 +21,9 @@ class JobPeekCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $jobId = $input->getArgument('job-id');
+        $job = $this->getBeanstalk()->peek($jobId);
+        $output->writeln("Found Job '$jobId'.");
+        $output->writeln(var_export($job['body'], true));
     }
 }

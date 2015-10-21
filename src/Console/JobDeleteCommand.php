@@ -10,6 +10,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class JobDeleteCommand extends Command
 {
+    use DefaultConfigureTrait;
+
     protected function configure()
     {
         $this->setName('job:delete')
@@ -19,5 +21,8 @@ class JobDeleteCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $jobId = $input->getArgument('job-id');
+        $this->getBeanstalk()->delete($jobId);
+        $output->writeln("Job '$jobId' successfully deleted.");
     }
 }

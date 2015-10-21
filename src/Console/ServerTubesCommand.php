@@ -10,6 +10,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ServerTubesCommand extends Command
 {
+    use DefaultConfigureTrait;
+
     protected function configure()
     {
         $this->setName('server:tubes')
@@ -19,5 +21,18 @@ class ServerTubesCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $beanstalk = $this->getBeanstalk();
+        $tubeList  = $beanstalk->listTubes();
+        if ($input->getOption('buried')) {
+//            $tubesBuried = array();
+//            foreach($tubeList as $tube) {
+//                $stats = $beanstalk->statsTube($tube);
+//                $buried = $stats['current-jobs-buried'];
+//                if ($buried > 0) {
+//                    $tubesBuried[$tube] = $buried;
+//                }
+//            }
+        }
+        $output->writeln(var_export($tubeList, true)); // TODO: this needs to be prettier?
     }
 }

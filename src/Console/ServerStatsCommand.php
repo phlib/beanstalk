@@ -13,6 +13,8 @@ use Symfony\Component\Console\Helper\Table;
 
 class ServerStatsCommand extends Command
 {
+    use DefaultConfigureTrait;
+
     protected function configure()
     {
         $this->setName('server:stats')
@@ -217,7 +219,7 @@ class ServerStatsCommand extends Command
     {
         //        $formatter = $this->getHelper('formatter');
         //        $formattedBlock = $formatter->formatBlock(['Some Beanstalk Title', 'Some version and pid information'], 'info');
-        //        $output->writeLn($formattedBlock);
+        //        $output->writeln($formattedBlock);
 
         $output->writeln('<info>Global</info>');
         $table = $this->getTable($output);
@@ -351,11 +353,5 @@ class ServerStatsCommand extends Command
         $table = new Table($output);
         $table->setStyle('borderless');
         return $table;
-    }
-
-    protected function getBeanstalk()
-    {
-        return new \Phlib\Beanstalk\Beanstalk('localhost');
-//        return new \Phlib\Beanstalk\Beanstalk('10.1.3.4');
     }
 }

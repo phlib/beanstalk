@@ -10,6 +10,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class JobStatsCommand extends Command
 {
+    use DefaultConfigureTrait;
+
     protected function configure()
     {
         $this->setName('job:stats')
@@ -19,5 +21,9 @@ class JobStatsCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $jobId = $input->getArgument('job-id');
+        $stats = $this->getBeanstalk()->statsJob($jobId);
+        $output->writeln("Found Job '$jobId'.");
+        $output->writeln(var_export($stats, true)); // TODO: this needs to be prettier?
     }
 }

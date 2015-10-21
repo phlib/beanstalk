@@ -10,14 +10,21 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class TubeKickCommand extends Command
 {
+    use DefaultConfigureTrait;
+
     protected function configure()
     {
         $this->setName('tube:kick')
             ->setDescription('Kick a number of delayed or buried jobs in the tube.')
-            ->addArgument('tube', InputArgument::REQUIRED, 'The tube name.');
+            ->addArgument('tube', InputArgument::REQUIRED, 'The tube name.')
+            ->addArgument('quantity', InputArgument::REQUIRED, 'The number of jobs to kick.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $quantity = $this->getBeanstalk()
+            ->useTube($input->getArgument('tube'))
+            ->kick($input->getArgument('quantity'));
+        $output->writeln("Successfully kicked $quantity jobs.");
     }
 }
