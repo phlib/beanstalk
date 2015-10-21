@@ -28,6 +28,7 @@ use Phlib\Beanstalk\Beanstalk;
 
 // producer
 $beanstalk = new Beanstalk('127.0.0.1');
+$beanstalk->useTube('my-tube');
 $beanstalk->put(array('my' => 'jobData'));
 ```
 
@@ -37,6 +38,8 @@ use Phlib\Beanstalk\Beanstalk;
 
 // consumer
 $beanstalk = new Beanstalk('127.0.0.1');
+$beanstalk->watch('my-tube')
+    ->ignore('default');
 $job = $beanstalk->reserve();
 $myJobData = $job['body'];
 $beanstalk->delete($job['id']);
@@ -49,7 +52,7 @@ By default all jobs are packaged as a JSON string from the producer to the consu
 ``` php
 <?php
 use Phlib\Beanstalk\Beanstalk;
-use \Phlib\Beanstalk\JobPackager;
+use Phlib\Beanstalk\JobPackager;
 
 $beanstalk = new Beanstalk('127.0.0.1');
 $beanstalk->setJobPackager(new JobPackager\Php);
