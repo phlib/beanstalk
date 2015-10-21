@@ -2,6 +2,7 @@
 
 namespace Phlib\Beanstalk\Console;
 
+use Phlib\Beanstalk\BeanstalkInterface;
 use Phlib\Beanstalk\StatsService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -212,7 +213,7 @@ class ServerStatsCommand extends Command
         $this->displayAllTubes($output, $beanstalk, $headers);
     }
 
-    protected function displayAllTopLevel($output, $beanstalk)
+    protected function displayAllTopLevel(OutputInterface $output, BeanstalkInterface $beanstalk)
     {
         //        $formatter = $this->getHelper('formatter');
         //        $formattedBlock = $formatter->formatBlock(['Some Beanstalk Title', 'Some version and pid information'], 'info');
@@ -289,7 +290,7 @@ class ServerStatsCommand extends Command
         $table->render();
     }
 
-    protected function displayAllTubes($output, $beanstalk, $headers)
+    protected function displayAllTubes(OutputInterface $output, BeanstalkInterface $beanstalk, $headers)
     {
         $table = $this->getTable($output);
         $table->setHeaders(array_values($headers));
@@ -302,7 +303,7 @@ class ServerStatsCommand extends Command
         $table->render();
     }
 
-    protected function displayForTube($output, $headers, $tube)
+    protected function displayForTube(OutputInterface $output, $headers, $tube)
     {
         $table = $this->getTable($output);
         $table->setHeaders(['Name', 'Stat']);
