@@ -139,7 +139,7 @@ class Beanstalk implements BeanstalkInterface
      */
     public function put(
         $data,
-        $priority = BeanstalkInterface::DEFAULT_DELAY,
+        $priority = BeanstalkInterface::DEFAULT_PRIORITY,
         $delay = BeanstalkInterface::DEFAULT_DELAY,
         $ttr = BeanstalkInterface::DEFAULT_TTR
     ) {
