@@ -40,7 +40,7 @@ class Reserve implements CommandInterface
 
     /**
      * @param SocketInterface $socket
-     * @return array
+     * @return array|false
      * @throws CommandException
      */
     public function process(SocketInterface $socket)
