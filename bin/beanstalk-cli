@@ -11,15 +11,24 @@ foreach ($autoloadFiles as $autoloadFile) {
 }
 
 // use
-use Phlib\Beanstalk\Console\StatsCommand;
-use Phlib\Beanstalk\Console\TubesCommand;
-use Phlib\Beanstalk\Console\JobsCommand;
-use Phlib\Beanstalk\Console\SchedulerCommand;
 use Symfony\Component\Console\Application;
+use Phlib\Beanstalk\Console\ServerStatsCommand;
+use Phlib\Beanstalk\Console\ServerTubesCommand;
+use Phlib\Beanstalk\Console\JobStatsCommand;
+use Phlib\Beanstalk\Console\JobPeekCommand;
+use Phlib\Beanstalk\Console\JobDeleteCommand;
+use Phlib\Beanstalk\Console\TubeStatsCommand;
+use Phlib\Beanstalk\Console\TubePeekCommand;
+use Phlib\Beanstalk\Console\TubeKickCommand;
 
 // lets go!
 $application = new Application();
-$application->add(new StatsCommand());
-$application->add(new TubesCommand());
-$application->add(new JobsCommand());
+$application->add(new ServerStatsCommand());
+$application->add(new ServerTubesCommand());
+$application->add(new JobStatsCommand());
+$application->add(new JobPeekCommand());
+$application->add(new JobDeleteCommand());
+$application->add(new TubeStatsCommand());
+$application->add(new TubePeekCommand());
+$application->add(new TubeKickCommand());
 $application->run();
