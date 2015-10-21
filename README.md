@@ -63,7 +63,7 @@ $beanstalk->setJobPackager(new JobPackager\Php);
 |Name|Type|Required|Default|Description|
 |----|----|--------|-------|-----------|
 |`host`|*String*|Yes| |Hostname or IP address.|
-|`port`|*Integer*|No|`11300`|Beanstalks port.|
+|`port`|*Integer*|No|`11300`|Beanstalk's port.|
 |`options`|*Array*|No|`<empty>`|Connection options for Beanstalk.|
 
 ### Options
