@@ -23,6 +23,7 @@ class Raw implements PackagerInterface
                 break;
             case 'object':
                 $data = (method_exists($data, '__toString')) ? (string)$data : '(Object)';
+                break;
             default:
                 $data = (string)$data;
         }
