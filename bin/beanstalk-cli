@@ -12,6 +12,7 @@ foreach ($autoloadFiles as $autoloadFile) {
 
 // use
 use Symfony\Component\Console\Application;
+use Symfony\Component\Console\Input\InputOption;
 use Phlib\Beanstalk\Console\ServerStatsCommand;
 use Phlib\Beanstalk\Console\ServerTubesCommand;
 use Phlib\Beanstalk\Console\JobStatsCommand;
@@ -33,4 +34,9 @@ $application->addCommands([
     new TubePeekCommand(),
     new TubeKickCommand()
 ]);
+
+$application
+    ->getDefinition()
+    ->addOption(new InputOption('config', 'c', InputOption::VALUE_REQUIRED, 'Path to configuration file.'));
+
 $application->run();
