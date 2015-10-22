@@ -62,7 +62,7 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $this->setupTube('integration-test');
         // make sure it's empty
         $this->beanstalk->peekReady();
-        
+
         $data = 'This is my data';
         $id = $this->beanstalk->put($data);
         $jobData = $this->beanstalk->reserve();
