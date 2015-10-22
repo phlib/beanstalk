@@ -8,10 +8,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TubeKickCommand extends Command
+class TubeKickCommand extends AbstractCommand
 {
-    use DefaultConfigureTrait;
-
     protected function configure()
     {
         $this->setName('tube:kick')

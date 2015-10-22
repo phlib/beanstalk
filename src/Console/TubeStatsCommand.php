@@ -8,10 +8,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class TubeStatsCommand extends Command
+class TubeStatsCommand extends AbstractCommand
 {
-    use DefaultConfigureTrait;
-
     protected function configure()
     {
         $this->setName('tube:stats')

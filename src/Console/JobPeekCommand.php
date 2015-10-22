@@ -8,10 +8,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class JobPeekCommand extends Command
+class JobPeekCommand extends AbstractCommand
 {
-    use DefaultConfigureTrait;
-
     protected function configure()
     {
         $this->setName('job:peek')

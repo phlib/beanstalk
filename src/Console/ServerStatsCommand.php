@@ -11,10 +11,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\Table;
 
-class ServerStatsCommand extends Command
+class ServerStatsCommand extends AbstractCommand
 {
-    use DefaultConfigureTrait;
-
     protected function configure()
     {
         $this->setName('server:stats')
