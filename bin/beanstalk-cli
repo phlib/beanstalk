@@ -22,13 +22,15 @@ use Phlib\Beanstalk\Console\TubePeekCommand;
 use Phlib\Beanstalk\Console\TubeKickCommand;
 
 // lets go!
-$application = new Application();
-$application->add(new ServerStatsCommand());
-$application->add(new ServerTubesCommand());
-$application->add(new JobStatsCommand());
-$application->add(new JobPeekCommand());
-$application->add(new JobDeleteCommand());
-$application->add(new TubeStatsCommand());
-$application->add(new TubePeekCommand());
-$application->add(new TubeKickCommand());
+$application = new Application('beanstalk-cli');
+$application->addCommands([
+    new ServerStatsCommand(),
+    new ServerTubesCommand(),
+    new JobStatsCommand(),
+    new JobPeekCommand(),
+    new JobDeleteCommand(),
+    new TubeStatsCommand(),
+    new TubePeekCommand(),
+    new TubeKickCommand()
+]);
 $application->run();
