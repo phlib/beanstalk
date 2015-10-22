@@ -13,7 +13,7 @@ class Factory
      * @param array $options
      * @return BeanstalkInterface
      */
-    public function create($host, $port, array $options)
+    public function create($host, $port = Socket::DEFAULT_PORT, array $options = [])
     {
         return new Beanstalk(new Socket($host, $port, $options));
     }
@@ -34,7 +34,8 @@ class Factory
         }
         
         if (array_key_exists('server', $config)) {
-            $connection = $this->create($config['server']);
+            $server = $this->serverArgs($config['server']);
+            $connection = $this->create($server['host'], $server['port'], $server['options']);
             $connection->setJobPackager($jobPackager);
         } elseif (array_key_exists('servers', $config)) {
             $connection = new BeanstalkPool($this->createConnections($config['server'], $jobPackager));
@@ -57,10 +58,20 @@ class Factory
             if (array_key_exists('enabled', $server) && $server['enabled'] == false) {
                 continue;
             }
-            $connection = $this->create($server);
+            $server = $this->serverArgs($server);
+            $connection = $this->create($server['host'], $server['port'], $server['options']);
             $connection->setJobPackager($jobPackager);
             $connections[] = $connection;
         }
         return $connections;
+    }
+
+    protected function serverArgs(array $serverArgs)
+    {
+        return $serverArgs + [
+            'host' => null,
+            'port' => Socket::DEFAULT_PORT,
+            'options' => []
+        ];
     }
 }
