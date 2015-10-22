@@ -4,6 +4,7 @@ namespace Phlib\Beanstalk\Tests;
 
 use Phlib\Beanstalk\Beanstalk;
 use Phlib\Beanstalk\Exception\NotFoundException;
+use Phlib\Beanstalk\Socket;
 
 /**
  * @runTestsInSeparateProcesses
@@ -21,7 +22,7 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         if (!isset($GLOBALS['BSTALK_HOST']) || !isset($GLOBALS['BSTALK_PORT'])) {
             $this->markTestSkipped();
         } else {
-            $this->beanstalk = new Beanstalk($GLOBALS['BSTALK_HOST'], $GLOBALS['BSTALK_PORT']);
+            $this->beanstalk = new Beanstalk(new Socket($GLOBALS['BSTALK_HOST'], $GLOBALS['BSTALK_PORT']));
         }
     }
 
@@ -59,12 +60,9 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
     public function testFullJobProcess()
     {
         $this->setupTube('integration-test');
-        try {
-            // make sure it's empty
-            $this->beanstalk->peekReady();
-        } catch (NotFoundException $e) {
-            // continue
-        }
+        // make sure it's empty
+        $this->beanstalk->peekReady();
+        
         $data = 'This is my data';
         $id = $this->beanstalk->put($data);
         $jobData = $this->beanstalk->reserve();
@@ -75,8 +73,7 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $this->beanstalk->touch($jobData['id']);
         $this->beanstalk->delete($jobData['id']);
 
-        $this->setExpectedException('\Phlib\Beanstalk\Exception\NotFoundException');
-        $this->beanstalk->peekReady();
+        $this->assertFalse($this->beanstalk->peekReady());
     }
 
     public function testBuriedJobProcess()

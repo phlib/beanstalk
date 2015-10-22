@@ -1,6 +1,7 @@
 <?php
 
 namespace Phlib\Beanstalk\Console;
+use Phlib\Beanstalk\Socket;
 
 /**
  * Class DefaultConfigureTrait
@@ -18,7 +19,7 @@ trait DefaultConfigureTrait
      */
     protected function getBeanstalk()
     {
-        return new \Phlib\Beanstalk\Beanstalk('localhost');
+        return new \Phlib\Beanstalk\Beanstalk(new Socket('localhost'));
 //        return new \Phlib\Beanstalk\Beanstalk('10.1.3.4');
     }
 }

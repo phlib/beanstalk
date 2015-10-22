@@ -8,16 +8,14 @@ use Phlib\Beanstalk\Socket;
 class Factory
 {
     /**
-     * @param array $config
+     * @param string $host
+     * @param integer $port
+     * @param array $options
      * @return BeanstalkInterface
      */
-    public function create(array $config)
+    public function create($host, $port, array $options)
     {
-        $host    = isset($config['host']) ?: '';
-        $port    = isset($config['port']) ?: Socket::DEFAULT_PORT;
-        $options = isset($config['options']) ?: [];
-
-        return new Beanstalk($host, $port, $options);
+        return new Beanstalk(new Socket($host, $port, $options));
     }
 
     /**

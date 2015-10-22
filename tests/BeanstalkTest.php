@@ -23,8 +23,7 @@ class BeanstalkTest extends \PHPUnit_Framework_TestCase
         $this->socket = $this->getMockBuilder('\Phlib\Beanstalk\Socket')
             ->disableOriginalConstructor()
             ->getMock();
-        $this->beanstalk = new Beanstalk('host');
-        $this->beanstalk->setSocket($this->socket);
+        $this->beanstalk = new Beanstalk($this->socket);
         parent::setUp();
     }
 

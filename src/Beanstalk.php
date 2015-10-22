@@ -14,21 +14,6 @@ class Beanstalk implements BeanstalkInterface
     const DEFAULT_TUBE = 'default';
 
     /**
-     * @var string
-     */
-    protected $host;
-
-    /**
-     * @var int
-     */
-    protected $port;
-
-    /**
-     * @var array
-     */
-    protected $options;
-
-    /**
      * @var SocketInterface
      */
     protected $socket;
@@ -56,15 +41,11 @@ class Beanstalk implements BeanstalkInterface
     /**
      * Constructor
      *
-     * @param string $host
-     * @param int    $port
-     * @param array  $options
+     * @param SocketInterface $socket
      */
-    public function __construct($host, $port = Socket::DEFAULT_PORT, array $options = [])
+    public function __construct(SocketInterface $socket)
     {
-        $this->host    = $host;
-        $this->port    = $port;
-        $this->options = $options;
+        $this->setSocket($socket);
     }
 
     /**
@@ -72,9 +53,6 @@ class Beanstalk implements BeanstalkInterface
      */
     public function getSocket()
     {
-        if (!$this->socket) {
-            $this->socket = new Socket($this->host, $this->port, $this->options);
-        }
         return $this->socket;
     }
 
