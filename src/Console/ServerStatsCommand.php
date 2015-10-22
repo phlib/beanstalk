@@ -69,7 +69,7 @@ class ServerStatsCommand extends AbstractCommand
         $output->writeln([
             "Host: {$info['hostname']} (pid {$info['pid']})",
             "Beanstalk Version: {$info['version']}",
-            "Uptime: {$info['uptime']}, Connections: {$info['total-connections']}",
+            "Resources: uptime/{$info['uptime']}, connections/{$info['total-connections']}",
             "Jobs: total/{$info['total-jobs']}, timeouts/{$info['job-timeouts']}",
         ]);
     }
