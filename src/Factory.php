@@ -33,12 +33,14 @@ class Factory
             $jobPackager = new $packagerClass;
         }
         
-        if (array_key_exists('server', $config)) {
+        if (array_key_exists('host', $config)) {
+            $connection = $this->create($this->serverArgs($config));
+        } elseif (array_key_exists('server', $config)) {
             $server = $this->serverArgs($config['server']);
             $connection = $this->create($server['host'], $server['port'], $server['options']);
             $connection->setJobPackager($jobPackager);
         } elseif (array_key_exists('servers', $config)) {
-            $connection = new BeanstalkPool($this->createConnections($config['server'], $jobPackager));
+            $connection = new BeanstalkPool($this->createConnections($config['servers'], $jobPackager));
         } else {
             throw new InvalidArgumentException('Missing required server(s) configuration');
         }
