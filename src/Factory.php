@@ -5,6 +5,10 @@ namespace Phlib\Beanstalk;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Socket;
 
+/**
+ * Class Factory
+ * @package Phlib\Beanstalk
+ */
 class Factory
 {
     /**
@@ -34,9 +38,11 @@ class Factory
         }
         
         if (array_key_exists('host', $config)) {
-            $connection = $this->create($this->serverArgs($config));
-        } elseif (array_key_exists('server', $config)) {
-            $server = $this->serverArgs($config['server']);
+            $config = ['server' => $config];
+        }
+
+        if (array_key_exists('server', $config)) {
+            $server     = $this->normalizeArgs($config['server']);
             $connection = $this->create($server['host'], $server['port'], $server['options']);
             $connection->setJobPackager($jobPackager);
         } elseif (array_key_exists('servers', $config)) {
@@ -60,7 +66,7 @@ class Factory
             if (array_key_exists('enabled', $server) && $server['enabled'] == false) {
                 continue;
             }
-            $server = $this->serverArgs($server);
+            $server = $this->normalizeArgs($server);
             $connection = $this->create($server['host'], $server['port'], $server['options']);
             $connection->setJobPackager($jobPackager);
             $connections[] = $connection;
@@ -68,7 +74,11 @@ class Factory
         return $connections;
     }
 
-    protected function serverArgs(array $serverArgs)
+    /**
+     * @param array $serverArgs
+     * @return array
+     */
+    protected function normalizeArgs(array $serverArgs)
     {
         return $serverArgs + [
             'host' => null,
