@@ -74,6 +74,39 @@ $beanstalk->setJobPackager(new JobPackager\Php);
 |----|----|-------|-----------|
 |`timeout`|*Integer*|`60`|The connection timeout.|
 
+## Factory
+The factory allows for easy setup of the objects. This especially useful when creating a pool of beanstalk servers. The
+following example lists the various ways it can be used. The configuration examples in the command line section are 
+created using the factory.
+
+```php
+use Phlib\Beanstalk\Factory;
+
+$beanstalk = (new Factory)->create('localhost');
+
+$beanstalk = (new Factory)->createFromArray(['host' => 'localhost']);
+
+$beanstalk = (new Factory)->createFromArray([
+    'server' => ['host' => 'localhost'],
+    'packager' => 'Php'
+]);
+
+$beanstalk = (new Factory)->createFromArray([
+    'servers' => [
+        ['host' => '10.0.0.1'],
+        ['host' => '10.0.0.2'],
+        ['host' => '10.0.0.3']
+    ],
+    'packager' => 'Php'
+]);
+
+```
+
+## Pool
+The pool allows for work to pushed to and retrieved from multiple servers.
+
+Todo: more description
+
 ## Command Line Script
 
 ```bash
