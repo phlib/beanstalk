@@ -25,9 +25,10 @@ or
 ``` php
 <?php
 use Phlib\Beanstalk\Beanstalk;
+use Phlib\Beanstalk\Socket;
 
 // producer
-$beanstalk = new Beanstalk('127.0.0.1');
+$beanstalk = new Beanstalk(new Socket('127.0.0.1'));
 $beanstalk->useTube('my-tube');
 $beanstalk->put(array('my' => 'jobData'));
 ```
@@ -35,9 +36,10 @@ $beanstalk->put(array('my' => 'jobData'));
 ``` php
 <?php
 use Phlib\Beanstalk\Beanstalk;
+use Phlib\Beanstalk\Socket;
 
 // consumer
-$beanstalk = new Beanstalk('127.0.0.1');
+$beanstalk = new Beanstalk(new Socket('127.0.0.1'));
 $beanstalk->watch('my-tube')
     ->ignore('default');
 $job = $beanstalk->reserve();
