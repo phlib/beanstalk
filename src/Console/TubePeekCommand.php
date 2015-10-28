@@ -3,7 +3,6 @@
 namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -11,6 +10,8 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class TubePeekCommand extends AbstractCommand
 {
+    use DisplayJobTrait;
+
     protected function configure()
     {
         $this->setName('tube:peek')
@@ -34,8 +35,7 @@ class TubePeekCommand extends AbstractCommand
         if ($job === false) {
             $output->writeln("No jobs found in $status status.");
         } else {
-            $output->writeln("Found job {$job['id']}.");
-            $output->writeln(var_export($job['body'], true)); // TODO: this needs to be prettier?
+            $this->displayJob($job, $output);
         }
     }
 }
