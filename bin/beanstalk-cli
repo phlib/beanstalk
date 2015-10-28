@@ -18,7 +18,6 @@ use Phlib\Beanstalk\Console\ServerTubesCommand;
 use Phlib\Beanstalk\Console\JobStatsCommand;
 use Phlib\Beanstalk\Console\JobPeekCommand;
 use Phlib\Beanstalk\Console\JobDeleteCommand;
-use Phlib\Beanstalk\Console\TubeStatsCommand;
 use Phlib\Beanstalk\Console\TubePeekCommand;
 use Phlib\Beanstalk\Console\TubeKickCommand;
 
@@ -30,7 +29,6 @@ $application->addCommands([
     new JobStatsCommand(),
     new JobPeekCommand(),
     new JobDeleteCommand(),
-    new TubeStatsCommand(),
     new TubePeekCommand(),
     new TubeKickCommand()
 ]);
