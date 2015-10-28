@@ -154,7 +154,8 @@ class StatsService
         }
         $tubeStats = [];
         foreach ($this->tubes as $tube) {
-            $tubeStats[] = $this->beanstalk->statsTube($tube);
+            $stats = $this->beanstalk->statsTube($tube);
+            $tubeStats[] = array_slice($stats, 0, -3); // @see getTubeHeaderMapping
         }
 
         usort($tubeStats, function ($a, $b) {
