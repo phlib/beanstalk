@@ -16,8 +16,7 @@ class ServerStatsCommand extends AbstractCommand
     protected function configure()
     {
         $this->setName('server:stats')
-            ->setDescription('Get a list of details about the beanstalk server(s).')
-            ->addOption('exclude-tubes', 'e', InputOption::VALUE_NONE, 'Exclude tube stats from the output.');
+            ->setDescription('Get a list of details about the beanstalk server(s).');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -25,10 +24,6 @@ class ServerStatsCommand extends AbstractCommand
         $service = new StatsService($this->getBeanstalk());
         $this->outputServerInfo($service, $output);
         $this->outputServerStats($service, $output);
-        if (!$input->getOption('exclude-tubes')) {
-            $output->write('', true);
-            $this->outputAllTubeStats($service, $output);
-        }
     }
 
     protected function outputServerInfo(StatsService $stats, OutputInterface $output)
@@ -83,21 +78,6 @@ class ServerStatsCommand extends AbstractCommand
         }
 
         $output->writeln('<info>Server Statistics</info>');
-        $table->render();
-    }
-
-    protected function outputAllTubeStats(StatsService $stats, OutputInterface $output)
-    {
-        $tubes = $stats->getAllTubeStats();
-
-        $table = new Table($output);
-        $table->setStyle('borderless');
-        $table->setHeaders($stats->getTubeHeaderMapping());
-        foreach ($tubes as $tubeStats) {
-            $table->addRow(array_slice($tubeStats, 0, -3));
-        }
-
-        $output->writeln('<info>Tube Statistics</info>');
         $table->render();
     }
 }
