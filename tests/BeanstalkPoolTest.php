@@ -316,18 +316,19 @@ class BeanstalkPoolTest extends \PHPUnit_Framework_TestCase
 
     public function testStats()
     {
-        $expected = ['current-jobs-ready' => 6];
         foreach (array_keys($this->servers) as $index) {
             $this->servers[$index]->expects($this->any())
                 ->method('stats')
                 ->willReturn(['current-jobs-ready' => 2, 'some-other' => 8]);
         }
-        $this->assertEquals($expected, $this->pool->stats());
+        $this->assertEquals(
+            ['current-jobs-ready' => 6, 'some-other' => 24],
+            $this->pool->stats()
+        );
     }
 
     public function testStatsWithOnInvalidResponse()
     {
-        $expected = ['current-jobs-ready' => 4];
         foreach (array_keys($this->servers) as $index) {
             if ($index == 1) {
                 continue;
@@ -336,7 +337,10 @@ class BeanstalkPoolTest extends \PHPUnit_Framework_TestCase
                 ->method('stats')
                 ->willReturn(['current-jobs-ready' => 2, 'some-other' => 8]);
         }
-        $this->assertEquals($expected, $this->pool->stats());
+        $this->assertEquals(
+            ['current-jobs-ready' => 4, 'some-other' => 16],
+            $this->pool->stats()
+        );
     }
 
     public function testStatsJob()
@@ -352,18 +356,19 @@ class BeanstalkPoolTest extends \PHPUnit_Framework_TestCase
 
     public function testStatsTube()
     {
-        $expected = ['current-jobs-ready' => 6];
         foreach (array_keys($this->servers) as $index) {
             $this->servers[$index]->expects($this->any())
                 ->method('statsTube')
                 ->willReturn(['current-jobs-ready' => 2, 'some-other' => 8]);
         }
-        $this->assertEquals($expected, $this->pool->statsTube('test-tube'));
+        $this->assertEquals(
+            ['current-jobs-ready' => 6, 'some-other' => 24],
+            $this->pool->statsTube('test-tube')
+        );
     }
 
     public function testStatsTubeWithOnInvalidResponse()
     {
-        $expected = ['current-jobs-ready' => 4];
         foreach (array_keys($this->servers) as $index) {
             if ($index == 1) {
                 continue;
@@ -372,7 +377,10 @@ class BeanstalkPoolTest extends \PHPUnit_Framework_TestCase
                 ->method('statsTube')
                 ->willReturn(['current-jobs-ready' => 2, 'some-other' => 8]);
         }
-        $this->assertEquals($expected, $this->pool->statsTube('test-tube'));
+        $this->assertEquals(
+            ['current-jobs-ready' => 4, 'some-other' => 16],
+            $this->pool->statsTube('test-tube')
+        );
     }
 
     public function testKick()
