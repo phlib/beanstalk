@@ -2,10 +2,9 @@
 
 namespace Phlib\Beanstalk\Console;
 
-use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
+use Phlib\Beanstalk\StatsService;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class ServerTubesCommand extends AbstractCommand
@@ -13,24 +12,29 @@ class ServerTubesCommand extends AbstractCommand
     protected function configure()
     {
         $this->setName('server:tubes')
-            ->setDescription('List all tubes known to the server(s).')
-            ->addOption('buried', 'b', InputArgument::OPTIONAL, 'Only list tubes which have buried jobs.');
+            ->setDescription('List all tubes known to the server(s).');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $beanstalk = $this->getBeanstalk();
-        $tubeList  = $beanstalk->listTubes();
-        if ($input->getOption('buried')) {
-//            $tubesBuried = array();
-//            foreach($tubeList as $tube) {
-//                $stats = $beanstalk->statsTube($tube);
-//                $buried = $stats['current-jobs-buried'];
-//                if ($buried > 0) {
-//                    $tubesBuried[$tube] = $buried;
-//                }
-//            }
+        $service = new StatsService($this->getBeanstalk());
+        $tubes = $service->getAllTubeStats();
+
+        if (empty($tubes)) {
+            $output->writeln('No tubes found.');
+            return;
         }
-        $output->writeln(var_export($tubeList, true)); // TODO: this needs to be prettier?
+
+        $table = new Table($output);
+        $table->setHeaders($service->getTubeHeaderMapping());
+        foreach ($tubes as $stats) {
+            if ($stats['current-jobs-buried'] > 0) {
+                $stats['name'] = "<error>{$stats['name']}</error>";
+                $stats['current-jobs-buried'] = "<error>{$stats['current-jobs-buried']}</error>";
+            }
+            $table->addRow($stats);
+        }
+
+        $table->render();
     }
 }
