@@ -92,11 +92,18 @@ class StatsService
         $this->beanstalk = $beanstalk;
     }
 
+    /**
+     * @return array
+     */
     public function getServerInfo()
     {
         return $this->filterTheseKeys($this->infoKeys, $this->getStats());
     }
 
+    /**
+     * @param int $filter
+     * @return array
+     */
     public function getServerStats($filter = self::SERVER_ALL)
     {
         $serverKeys = $this->filterServerKeys($filter);
@@ -105,6 +112,10 @@ class StatsService
         return $stats;
     }
 
+    /**
+     * @param $filter
+     * @return array
+     */
     protected function filterServerKeys($filter)
     {
         $serverKeys = $this->serverKeys;
@@ -133,6 +144,9 @@ class StatsService
         return $serverKeys;
     }
 
+    /**
+     * @return array
+     */
     public function getAllTubeStats()
     {
         if (!$this->tubes) {
@@ -150,11 +164,13 @@ class StatsService
         return $tubeStats;
     }
 
+    /**
+     * @param array $keys
+     * @param $data
+     * @return array
+     */
     protected function filterTheseKeys(array $keys, $data)
     {
-//        var_dump(array_flip($keys));
-//        var_dump($data);
-//        var_dump(array_intersect_key($data, array_flip($keys))); die;
         return array_intersect_key($data, array_flip($keys));
     }
 
@@ -179,5 +195,23 @@ class StatsService
 
     }
 
-
+    /**
+     * @return array
+     */
+    public function getTubeHeaderMapping()
+    {
+        return [
+            'name' => 'Tube',
+            'current-jobs-urgent' => 'JobsUrgent',
+            'current-jobs-ready' => 'JobsReady',
+            'current-jobs-reserved' => 'JobsReserved',
+            'current-jobs-delayed' => 'JobsDelayed',
+            'current-jobs-buried' => 'JobsBuried',
+            'total-jobs' => 'TotalJobs',
+            'current-using' => 'Using',
+            'current-watching' => 'Watching',
+            'current-waiting' => 'Waiting',
+            'cmd-delete' => 'Delete',
+        ];
+    }
 }
