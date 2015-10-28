@@ -26,6 +26,7 @@ class ServerStatsCommand extends AbstractCommand
         $this->outputServerInfo($service, $output);
         $this->outputServerStats($service, $output);
         if (!$input->getOption('exclude-tubes')) {
+            $output->write('', true);
             $this->outputAllTubeStats($service, $output);
         }
     }
@@ -34,13 +35,21 @@ class ServerStatsCommand extends AbstractCommand
     {
         $info = $stats->getServerInfo();
 
-        $output->writeln('Server Info:');
-        $output->writeln([
-            "Host: {$info['hostname']} (pid {$info['pid']})",
-            "Beanstalk Version: {$info['version']}",
-            "Resources: uptime/{$info['uptime']}, connections/{$info['total-connections']}",
-            "Jobs: total/{$info['total-jobs']}, timeouts/{$info['job-timeouts']}",
-        ]);
+        /* @var $formatter \Symfony\Component\Console\Helper\FormatterHelper */
+        $formatter = $this->getHelper('formatter');
+        $block = $formatter->formatBlock(
+            [
+                "Host: {$info['hostname']} (pid {$info['pid']})",
+                "Beanstalk Version: {$info['version']}",
+                "Resources: uptime/{$info['uptime']}, connections/{$info['total-connections']}",
+                "Jobs: total/{$info['total-jobs']}, timeouts/{$info['job-timeouts']}"
+            ],
+            'info',
+            true
+        );
+
+        $output->writeln('<info>Server Information</info>');
+        $output->writeln($block);
     }
 
     protected function outputServerStats(StatsService $stats, OutputInterface $output)
@@ -49,7 +58,6 @@ class ServerStatsCommand extends AbstractCommand
         $command = $stats->getServerStats(StatsService::SERVER_COMMAND);
         $current = $stats->getServerStats(StatsService::SERVER_CURRENT);
 
-        $output->writeln('<info>Server Stats:</info>');
         $table = new Table($output);
         $table->setStyle('borderless');
         $table->setHeaders(['Current', 'Stat', 'Command', 'Stat', 'Binlog', 'Stat']);
@@ -73,6 +81,8 @@ class ServerStatsCommand extends AbstractCommand
             ];
             $table->addRow($row);
         }
+
+        $output->writeln('<info>Server Statistics</info>');
         $table->render();
     }
 
@@ -80,13 +90,14 @@ class ServerStatsCommand extends AbstractCommand
     {
         $tubes = $stats->getAllTubeStats();
 
-        $output->writeln('<info>Tube Stats:</info>');
         $table = new Table($output);
         $table->setStyle('borderless');
         $table->setHeaders($stats->getTubeHeaderMapping());
         foreach ($tubes as $tubeStats) {
             $table->addRow(array_slice($tubeStats, 0, -3));
         }
+
+        $output->writeln('<info>Tube Statistics</info>');
         $table->render();
     }
 }
