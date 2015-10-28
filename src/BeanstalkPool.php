@@ -250,49 +250,10 @@ class BeanstalkPool implements BeanstalkInterface
             $stats = $this->statsCombine($stats, $result['response']);
         }
 
-        if (is_array($stats)) {
-            $keys = [
-                'current-jobs-urgent',
-                'current-jobs-ready',
-                'current-jobs-reserved',
-                'current-jobs-delayed',
-                'current-jobs-buried',
-                'cmd-put',
-                'cmd-peek',
-                'cmd-peek-ready',
-                'cmd-peek-delayed',
-                'cmd-peek-buried',
-                'cmd-reserve',
-                'cmd-reserve-with-timeout',
-                'cmd-delete',
-                'cmd-release',
-                'cmd-use',
-                'cmd-watch',
-                'cmd-ignore',
-                'cmd-bury',
-                'cmd-kick',
-                'cmd-touch',
-                'cmd-stats',
-                'cmd-stats-job',
-                'cmd-stats-tube',
-                'cmd-list-tubes',
-                'cmd-list-tube-used',
-                'cmd-list-tubes-watched',
-                'cmd-pause-tube',
-                'job-timeouts',
-                'total-jobs',
-                'current-tubes',
-                'current-connections',
-                'current-producers',
-                'current-workers',
-                'current-waiting',
-                'total-connections',
-            ];
-
-            return array_intersect_key($stats, array_flip($keys));
+        if (!is_array($stats) || empty($stats)) {
+            return false;
         }
-
-        return false;
+        return $stats;
     }
 
     /**
@@ -320,27 +281,10 @@ class BeanstalkPool implements BeanstalkInterface
             $stats = $this->statsCombine($stats, $result['response']);
         }
 
-        if (empty($stats)) {
+        if (!is_array($stats) || empty($stats)) {
             return false;
         }
-
-        $keys = [
-            'current-jobs-urgent',
-            'current-jobs-ready',
-            'current-jobs-reserved',
-            'current-jobs-delayed',
-            'current-jobs-buried',
-            'total-jobs',
-            'current-using',
-            'current-watching',
-            'current-waiting',
-            'cmd-delete',
-            'cmd-pause-tube',
-            'pause',
-            'pause-time-left',
-        ];
-
-        return array_intersect_key($stats, array_flip($keys));
+        return $stats;
     }
 
     /**
@@ -350,11 +294,27 @@ class BeanstalkPool implements BeanstalkInterface
      */
     protected function statsCombine(array $cumulative, array $stats)
     {
+        $list    = ['pid', 'version', 'hostname', 'name', 'uptime', 'binlog-current-index'];
+        $maximum = ['timeouts', 'binlog-max-size', 'binlog-oldest-index'];
         foreach ($stats as $name => $value) {
             if (!array_key_exists($name, $cumulative)) {
-                $cumulative[$name] = 0;
+                $cumulative[$name] = $value;
+                continue;
             }
-            $cumulative[$name] += $value;
+
+            switch (true) {
+                case in_array($name, $list):
+                    if ($cumulative[$name] != $value) {
+                        $cumulative[$name] .= ',' . $value;
+                    }
+                    break;
+                case in_array($name, $maximum):
+                    if ($value > $cumulative[$name]) {
+                        $cumulative[$name] = $value;
+                    }
+                default:
+                    $cumulative[$name] += $value;
+            }
         }
         return $cumulative;
     }
