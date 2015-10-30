@@ -302,18 +302,16 @@ class BeanstalkPool implements BeanstalkInterface
                 continue;
             }
 
-            switch (true) {
-                case in_array($name, $list):
-                    if ($cumulative[$name] != $value) {
-                        $cumulative[$name] .= ',' . $value;
-                    }
-                    break;
-                case in_array($name, $maximum):
-                    if ($value > $cumulative[$name]) {
-                        $cumulative[$name] = $value;
-                    }
-                default:
-                    $cumulative[$name] += $value;
+            if (in_array($name, $list)) {
+                if ($cumulative[$name] != $value) {
+                    $cumulative[$name] .= ',' . $value;
+                }
+            } elseif (in_array($name, $maximum)) {
+                if ($value > $cumulative[$name]) {
+                    $cumulative[$name] = $value;
+                }
+            } else {
+                $cumulative[$name] += $value;
             }
         }
         return $cumulative;
