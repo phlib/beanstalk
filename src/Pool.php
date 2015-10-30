@@ -2,35 +2,36 @@
 
 namespace Phlib\Beanstalk;
 
+use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 
-class BeanstalkPool implements BeanstalkInterface
+class Pool implements ConnectionInterface
 {
     /**
-     * @var Beanstalk[]
+     * @var Connection[]
      */
     protected $connections;
 
     /**
      * @var string
      */
-    protected $using = Beanstalk::DEFAULT_TUBE;
+    protected $using = Connection::DEFAULT_TUBE;
 
     /**
      * @var array
      */
-    protected $watching = [Beanstalk::DEFAULT_TUBE => true];
+    protected $watching = [Connection::DEFAULT_TUBE => true];
 
     /**
-     * @param Beanstalk[] $connections
+     * @param Connection[] $connections
      */
     public function __construct(array $connections)
     {
         $formatted = [];
         foreach ($connections as $connection) {
-            if (!$connection instanceof Beanstalk) {
+            if (!$connection instanceof Connection) {
                 throw new InvalidArgumentException('Invalid connection specified for pool.');
             }
             $key = $connection->getUniqueIdentifier();
@@ -347,11 +348,11 @@ class BeanstalkPool implements BeanstalkInterface
     }
 
     /**
-     * @param Beanstalk      $connection
+     * @param Connection      $connection
      * @param integer|string $id
      * @return string
      */
-    protected function combineId(Beanstalk $connection, $id)
+    protected function combineId(Connection $connection, $id)
     {
         return "{$connection->getUniqueIdentifier()}.{$id}";
     }
@@ -372,7 +373,7 @@ class BeanstalkPool implements BeanstalkInterface
 
     /**
      * @param string $key
-     * @return Beanstalk
+     * @return Connection
      * @throws NotFoundException
      * @throws RuntimeException
      */

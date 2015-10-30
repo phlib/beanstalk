@@ -2,23 +2,23 @@
 
 namespace Phlib\Beanstalk\Tests;
 
-use Phlib\Beanstalk\Beanstalk;
-use Phlib\Beanstalk\BeanstalkPool;
+use Phlib\Beanstalk\Connection;
+use Phlib\Beanstalk\Pool;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\SocketException;
 use phpmock\phpunit\PHPMock;
 
-class BeanstalkPoolTest extends \PHPUnit_Framework_TestCase
+class PoolTest extends \PHPUnit_Framework_TestCase
 {
     use PHPMock;
 
     /**
-     * @var BeanstalkPool
+     * @var Pool
      */
     protected $pool;
 
     /**
-     * @var Beanstalk[]|\PHPUnit_Framework_MockObject_MockObject[]
+     * @var Connection[]|\PHPUnit_Framework_MockObject_MockObject[]
      */
     protected $servers;
 
@@ -26,7 +26,7 @@ class BeanstalkPoolTest extends \PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $builder = $this->getMockBuilder('\Phlib\Beanstalk\Beanstalk')
+        $builder = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
             ->disableOriginalConstructor();
 
         $conn1 = $builder->getMock();
@@ -45,7 +45,7 @@ class BeanstalkPoolTest extends \PHPUnit_Framework_TestCase
             ->willReturn('host:789');
 
         $this->servers = [$conn1, $conn2, $conn3];
-        $this->pool = new BeanstalkPool($this->servers);
+        $this->pool = new Pool($this->servers);
     }
 
     public function tearDown()

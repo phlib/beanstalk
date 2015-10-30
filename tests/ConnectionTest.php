@@ -2,11 +2,11 @@
 
 namespace Phlib\Beanstalk\Tests;
 
-use Phlib\Beanstalk\Beanstalk;
+use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\JobPackager\Raw;
-use Phlib\Beanstalk\Socket;
+use Phlib\Beanstalk\Connection\Socket;
 
-class BeanstalkTest extends \PHPUnit_Framework_TestCase
+class ConnectionTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @var Socket|\PHPUnit_Framework_MockObject_MockObject
@@ -14,22 +14,22 @@ class BeanstalkTest extends \PHPUnit_Framework_TestCase
     protected $socket;
 
     /**
-     * @var Beanstalk
+     * @var Connection
      */
     protected $beanstalk;
 
     public function setUp()
     {
-        $this->socket = $this->getMockBuilder('\Phlib\Beanstalk\Socket')
+        $this->socket = $this->getMockBuilder('\Phlib\Beanstalk\Connection\Socket')
             ->disableOriginalConstructor()
             ->getMock();
-        $this->beanstalk = new Beanstalk($this->socket);
+        $this->beanstalk = new Connection($this->socket);
         parent::setUp();
     }
 
     public function testImplementsInterface()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\BeanstalkInterface', $this->beanstalk);
+        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\ConnectionInterface', $this->beanstalk);
     }
 
     public function testSocketIsSetCorrectly()
@@ -39,7 +39,7 @@ class BeanstalkTest extends \PHPUnit_Framework_TestCase
 
     public function testDefaultSocketImplementation()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Socket', $this->beanstalk->getSocket());
+        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\Socket', $this->beanstalk->getSocket());
     }
 
     public function testGetUniqueIdentifierPassesThroughToSocket()

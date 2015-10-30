@@ -2,9 +2,9 @@
 
 namespace Phlib\Beanstalk\Tests;
 
-use Phlib\Beanstalk\Beanstalk;
+use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Exception\NotFoundException;
-use Phlib\Beanstalk\Socket;
+use Phlib\Beanstalk\Connection\Socket;
 
 /**
  * @runTestsInSeparateProcesses
@@ -13,7 +13,7 @@ use Phlib\Beanstalk\Socket;
 class IntegrationTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var Beanstalk
+     * @var Connection
      */
     protected $beanstalk;
 
@@ -22,7 +22,7 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         if (!isset($GLOBALS['BSTALK_HOST']) || !isset($GLOBALS['BSTALK_PORT'])) {
             $this->markTestSkipped();
         } else {
-            $this->beanstalk = new Beanstalk(new Socket($GLOBALS['BSTALK_HOST'], $GLOBALS['BSTALK_PORT']));
+            $this->beanstalk = new Connection(new Socket($GLOBALS['BSTALK_HOST'], $GLOBALS['BSTALK_PORT']));
         }
     }
 

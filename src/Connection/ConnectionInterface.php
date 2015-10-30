@@ -1,12 +1,12 @@
 <?php
 
-namespace Phlib\Beanstalk;
+namespace Phlib\Beanstalk\Connection;
 
 /**
  * Interface ConnectionInterface
  * @package Phlib\Beanstalk
  */
-interface BeanstalkInterface
+interface ConnectionInterface
 {
     const DEFAULT_PRIORITY = 1024;
     const DEFAULT_DELAY = 0;

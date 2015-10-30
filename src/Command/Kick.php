@@ -2,7 +2,7 @@
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\SocketInterface;
+use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\CommandException;
 
 /**

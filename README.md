@@ -24,22 +24,22 @@ or
 
 ``` php
 <?php
-use Phlib\Beanstalk\Beanstalk;
-use Phlib\Beanstalk\Socket;
+use Phlib\Beanstalk\Connection;
+use Phlib\Beanstalk\Connection\Socket;
 
 // producer
-$beanstalk = new Beanstalk(new Socket('127.0.0.1'));
+$beanstalk = new Connection(new Socket('127.0.0.1'));
 $beanstalk->useTube('my-tube');
 $beanstalk->put(array('my' => 'jobData'));
 ```
 
 ``` php
 <?php
-use Phlib\Beanstalk\Beanstalk;
-use Phlib\Beanstalk\Socket;
+use Phlib\Beanstalk\Connection;
+use Phlib\Beanstalk\Connection\Socket;
 
 // consumer
-$beanstalk = new Beanstalk(new Socket('127.0.0.1'));
+$beanstalk = new Connection(new Socket('127.0.0.1'));
 $beanstalk->watch('my-tube')
     ->ignore('default');
 $job = $beanstalk->reserve();
@@ -53,10 +53,11 @@ By default all jobs are packaged as a JSON string from the producer to the consu
 
 ``` php
 <?php
-use Phlib\Beanstalk\Beanstalk;
+use Phlib\Beanstalk\Connection;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\JobPackager;
 
-$beanstalk = new Beanstalk('127.0.0.1');
+$beanstalk = new Connection(new Socket('127.0.0.1'));
 $beanstalk->setJobPackager(new JobPackager\Php);
 ```
 

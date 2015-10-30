@@ -12,12 +12,12 @@ use Phlib\Beanstalk\Factory;
 abstract class AbstractCommand extends Command
 {
     /**
-     * @var \Phlib\Beanstalk\BeanstalkInterface
+     * @var \Phlib\Beanstalk\Connection\ConnectionInterface
      */
     protected $beanstalk;
 
     /**
-     * @return \Phlib\Beanstalk\BeanstalkInterface
+     * @return \Phlib\Beanstalk\Connection\ConnectionInterface
      */
     public function getBeanstalk()
     {

@@ -2,7 +2,7 @@
 
 namespace Phlib\Beanstalk\Console;
 
-use Phlib\Beanstalk\BeanstalkInterface;
+use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\StatsService;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;

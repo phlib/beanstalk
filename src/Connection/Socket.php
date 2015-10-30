@@ -1,8 +1,9 @@
 <?php
 
-namespace Phlib\Beanstalk;
+namespace Phlib\Beanstalk\Connection;
 
 use Phlib\Beanstalk\Exception;
+use Phlib\Beanstalk\Connection\SocketInterface;
 
 /**
  * Class Socket

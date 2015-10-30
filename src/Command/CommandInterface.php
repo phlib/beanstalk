@@ -2,7 +2,7 @@
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\SocketInterface;
+use Phlib\Beanstalk\Connection\SocketInterface;
 
 /**
  * Interface CommandInterface

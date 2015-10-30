@@ -2,6 +2,8 @@
 
 namespace Phlib\Beanstalk;
 
+use Phlib\Beanstalk\Connection\ConnectionInterface;
+
 class StatsService
 {
     const SERVER_BINLOG  = 1;
@@ -70,7 +72,7 @@ class StatsService
     ];
     
     /**
-     * @var BeanstalkInterface
+     * @var ConnectionInterface
      */
     private $beanstalk;
 
@@ -85,9 +87,9 @@ class StatsService
     protected $tubes;
 
     /**
-     * @param BeanstalkInterface $beanstalk
+     * @param ConnectionInterface $beanstalk
      */
-    public function __construct(BeanstalkInterface $beanstalk)
+    public function __construct(ConnectionInterface $beanstalk)
     {
         $this->beanstalk = $beanstalk;
     }

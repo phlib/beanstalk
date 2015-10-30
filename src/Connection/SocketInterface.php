@@ -1,6 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk;
+namespace Phlib\Beanstalk\Connection;
 
 /**
  * Interface SocketInterface

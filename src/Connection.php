@@ -2,6 +2,8 @@
 
 namespace Phlib\Beanstalk;
 
+use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\JobPackager\PackagerInterface;
 
@@ -9,7 +11,7 @@ use Phlib\Beanstalk\JobPackager\PackagerInterface;
  * Class Connection
  * @package Phlib\Beanstalk
  */
-class Beanstalk implements BeanstalkInterface
+class Connection implements ConnectionInterface
 {
     const DEFAULT_TUBE = 'default';
 
@@ -118,9 +120,9 @@ class Beanstalk implements BeanstalkInterface
      */
     public function put(
         $data,
-        $priority = BeanstalkInterface::DEFAULT_PRIORITY,
-        $delay = BeanstalkInterface::DEFAULT_DELAY,
-        $ttr = BeanstalkInterface::DEFAULT_TTR
+        $priority = ConnectionInterface::DEFAULT_PRIORITY,
+        $delay = ConnectionInterface::DEFAULT_DELAY,
+        $ttr = ConnectionInterface::DEFAULT_TTR
     ) {
         $data = $this->getJobPackager()->encode($data);
         return (new Command\Put($data, $priority, $delay, $ttr))
@@ -165,8 +167,8 @@ class Beanstalk implements BeanstalkInterface
      */
     public function release(
         $id,
-        $priority = BeanstalkInterface::DEFAULT_PRIORITY,
-        $delay = BeanstalkInterface::DEFAULT_DELAY
+        $priority = ConnectionInterface::DEFAULT_PRIORITY,
+        $delay = ConnectionInterface::DEFAULT_DELAY
     ) {
         (new Command\Release($id, $priority, $delay))
             ->process($this->getSocket());
@@ -180,7 +182,7 @@ class Beanstalk implements BeanstalkInterface
      * @throws Exception\NotFoundException
      * @throws Exception\CommandException
      */
-    public function bury($id, $priority = BeanstalkInterface::DEFAULT_PRIORITY)
+    public function bury($id, $priority = ConnectionInterface::DEFAULT_PRIORITY)
     {
         (new Command\Bury($id, $priority))
             ->process($this->getSocket());

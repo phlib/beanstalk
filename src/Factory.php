@@ -2,8 +2,9 @@
 
 namespace Phlib\Beanstalk;
 
+use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\Socket;
+use Phlib\Beanstalk\Connection\Socket;
 
 /**
  * Class Factory
@@ -15,16 +16,16 @@ class Factory
      * @param string $host
      * @param integer $port
      * @param array $options
-     * @return BeanstalkInterface
+     * @return ConnectionInterface
      */
     public function create($host, $port = Socket::DEFAULT_PORT, array $options = [])
     {
-        return new Beanstalk(new Socket($host, $port, $options));
+        return new Connection(new Socket($host, $port, $options));
     }
 
     /**
      * @param array $config
-     * @return BeanstalkInterface
+     * @return ConnectionInterface
      */
     public function createFromArray(array $config)
     {
@@ -46,7 +47,7 @@ class Factory
             $connection = $this->create($server['host'], $server['port'], $server['options']);
             $connection->setJobPackager($jobPackager);
         } elseif (array_key_exists('servers', $config)) {
-            $connection = new BeanstalkPool($this->createConnections($config['servers'], $jobPackager));
+            $connection = new Pool($this->createConnections($config['servers'], $jobPackager));
         } else {
             throw new InvalidArgumentException('Missing required server(s) configuration');
         }
