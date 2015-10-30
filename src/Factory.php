@@ -72,7 +72,7 @@ class Factory
             $connection->setJobPackager($jobPackager);
             $connections[] = $connection;
         }
-        return $connections;
+        return new Pool\Collection($connections);
     }
 
     /**
