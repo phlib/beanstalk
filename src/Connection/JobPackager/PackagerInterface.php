@@ -1,6 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\JobPackager;
+namespace Phlib\Beanstalk\Connection\JobPackager;
 
 /**
  * Interface PackagerInterface

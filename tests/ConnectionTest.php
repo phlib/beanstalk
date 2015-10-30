@@ -3,7 +3,7 @@
 namespace Phlib\Beanstalk\Tests;
 
 use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\JobPackager\Raw;
+use Phlib\Beanstalk\Connection\JobPackager\Raw;
 use Phlib\Beanstalk\Connection\Socket;
 
 class ConnectionTest extends \PHPUnit_Framework_TestCase
@@ -51,7 +51,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
     public function testDefaultJobPackager()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\JobPackager\Json', $this->beanstalk->getJobPackager());
+        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\JobPackager\Json', $this->beanstalk->getJobPackager());
     }
 
     public function testCanSetJobPackager()

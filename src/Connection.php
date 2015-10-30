@@ -5,7 +5,7 @@ namespace Phlib\Beanstalk;
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\NotFoundException;
-use Phlib\Beanstalk\JobPackager\PackagerInterface;
+use Phlib\Beanstalk\Connection\JobPackager\PackagerInterface;
 
 /**
  * Class Connection
@@ -74,7 +74,7 @@ class Connection implements ConnectionInterface
     public function getJobPackager()
     {
         if (!$this->jobPackager) {
-            $this->jobPackager = new JobPackager\Json();
+            $this->jobPackager = new Connection\JobPackager\Json();
         }
         return $this->jobPackager;
     }

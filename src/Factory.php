@@ -3,6 +3,7 @@
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\Connection\JobPackager\PackagerInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Connection\Socket;
 
@@ -33,7 +34,7 @@ class Factory
         if (array_key_exists('packager', $config)) {
             $packagerClass = $config['packager'];
             if (in_array($packagerClass, ['Php', 'Json', 'Raw'])) {
-                $packagerClass = "\\Phlib\\Beanstalk\\JobPackager\\{$packagerClass}";
+                $packagerClass = "\\Phlib\\Beanstalk\\Connection\\JobPackager\\{$packagerClass}";
             }
             $jobPackager = new $packagerClass;
         }
@@ -57,10 +58,10 @@ class Factory
 
     /**
      * @param array                              $servers
-     * @param JobPackager\PackagerInterface|null $jobPackager
+     * @param PackagerInterface|null $jobPackager
      * @return Socket[]
      */
-    public function createConnections(array $servers, JobPackager\PackagerInterface $jobPackager = null)
+    public function createConnections(array $servers, PackagerInterface $jobPackager = null)
     {
         $connections = [];
         foreach ($servers as $server) {

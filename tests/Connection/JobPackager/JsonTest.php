@@ -2,7 +2,7 @@
 
 namespace Phlib\Beanstalk\Tests\JobPackager;
 
-use Phlib\Beanstalk\JobPackager\Json;
+use Phlib\Beanstalk\Connection\JobPackager\Json;
 use phpmock\phpunit\PHPMock;
 
 class JsonTest extends \PHPUnit_Framework_TestCase
@@ -11,7 +11,7 @@ class JsonTest extends \PHPUnit_Framework_TestCase
 
     public function testImplementsInterface()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\JobPackager\PackagerInterface', new Json());
+        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\JobPackager\PackagerInterface', new Json());
     }
 
     public function testEncodeMethodCalled()

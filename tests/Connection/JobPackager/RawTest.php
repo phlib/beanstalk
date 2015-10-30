@@ -2,13 +2,13 @@
 
 namespace Phlib\Beanstalk\Tests\JobPackager;
 
-use Phlib\Beanstalk\JobPackager\Raw;
+use Phlib\Beanstalk\Connection\JobPackager\Raw;
 
 class RawTest extends \PHPUnit_Framework_TestCase
 {
     public function testImplementsInterface()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\JobPackager\PackagerInterface', new Raw());
+        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\JobPackager\PackagerInterface', new Raw());
     }
 
     /**
