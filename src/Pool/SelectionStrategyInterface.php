@@ -8,5 +8,9 @@ namespace Phlib\Beanstalk\Pool;
  */
 interface SelectionStrategyInterface
 {
-    public function pickOne($collection);
+    /**
+     * @param string[] $collection
+     * @return string
+     */
+    public function pickOne(array $collection);
 }
