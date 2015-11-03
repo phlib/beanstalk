@@ -172,21 +172,48 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $collection->sendToAll($command);
     }
 
-    public function testSendToAllGatherAllResults()
+    public function testSendToAllCallsSuccessCallback()
+    {
+        $command     = 'stats';
+        $connection1 = $this->getMockConnection('id-123');
+        $connection1->expects($this->any())
+            ->method($command);
+
+        $connection2 = $this->getMockConnection('id-456');
+        $connection2->expects($this->any())
+            ->method($command);
+
+        $called = 0;
+        $onSuccess = function () use (&$called) {
+            $called++;
+        };
+
+        $collection = new Collection([$connection1, $connection2]);
+        $collection->sendToAll($command, [], $onSuccess);
+        $this->assertEquals(2, $called);
+    }
+
+    public function testSendToAllCallsFailureCallback()
     {
         $command     = 'stats';
         $connection1 = $this->getMockConnection('id-123');
         $connection1->expects($this->any())
             ->method($command)
-            ->will($this->returnValue(123));
+            ->will($this->throwException(new RuntimeException()));
 
         $connection2 = $this->getMockConnection('id-456');
         $connection2->expects($this->any())
             ->method($command)
-            ->will($this->returnValue(456));
+            ->will($this->throwException(new RuntimeException()));
+
+        $failed = 0;
+        $onFailure = function () use (&$failed) {
+            $failed++;
+        };
 
         $collection = new Collection([$connection1, $connection2]);
-        $this->assertCount(2, $collection->sendToAll($command));
+        $collection->sendToAll($command, [], null, $onFailure);
+        $this->assertEquals(2, $failed);
     }
 
     public function testSendToOne()

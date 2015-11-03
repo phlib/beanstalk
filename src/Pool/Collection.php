@@ -85,43 +85,6 @@ class Collection implements CollectionInterface
     /**
      * @inheritdoc
      */
-    public function sendToExact($key, $command, array $arguments = [])
-    {
-        try {
-            $connection = $this->getConnection($key);
-            $result     = call_user_func_array([$connection, $command], $arguments);
-            $this->connections[$key]['retry_at'] = false;
-
-            return ['connection' => $connection, 'response' => $result];
-        } catch (RuntimeException $e) {
-            if ($this->connections[$key]['retry_at'] === false) {
-                $retryDelay = $this->options['retry_delay'];
-                $this->connections[$key]['retry_at'] = time() + $retryDelay; // 10 minutes
-            }
-            throw $e;
-        }
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public function sendToAll($command, array $arguments = [])
-    {
-        $results = [];
-        $keys = array_keys($this->connections);
-        foreach ($keys as $key) {
-            try {
-                $results[$key] = $this->sendToExact($key, $command, $arguments);
-            } catch (\Exception $e) {
-                // ignore
-            }
-        }
-        return $results;
-    }
-
-    /**
-     * @inheritdoc
-     */
     public function sendToOne($command, array $arguments = [])
     {
         $e = null;
@@ -149,5 +112,57 @@ class Collection implements CollectionInterface
             throw $e;
         }
         return ['connection' => null, 'response' => false];
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function sendToExact($key, $command, array $arguments = [])
+    {
+        try {
+            $connection = $this->getConnection($key);
+            $result     = call_user_func_array([$connection, $command], $arguments);
+            $this->connections[$key]['retry_at'] = false;
+
+            return ['connection' => $connection, 'response' => $result];
+        } catch (RuntimeException $e) {
+            if ($this->connections[$key]['retry_at'] === false) {
+                $retryDelay = $this->options['retry_delay'];
+                $this->connections[$key]['retry_at'] = time() + $retryDelay; // 10 minutes
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * @inheritdoc
+     */
+    public function sendToAll($command, array $arguments = [], callable $success = null, callable $failure = null)
+    {
+        foreach (array_keys($this->connections) as $key) {
+            try {
+                $result = $this->sendToExact($key, $command, $arguments);
+            } catch (RuntimeException $e) {
+                // ignore
+                $result = ['response' => false];
+            }
+
+            if ($result['response'] === false) {
+                if (!is_null($failure)) {
+                    $continue = call_user_func($failure);
+                    if ($continue === false) {
+                        return;
+                    }
+                }
+                continue;
+            }
+
+            if (!is_null($success)) {
+                $continue = call_user_func($success, $result);
+                if ($continue === false) {
+                    return;
+                }
+            }
+        }
     }
 }
