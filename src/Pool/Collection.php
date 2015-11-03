@@ -54,7 +54,15 @@ class Collection implements CollectionInterface
             $strategy = new RoundRobinStrategy();
         }
         $this->strategy = $strategy;
-        $this->options = $options;
+        $this->options = $options + ['retry_delay' => 600];
+    }
+
+    /**
+     * @return SelectionStrategyInterface
+     */
+    public function getSelectionStrategy()
+    {
+        return $this->strategy;
     }
 
     /**
@@ -68,6 +76,8 @@ class Collection implements CollectionInterface
         $retryAt = $this->connections[$key]['retry_at'];
         if ($retryAt !== false && $retryAt > time()) {
             throw new RuntimeException('Connection recently failed.');
+        } elseif ($retryAt !== false && $retryAt <= time()) {
+            $this->connections[$key]['retry_at'] = false;
         }
         return $this->connections[$key]['connection'];
     }
@@ -82,14 +92,11 @@ class Collection implements CollectionInterface
             $result     = call_user_func_array([$connection, $command], $arguments);
             $this->connections[$key]['retry_at'] = false;
 
-            if (is_array($result) and array_key_exists('id', $result)) {
-                $result['id'] = $this->combineId($connection, $result['id']);
-            }
-
             return ['connection' => $connection, 'response' => $result];
         } catch (RuntimeException $e) {
             if ($this->connections[$key]['retry_at'] === false) {
-                $this->connections[$key]['retry_at'] = time() + 600; // 10 minutes
+                $retryDelay = $this->options['retry_delay'];
+                $this->connections[$key]['retry_at'] = time() + $retryDelay; // 10 minutes
             }
             throw $e;
         }
@@ -118,7 +125,11 @@ class Collection implements CollectionInterface
     public function sendToOne($command, array $arguments = [])
     {
         $e = null;
-        foreach ($this->randomKeys() as $key) {
+
+        $keysAvailable = array_keys($this->connections);
+        $keysUsed      = [];
+        $keysExhausted = false;
+        while (!$keysExhausted && ($key = $this->strategy->pickOne($keysAvailable)) !== false) {
             try {
                 $result = $this->sendToExact($key, $command, $arguments);
                 if ($result['response'] !== false) {
@@ -126,6 +137,11 @@ class Collection implements CollectionInterface
                 }
             } catch (RuntimeException $e) {
                 // ignore
+            }
+
+            $keysUsed[$key] = true;
+            if (array_keys($keysUsed) === $keysAvailable) {
+                $keysExhausted = true;
             }
         }
 
