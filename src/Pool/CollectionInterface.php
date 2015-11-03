@@ -27,12 +27,14 @@ interface CollectionInterface
      * @param array $arguments
      * @return mixed
      */
-    public function sendToAll($command, array $arguments = []);
+    public function sendToOne($command, array $arguments = []);
 
     /**
      * @param $command
      * @param array $arguments
+     * @param callable $success
+     * @param callable $failure
      * @return mixed
      */
-    public function sendToOne($command, array $arguments = []);
+    public function sendToAll($command, array $arguments = [], callable $success = null, callable $failure = null);
 }
