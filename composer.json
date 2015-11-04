@@ -2,8 +2,9 @@
     "name": "phlib/beanstalk",
     "description": "Library for handling beanstalk connections.",
     "type": "library",
-    "keywords": ["beanstalk", "job", "queue"],
+    "keywords": ["beanstalk", "pool", "job", "queue"],
     "license": "MIT",
+    "homepage": "https://github.com/phlib/beanstalk",
     "authors": [
         {
             "name": "James Dempster",
