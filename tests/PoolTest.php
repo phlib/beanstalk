@@ -3,7 +3,9 @@
 namespace Phlib\Beanstalk\Tests;
 
 use Phlib\Beanstalk\Connection;
+use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool;
+use Phlib\Beanstalk\Pool\Collection;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\SocketException;
 use phpmock\phpunit\PHPMock;
@@ -18,34 +20,18 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     protected $pool;
 
     /**
-     * @var Connection[]|\PHPUnit_Framework_MockObject_MockObject[]
+     * @var Collection|\PHPUnit_Framework_MockObject_MockObject
      */
-    protected $servers;
+    protected $collection;
 
     public function setUp()
     {
         parent::setUp();
 
-        $builder = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
-            ->disableOriginalConstructor();
-
-        $conn1 = $builder->getMock();
-        $conn1->expects($this->any())
-            ->method('getUniqueIdentifier')
-            ->willReturn('host:123');
-
-        $conn2 = $builder->getMock();
-        $conn2->expects($this->any())
-            ->method('getUniqueIdentifier')
-            ->willReturn('host:456');
-
-        $conn3 = $builder->getMock();
-        $conn3->expects($this->any())
-            ->method('getUniqueIdentifier')
-            ->willReturn('host:789');
-
-        $this->servers = [$conn1, $conn2, $conn3];
-        $this->pool = new Pool($this->servers);
+        $this->collection = $this->getMockBuilder('\Phlib\Beanstalk\Pool\Collection')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->pool = new Pool($this->collection);
     }
 
     public function tearDown()
@@ -55,29 +41,11 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $this->pool = null;
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
-    public function testGetConnectionWithInvalidHash()
-    {
-        $this->pool->getConnection('InvalidHash');
-    }
-
-    public function testGetConnection()
-    {
-        $beanstalk = $this->pool->getConnection('host:789');
-        $this->assertSame($this->servers[2], $beanstalk);
-    }
-
-    public function testUseTubeCallsEachConnection()
+    public function testUseTubeCallsAllConnections()
     {
         $tube = 'test-tube';
-        foreach (array_keys($this->servers) as $index) {
-            $this->servers[$index]->expects($this->once())
-                ->method('useTube')
-                ->with($tube)
-                ->willReturn($tube);
-        }
+        $this->collection->expects($this->once())
+            ->method('sendToAll');
         $this->pool->useTube($tube);
     }
 
@@ -95,60 +63,43 @@ class PoolTest extends \PHPUnit_Framework_TestCase
 
     public function testPutSuccess()
     {
-        $jobData = 'myJobData';
-        $randomConnection = $this->servers[0];
-
-        $this->setupExpectedShuffle();
-        $randomConnection->expects($this->once())
-            ->method('put')
-            ->with($jobData)
-            ->willReturn('abc123');
-
-        $this->pool->put($jobData);
-    }
-
-    public function testPutReturnsJobIdThatStartsWithServerIdentifier()
-    {
-        $randomConnection = $this->servers[0];
-
-        $this->setupExpectedShuffle();
-        $serverJobId = 'abc123';
-        $randomConnection->expects($this->once())
-            ->method('put')
-            ->willReturn($serverJobId);
-
-        $expectedJobId = $randomConnection->getUniqueIdentifier() . '.' . $serverJobId;
-        $this->assertEquals($expectedJobId, $this->pool->put('myJobData'));
-    }
-
-    public function testPutFailureFailsToAnotherConnection()
-    {
-        $this->setupExpectedShuffle();
-        $this->servers[0]->expects($this->once())
-            ->method('put')
-            ->will($this->throwException(new SocketException('Failed to write data.')));
-        $this->servers[1]->expects($this->once())
-            ->method('put')
-            ->willReturn('abc123');
-
+        $connection = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->collection->expects($this->once())
+            ->method('sendToOne')
+            ->will($this->returnValue(['connection' => $connection, 'response' => '123']));
         $this->pool->put('myJobData');
     }
 
+    public function testPutReturnsJobIdContainingTheServerIdentifier()
+    {
+        $host = 'host123';
+        $connection = $this->createMockConnection($host);
+        $this->collection->expects($this->any())
+            ->method('sendToOne')
+            ->will($this->returnValue(['connection' => $connection, 'response' => '123']));
+        $this->assertContains($host, $this->pool->put('myJobData'));
+    }
+
+    public function testPutReturnsJobIdContainingTheOriginalJobId()
+    {
+        $jobId = '432';
+        $connection = $this->createMockConnection('host:123');
+        $this->collection->expects($this->any())
+            ->method('sendToOne')
+            ->will($this->returnValue(['connection' => $connection, 'response' => $jobId]));
+        $this->assertContains($jobId, $this->pool->put('myJobData'));
+    }
+
     /**
-     * @expectedException \Phlib\Beanstalk\Exception\SocketException
+     * @expectedException \Phlib\Beanstalk\Exception\RuntimeException
      */
     public function testPutTotalFailure()
     {
-        $this->servers[0]->expects($this->once())
-            ->method('put')
-            ->will($this->throwException(new SocketException('Failed to write data.')));
-        $this->servers[1]->expects($this->once())
-            ->method('put')
-            ->will($this->throwException(new SocketException('Failed to write data.')));
-        $this->servers[2]->expects($this->once())
-            ->method('put')
-            ->will($this->throwException(new SocketException('Failed to write data.')));
-
+        $this->collection->expects($this->any())
+            ->method('sendToOne')
+            ->will($this->throwException(new RuntimeException()));
         $this->pool->put('myJobData');
     }
 
@@ -166,24 +117,16 @@ class PoolTest extends \PHPUnit_Framework_TestCase
 
     public function testReserve()
     {
-        $jobId = 'abc123';
-        $hostJobId = "host:123.$jobId";
-        $this->setupExpectedShuffle();
-        $this->servers[0]->expects($this->any())
-            ->method('reserve')
-            ->willReturn(['id' => $jobId, 'body' => 'jobData']);
-        $this->assertEquals(['id' => $hostJobId, 'body' => 'jobData'], $this->pool->reserve());
-    }
+        $jobId      = 'abc123';
+        $host       = 'host:123';
+        $response   = ['id' => $jobId, 'body' => 'jobData'];
+        $expected   = ['id' => "host:123.$jobId", 'body' => 'jobData'];
+        $connection = $this->createMockConnection($host);
 
-    public function testDelete()
-    {
-        $jobId = 'abc123';
-        $this->servers[1]->expects($this->once())
-            ->method('delete')
-            ->with($jobId)
-            ->will($this->returnSelf());
-        // returns self
-        $this->assertSame($this->pool, $this->pool->delete("host:456.$jobId"));
+        $this->collection->expects($this->any())
+            ->method('sendToOne')
+            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
+        $this->assertEquals($expected, $this->pool->reserve());
     }
 
     /**
@@ -194,236 +137,221 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $this->pool->release('abc123');
     }
 
-    public function testRelease()
+    /**
+     * @param string $method
+     * @dataProvider methodsWithJobIdDataProvider
+     */
+    public function testMethodsWithJobId($method)
     {
+        $host  = 'host:456';
         $jobId = 'abc123';
-        $this->servers[1]->expects($this->any())
-            ->method('release')
-            ->with($jobId)
-            ->will($this->returnSelf());
-        // returns self
-        $this->assertSame($this->pool, $this->pool->release("host:456.$jobId"));
+        $this->collection->expects($this->once())
+            ->method('sendToExact')
+            ->with(
+                $this->equalTo($host),
+                $this->equalTo($method),
+                $this->contains($jobId)
+            );
+        $this->pool->$method("$host.$jobId");
     }
 
-    public function testBury()
+    public function methodsWithJobIdDataProvider()
     {
-        $jobId = 'abc123';
-        $this->servers[1]->expects($this->any())
-            ->method('bury')
-            ->with($jobId)
-            ->will($this->returnSelf());
-        // returns self
-        $this->assertSame($this->pool, $this->pool->bury("host:456.$jobId"));
-    }
-
-    public function testTouch()
-    {
-        $jobId = 'abc123';
-        $this->servers[1]->expects($this->any())
-            ->method('touch')
-            ->with($jobId)
-            ->will($this->returnSelf());
-        // returns self
-        $this->assertSame($this->pool, $this->pool->touch("host:456.$jobId"));
+        return [['delete'], ['release'], ['bury'], ['touch']];
     }
 
     public function testPeek()
     {
-        $jobId     = 'abc123';
-        $hostJobId = "host:456.$jobId";
-        $this->servers[1]->expects($this->any())
-            ->method('peek')
-            ->with($jobId)
-            ->willReturn(['id' => $jobId, 'body' => 'jobBody']);
-        // returns self
-        $this->assertEquals(['id' => $hostJobId, 'body' => 'jobBody'], $this->pool->peek("host:456.$jobId"));
+        $host       = 'host:456';
+        $jobId      = 'abc123';
+        $jobBody    = 'jobBody';
+        $response   = ['id' => $jobId, 'body' => $jobBody];
+        $expected   = ['id' => "$host.$jobId", 'body' => $jobBody];
+        $connection = $this->createMockConnection($host);
+
+        $this->collection->expects($this->any())
+            ->method('sendToExact')
+            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
+
+        $this->assertEquals($expected, $this->pool->peek("$host.$jobId"));
     }
 
     public function testPeekReady()
     {
-        $this->setupExpectedShuffle();
-        $jobId     = 'abc123';
-        $hostJobId = "host:123.$jobId";
-        $this->servers[0]->expects($this->any())
-            ->method('peekReady')
-            ->willReturn(['id' => $jobId, 'body' => 'jobBody']);
-        $this->assertEquals(['id' => $hostJobId, 'body' => 'jobBody'], $this->pool->peekReady());
+        $host       = 'host:123';
+        $jobId      = 'abc123';
+        $jobBody    = 'jobBody';
+        $response   = ['id' => $jobId, 'body' => $jobBody];
+        $expected   = ['id' => "$host.$jobId", 'body' => $jobBody];
+        $connection = $this->createMockConnection($host);
+
+        $this->collection->expects($this->any())
+            ->method('sendToOne')
+            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
+
+        $this->assertEquals($expected, $this->pool->peekReady());
     }
 
     public function testPeekReadyWithNoReadyJobs()
     {
-        $this->servers[0]->expects($this->any())
-            ->method('peekReady')
-            ->willReturn(false);
-        $this->servers[1]->expects($this->any())
-            ->method('peekReady')
-            ->willReturn(false);
-        $this->servers[2]->expects($this->any())
-            ->method('peekReady')
-            ->willReturn(false);
+        $this->collection->expects($this->any())
+            ->method('sendToOne')
+            ->will($this->returnValue(['connection' => null, 'response' => false]));
         $this->assertFalse($this->pool->peekReady());
     }
 
     public function testPeekDelayed()
     {
-        $this->setupExpectedShuffle();
-        $jobId     = 'abc123';
-        $hostJobId = "host:123.$jobId";
-        $this->servers[0]->expects($this->any())
-            ->method('peekDelayed')
-            ->willReturn(['id' => $jobId, 'body' => 'jobBody']);
-        $this->assertEquals(['id' => $hostJobId, 'body' => 'jobBody'], $this->pool->peekDelayed());
+        $host       = 'host:123';
+        $jobId      = 'abc123';
+        $jobBody    = 'jobBody';
+        $response   = ['id' => $jobId, 'body' => $jobBody];
+        $expected   = ['id' => "$host.$jobId", 'body' => $jobBody];
+        $connection = $this->createMockConnection($host);
+
+        $this->collection->expects($this->any())
+            ->method('sendToOne')
+            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
+
+        $this->assertEquals($expected, $this->pool->peekDelayed());
     }
 
     public function testPeekDelayedWithNoDelayedJobs()
     {
-        $this->servers[0]->expects($this->any())
-            ->method('peekDelayed')
-            ->willReturn(false);
-        $this->servers[1]->expects($this->any())
-            ->method('peekDelayed')
-            ->willReturn(false);
-        $this->servers[2]->expects($this->any())
-            ->method('peekDelayed')
-            ->willReturn(false);
+        $this->collection->expects($this->any())
+            ->method('sendToOne')
+            ->will($this->returnValue(['connection' => null, 'response' => false]));
         $this->assertFalse($this->pool->peekDelayed());
     }
 
     public function testPeekBuried()
     {
-        $this->setupExpectedShuffle();
-        $jobId     = 'abc123';
-        $hostJobId = "host:123.$jobId";
-        $this->servers[0]->expects($this->any())
-            ->method('peekBuried')
-            ->willReturn(['id' => $jobId, 'body' => 'jobBody']);
-        $this->assertEquals(['id' => $hostJobId, 'body' => 'jobBody'], $this->pool->peekBuried());
+        $host       = 'host:123';
+        $jobId      = 'abc123';
+        $jobBody    = 'jobBody';
+        $response   = ['id' => $jobId, 'body' => $jobBody];
+        $expected   = ['id' => "$host.$jobId", 'body' => $jobBody];
+        $connection = $this->createMockConnection($host);
+
+        $this->collection->expects($this->any())
+            ->method('sendToOne')
+            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
+
+        $this->assertEquals($expected, $this->pool->peekBuried());
     }
 
     public function testPeekBuriedWithNoBuriedJobs()
     {
-        $this->servers[0]->expects($this->any())
-            ->method('peekBuried')
-            ->willReturn(false);
-        $this->servers[1]->expects($this->any())
-            ->method('peekBuried')
-            ->willReturn(false);
-        $this->servers[2]->expects($this->any())
-            ->method('peekBuried')
-            ->willReturn(false);
+        $this->collection->expects($this->any())
+            ->method('sendToOne')
+            ->will($this->returnValue(['connection' => null, 'response' => false]));
         $this->assertFalse($this->pool->peekBuried());
     }
 
     public function testStats()
     {
-        foreach (array_keys($this->servers) as $index) {
-            $this->servers[$index]->expects($this->any())
-                ->method('stats')
-                ->willReturn(['current-jobs-ready' => 2, 'some-other' => 8]);
-        }
+        $noOfServers = 3;
+        $ready       = 2;
+        $other       = 8;
+        $response    = ['current-jobs-ready' => $ready, 'some-other' => $other];
+        $this->collection->expects($this->any())
+            ->method('sendToAll')
+            ->will($this->returnCallback(function ($command, $arguments, $success, $failure) use ($response, $noOfServers) {
+                for ($i = 0; $i < $noOfServers; $i++) {
+                    call_user_func($success, ['connection' => null, 'response' => $response]);
+                }
+            }));
         $this->assertEquals(
-            ['current-jobs-ready' => 6, 'some-other' => 24],
-            $this->pool->stats()
-        );
-    }
-
-    public function testStatsWithOnInvalidResponse()
-    {
-        foreach (array_keys($this->servers) as $index) {
-            if ($index == 1) {
-                continue;
-            }
-            $this->servers[$index]->expects($this->any())
-                ->method('stats')
-                ->willReturn(['current-jobs-ready' => 2, 'some-other' => 8]);
-        }
-        $this->assertEquals(
-            ['current-jobs-ready' => 4, 'some-other' => 16],
+            ['current-jobs-ready' => ($ready * $noOfServers), 'some-other' => ($other * $noOfServers)],
             $this->pool->stats()
         );
     }
 
     public function testStatsJob()
     {
-        $this->setupExpectedShuffle();
-        $jobId     = 'abc123';
-        $hostJobId = "host:123.$jobId";
-        $this->servers[0]->expects($this->any())
-            ->method('statsJob')
-            ->willReturn(['id' => $jobId, 'some-other' => 8]);
-        $this->assertEquals(['id' => $hostJobId, 'some-other' => 8], $this->pool->statsJob($hostJobId));
+        $host       = 'host:123';
+        $jobId      = 'abc123';
+        $hostJobId  = "$host.$jobId";
+        $jobBody    = 'jobBody';
+        $connection = $this->createMockConnection($host);
+        $response   = ['id' => $jobId, 'body' => $jobBody];
+        $expected   = ['id' => $hostJobId, 'body' => $jobBody];
+
+        $this->collection->expects($this->any())
+            ->method('sendToExact')
+            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
+        $this->assertEquals($expected, $this->pool->statsJob($hostJobId));
     }
 
     public function testStatsTube()
     {
-        foreach (array_keys($this->servers) as $index) {
-            $this->servers[$index]->expects($this->any())
-                ->method('statsTube')
-                ->willReturn(['current-jobs-ready' => 2, 'some-other' => 8]);
-        }
+        $noOfServers = 3;
+        $ready       = 2;
+        $other       = 8;
+        $response    = ['current-jobs-ready' => $ready, 'some-other' => $other];
+        $this->collection->expects($this->any())
+            ->method('sendToAll')
+            ->will($this->returnCallback(function ($command, $arguments, $success, $failure) use ($response, $noOfServers) {
+                for ($i = 0; $i < $noOfServers; $i++) {
+                    call_user_func($success, ['connection' => null, 'response' => $response]);
+                }
+            }));
         $this->assertEquals(
-            ['current-jobs-ready' => 6, 'some-other' => 24],
+            ['current-jobs-ready' => ($ready * $noOfServers), 'some-other' => ($other * $noOfServers)],
             $this->pool->statsTube('test-tube')
         );
     }
 
-    public function testStatsTubeWithOnInvalidResponse()
+    /**
+     * @param array $kickValues
+     * @param integer $kickAmount
+     * @param integer $expected
+     * @dataProvider kickDataProvider
+     */
+    public function testKick(array $kickValues, $kickAmount, $expected)
     {
-        foreach (array_keys($this->servers) as $index) {
-            if ($index == 1) {
-                continue;
-            }
-            $this->servers[$index]->expects($this->any())
-                ->method('statsTube')
-                ->willReturn(['current-jobs-ready' => 2, 'some-other' => 8]);
-        }
-        $this->assertEquals(
-            ['current-jobs-ready' => 4, 'some-other' => 16],
-            $this->pool->statsTube('test-tube')
-        );
+        $connection = $this->createMockConnection('host:123');
+        $connection->expects($this->any())
+            ->method('kick')
+            ->will($this->returnCallback(function ($quantity) {
+                return ['response' => $quantity];
+            }));
+
+        $this->collection->expects($this->any())
+            ->method('sendToAll')
+            ->will($this->returnCallback(function ($command, $arguments, $success, $failure) use ($kickValues, $connection) {
+                foreach ($kickValues as $count) {
+                    $response = ['current-jobs-buried' => $count];
+                    call_user_func($success, ['connection' => $connection, 'response' => $response]);
+                }
+            }));
+
+        $this->assertEquals($expected, $this->pool->kick($kickAmount));
     }
 
-    public function testKick()
+    public function kickDataProvider()
     {
-        $expected = [1, 2, 4];
-        foreach ($expected as $index => $count) {
-            $this->servers[$index]->expects($this->any())
-                ->method('statsTube')
-                ->willReturn(['current-jobs-buried' => $count]);
-            $this->servers[$index]->expects($this->any())
-                ->method('kick')
-                ->willReturn($count);
-        }
-        $this->assertSame(array_sum($expected), $this->pool->kick(100));
-    }
-
-    public function testKickWithinBounds()
-    {
-        $this->setupExpectedShuffle();
-        $expected = 5;
-        foreach ([1, 2, 4] as $index => $count) {
-            $this->servers[$index]->expects($this->any())
-                ->method('statsTube')
-                ->willReturn(['current-jobs-buried' => $count]);
-            $this->servers[$index]->expects($this->any())
-                ->method('kick')
-                ->will($this->returnArgument(0));
-        }
-        $this->assertSame($expected, $this->pool->kick($expected));
+        return [
+            [[1, 2, 4], 100, 7],
+            [[1, 0, 4], 100, 5],
+            [[0, 0, 0], 100, 0],
+            [[33, 33], 100, 66],
+            [[33, 33, 33], 100, 99],
+            [[40, 40, 40], 100, 100],
+        ];
     }
 
     public function testListTubes()
     {
         $expected = ['test1', 'test2', 'test3', 'test4'];
-        $this->servers[0]->expects($this->any())
-            ->method('listTubes')
-            ->willReturn(array_slice($expected, 0, 2));
-        $this->servers[1]->expects($this->any())
-            ->method('listTubes')
-            ->willReturn(array_slice($expected, 2, 1));
-        $this->servers[2]->expects($this->any())
-            ->method('listTubes')
-            ->willReturn(array_slice($expected, 2, 2));
+
+        $this->collection->expects($this->any())
+            ->method('sendToAll')
+            ->will($this->returnCallback(function ($command, $args, $success, $failure) use ($expected) {
+                $success(['connection' => null, 'response' => array_slice($expected, 0, 2)]);
+                $success(['connection' => null, 'response' => array_slice($expected, 2, 1)]);
+                $success(['connection' => null, 'response' => array_slice($expected, 2, 2)]);
+            }));
 
         $actual = $this->pool->listTubes();
         sort($actual); // this is so they match
@@ -448,12 +376,18 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(['default', 'test'], $this->pool->listTubesWatched());
     }
 
-    protected function setupExpectedShuffle()
+    /**
+     * @param string $host
+     * @return Connection|\PHPUnit_Framework_MockObject_MockObject
+     */
+    protected function createMockConnection($host)
     {
-        $shuffle = $this->getFunctionMock('\Phlib\Beanstalk', 'shuffle');
-        $shuffle->expects($this->any())
-            ->willReturnCallback(function (&$keys) {
-                $keys = ['host:123', 'host:456', 'host:789'];
-            });
+        $connection = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $connection->expects($this->any())
+            ->method('getUniqueIdentifier')
+            ->will($this->returnValue($host));
+        return $connection;
     }
 }

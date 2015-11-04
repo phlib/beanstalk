@@ -3,6 +3,7 @@
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool\CollectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
@@ -56,6 +57,9 @@ class Pool implements ConnectionInterface
         $ttr = self::DEFAULT_TTR
     ) {
         $result = $this->collection->sendToOne('put', func_get_args());
+        if (!$result['connection'] instanceof ConnectionInterface || $result['response'] === false) {
+            throw new RuntimeException('Failed to put the job into the tube.');
+        }
         return $this->combineId($result['connection'], $result['response']);
     }
 
@@ -67,16 +71,14 @@ class Pool implements ConnectionInterface
     {
         $startTime = time();
         do {
-            foreach ($this->randomKeys() as $key) {
-                try {
-                    $result = $this->collection->sendToExact($key, 'reserve', [0]);
-                    if (is_array($result) && isset($result['response'])) {
-                        return $result['response'];
-                    }
-                } catch (\Exception $e) {
-                    // ignore
+            $result = $this->collection->sendToOne('reserve', [0]);
+            if (is_array($result['response'])) {
+                if (array_key_exists('id', $result['response'])) {
+                    $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
                 }
+                return $result['response'];
             }
+
             usleep(250 * 1000);
         } while (time() - $startTime < $timeout);
 
@@ -167,7 +169,10 @@ class Pool implements ConnectionInterface
     public function peek($id)
     {
         list($key, $jobId) = $this->splitId($id);
-        return $this->collection->sendToExact($key, 'peek', [$jobId])['response'];
+        $result    = $this->collection->sendToExact($key, 'peek', [$jobId]);
+        $job       = $result['response'];
+        $job['id'] = $id;
+        return $job;
     }
 
     /**
@@ -175,7 +180,11 @@ class Pool implements ConnectionInterface
      */
     public function peekReady()
     {
-        return $this->collection->sendToOne('peekReady')['response'];
+        $result = $this->collection->sendToOne('peekReady');
+        if (isset($result['response']['id'])) {
+            $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
+        }
+        return $result['response'];
     }
 
     /**
@@ -183,7 +192,11 @@ class Pool implements ConnectionInterface
      */
     public function peekDelayed()
     {
-        return $this->collection->sendToOne('peekDelayed')['response'];
+        $result = $this->collection->sendToOne('peekDelayed');
+        if (isset($result['response']['id'])) {
+            $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
+        }
+        return $result['response'];
     }
 
     /**
@@ -191,7 +204,11 @@ class Pool implements ConnectionInterface
      */
     public function peekBuried()
     {
-        return $this->collection->sendToOne('peekBuried')['response'];
+        $result = $this->collection->sendToOne('peekBuried');
+        if (isset($result['response']['id'])) {
+            $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
+        }
+        return $result['response'];
     }
 
     /**
@@ -200,28 +217,26 @@ class Pool implements ConnectionInterface
      */
     public function kick($quantity)
     {
-        $kicked = 0;
-        foreach ($this->randomKeys() as $key) {
-            try {
-                $result = $this->collection->sendToExact($key, 'statsTube', [$this->using]);
+        $kicked    = 0;
+        $onSuccess = function ($result) use ($quantity, &$kicked) {
+            $stats = $result['response'];
+            $buriedJobs = isset($stats['current-jobs-buried'])
+                ? $stats['current-jobs-buried'] : 0;
 
-                $stats = $result['response'];
-                $buriedJobs = isset($stats['current-jobs-buried'])
-                    ? $stats['current-jobs-buried'] : 0;
-
-                if ($buriedJobs > 0) {
-                    $kick   = min($buriedJobs, $quantity - $kicked);
-                    $result = $this->collection->sendToExact($key, 'kick', [$kick]);
-                    $kicked += (int)$result['response'];
-
-                    if ($kicked >= $quantity) {
-                        break;
-                    }
-                }
-            } catch (\Exception $e) {
-                // ignore
+            if ($buriedJobs == 0) {
+                return true;
             }
-        }
+
+            $kick   = min($buriedJobs, $quantity - $kicked);
+            $result = $result['connection']->kick($kick);
+            $kicked += (int)$result['response'];
+
+            if ($kicked >= $quantity) {
+                return false;
+            }
+        };
+        $this->collection->sendToAll('statTube', [$this->using], $onSuccess);
+
         return $kicked;
     }
 
@@ -230,14 +245,14 @@ class Pool implements ConnectionInterface
      */
     public function stats()
     {
-        $stats = [];
-        $results = $this->collection->sendToAll('stats');
-        foreach ($results as $result) {
-            if (!isset($result['response']) || !is_array($result['response'])) {
-                continue;
+        $stats     = [];
+        $onSuccess = function ($result) use (&$stats) {
+            if (!is_array($result['response'])) {
+                return;
             }
             $stats = $this->statsCombine($stats, $result['response']);
-        }
+        };
+        $this->collection->sendToAll('stats', [], $onSuccess);
 
         if (!is_array($stats) || empty($stats)) {
             return false;
@@ -252,7 +267,10 @@ class Pool implements ConnectionInterface
     public function statsJob($id)
     {
         list($key, $jobId) = $this->splitId($id);
-        return $this->collection->sendToExact($key, 'statsJob', [$jobId])['response'];
+        $result    = $this->collection->sendToExact($key, 'statsJob', [$jobId]);
+        $job       = $result['response'];
+        $job['id'] = $id;
+        return $job;
     }
 
     /**
@@ -261,14 +279,14 @@ class Pool implements ConnectionInterface
      */
     public function statsTube($tube)
     {
-        $stats = [];
-        $results = $this->collection->sendToAll('statsTube', [$tube]);
-        foreach ($results as $result) {
-            if (!isset($result['response']) || !is_array($result['response'])) {
-                continue;
+        $stats     = [];
+        $onSuccess = function ($result) use (&$stats) {
+            if (!is_array($result['response'])) {
+                return;
             }
             $stats = $this->statsCombine($stats, $result['response']);
-        }
+        };
+        $this->collection->sendToAll('statsTube', [$tube], $onSuccess);
 
         if (!is_array($stats) || empty($stats)) {
             return false;
@@ -311,11 +329,14 @@ class Pool implements ConnectionInterface
      */
     public function listTubes()
     {
-        $tubes = [];
-        $responses = $this->collection->sendToAll('listTubes');
-        foreach ($responses as $response) {
-            $tubes = array_merge($response['response'], $tubes);
-        }
+        $tubes     = [];
+        $onSuccess = function ($result) use (&$tubes) {
+            if (!is_array($result['response'])) {
+                return;
+            }
+            $tubes = array_merge($result['response'], $tubes);
+        };
+        $this->collection->sendToAll('listTubes', [], $onSuccess);
         return array_unique($tubes);
     }
 
