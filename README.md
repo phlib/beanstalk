@@ -104,9 +104,30 @@ $beanstalk = (new Factory)->createFromArray([
 ```
 
 ## Pool
-The pool allows for work to pushed to and retrieved from multiple servers.
+The pool allows for work to pushed to and retrieved from multiple servers. The interface for the pool is identical to
+the standard Connection class. It is implemented to be as transparent as possible.
 
-Todo: more description
+```php
+use Phlib\Beanstalk\Connection;
+use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Pool;
+use Phlib\Beanstalk\Pool\Collection;
+use Phlib\Beanstalk\Pool\RoundRobinStrategy;
+
+$servers = [
+    new Connection(new Socket('10.0.0.1')),
+    new Connection(new Socket('10.0.0.2')),
+    new Connection(new Socket('10.0.0.3')),
+    new Connection(new Socket('10.0.0.4'))
+];
+$strategy = new RoundRobinStrategy
+$pool = new Pool(new Collection($servers, $strategy, ['retry_delay' => '120']));
+
+$pool->useTube('my-tube');
+$pool->put(array('my' => 'jobData1')); // <- sent to server 1
+$pool->put(array('my' => 'jobData2')); // <- sent to server 2
+$pool->put(array('my' => 'jobData3')); // <- sent to server 3
+```
 
 ## Command Line Script
 
