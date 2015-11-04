@@ -1,6 +1,7 @@
 <?php
 
 namespace Phlib\Beanstalk\Pool;
+
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 /**

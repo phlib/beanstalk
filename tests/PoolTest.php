@@ -6,13 +6,9 @@ use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool;
 use Phlib\Beanstalk\Pool\Collection;
-use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\Exception\SocketException;
-use phpmock\phpunit\PHPMock;
 
 class PoolTest extends \PHPUnit_Framework_TestCase
 {
-    use PHPMock;
 
     /**
      * @var Pool
