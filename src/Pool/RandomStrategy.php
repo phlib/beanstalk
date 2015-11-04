@@ -21,6 +21,6 @@ class RandomStrategy implements SelectionStrategyInterface
             return current($collection);
         }
 
-        return array_rand($collection);
+        return $collection[array_rand($collection)];
     }
 }
