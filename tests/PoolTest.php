@@ -396,6 +396,16 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($jobId, $actualJobId);
     }
 
+    public function testCombineAndSplitReturnCorrectHost()
+    {
+        $host = '127.0.0.1';
+        $connection = $this->createMockConnection($host);
+
+        $poolId = $this->pool->combineId($connection, 123);
+        list($actualHost, ) = $this->pool->splitId($poolId);
+        $this->assertEquals($host, $actualHost);
+    }
+
     /**
      * @param string $host
      * @return Connection|\PHPUnit_Framework_MockObject_MockObject

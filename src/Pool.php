@@ -366,8 +366,7 @@ class Pool implements ConnectionInterface
         if (!is_numeric($id)) {
             throw new InvalidArgumentException('Specified job id must be a number.');
         }
-        $key = str_replace('.', '-', $connection->getUniqueIdentifier());
-        return "{$key}.{$id}";
+        return "{$connection->getUniqueIdentifier()}.{$id}";
     }
 
     /**
