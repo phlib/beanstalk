@@ -33,6 +33,6 @@ $application->addCommands([
     new TubeKickCommand()
 ]);
 
-ConfigurationHelper::initHelper($application);
+ConfigurationHelper::initHelper($application, ['filename' => 'beanstalk-config.php']);
 
 $application->run();
