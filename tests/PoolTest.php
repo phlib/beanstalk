@@ -113,7 +113,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
 
     public function testReserve()
     {
-        $jobId      = 'abc123';
+        $jobId      = '123';
         $host       = 'host:123';
         $response   = ['id' => $jobId, 'body' => 'jobData'];
         $expected   = ['id' => "host:123.$jobId", 'body' => 'jobData'];
@@ -130,7 +130,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
      */
     public function testPoolIdWithInvalidFormat()
     {
-        $this->pool->release('abc123');
+        $this->pool->release('123');
     }
 
     /**
@@ -140,7 +140,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     public function testMethodsWithJobId($method)
     {
         $host  = 'host:456';
-        $jobId = 'abc123';
+        $jobId = '123';
         $this->collection->expects($this->once())
             ->method('sendToExact')
             ->with(
@@ -159,7 +159,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     public function testPeek()
     {
         $host       = 'host:456';
-        $jobId      = 'abc123';
+        $jobId      = '123';
         $jobBody    = 'jobBody';
         $response   = ['id' => $jobId, 'body' => $jobBody];
         $expected   = ['id' => "$host.$jobId", 'body' => $jobBody];
@@ -175,7 +175,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     public function testPeekReady()
     {
         $host       = 'host:123';
-        $jobId      = 'abc123';
+        $jobId      = '123';
         $jobBody    = 'jobBody';
         $response   = ['id' => $jobId, 'body' => $jobBody];
         $expected   = ['id' => "$host.$jobId", 'body' => $jobBody];
@@ -199,7 +199,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     public function testPeekDelayed()
     {
         $host       = 'host:123';
-        $jobId      = 'abc123';
+        $jobId      = '123';
         $jobBody    = 'jobBody';
         $response   = ['id' => $jobId, 'body' => $jobBody];
         $expected   = ['id' => "$host.$jobId", 'body' => $jobBody];
@@ -223,7 +223,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     public function testPeekBuried()
     {
         $host       = 'host:123';
-        $jobId      = 'abc123';
+        $jobId      = '123';
         $jobBody    = 'jobBody';
         $response   = ['id' => $jobId, 'body' => $jobBody];
         $expected   = ['id' => "$host.$jobId", 'body' => $jobBody];
@@ -266,7 +266,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     public function testStatsJob()
     {
         $host       = 'host:123';
-        $jobId      = 'abc123';
+        $jobId      = '123';
         $hostJobId  = "$host.$jobId";
         $jobBody    = 'jobBody';
         $connection = $this->createMockConnection($host);
@@ -370,6 +370,30 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     {
         $this->pool->watch('test');
         $this->assertEquals(['default', 'test'], $this->pool->listTubesWatched());
+    }
+
+    public function testCombineIdIsNotTheJobId()
+    {
+        $jobId = 123;
+        $connection = $this->createMockConnection('host');
+        $this->assertNotEquals($jobId, $this->pool->combineId($connection, $jobId));
+    }
+
+    public function testCombineIdContainsJob()
+    {
+        $jobId = 123;
+        $connection = $this->createMockConnection('host');
+        $this->assertContains((string)$jobId, $this->pool->combineId($connection, $jobId));
+    }
+
+    public function testCombineAndSplitReturnCorrectJob()
+    {
+        $jobId = 234;
+        $connection = $this->createMockConnection('127.0.0.1');
+
+        $poolId = $this->pool->combineId($connection, $jobId);
+        list($actualHost, $actualJobId) = $this->pool->splitId($poolId);
+        $this->assertEquals($jobId, $actualJobId);
     }
 
     /**

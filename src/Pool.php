@@ -357,13 +357,17 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param Connection      $connection
-     * @param integer|string $id
+     * @param Connection $connection
+     * @param integer $id
      * @return string
      */
-    protected function combineId(Connection $connection, $id)
+    public function combineId(Connection $connection, $id)
     {
-        return "{$connection->getUniqueIdentifier()}.{$id}";
+        if (!is_numeric($id)) {
+            throw new InvalidArgumentException('Specified job id must be a number.');
+        }
+        $key = str_replace('.', '-', $connection->getUniqueIdentifier());
+        return "{$key}.{$id}";
     }
 
     /**
@@ -371,12 +375,16 @@ class Pool implements ConnectionInterface
      * @return array Indexed array of key and id.
      * @throws InvalidArgumentException
      */
-    protected function splitId($id)
+    public function splitId($id)
     {
         if (strpos($id, '.') === false) {
             throw new InvalidArgumentException('Job ID is not in expected pool format.');
         }
-        list($key, $jobId) = explode('.', $id, 3);
+
+        $position = strrpos($id, '.');
+        $key      = substr($id, 0, $position);
+        $jobId    = substr($id, $position + 1);
+
         return [$key, $jobId];
     }
 }
