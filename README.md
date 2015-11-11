@@ -49,7 +49,9 @@ $beanstalk->delete($job['id']);
 
 ### Changing the Job Packager
 
-By default all jobs are packaged as a JSON string from the producer to the consumer.
+Job packagers take the job data and convert it to a string into Beanstalk and then reverse that when the job is
+reserved. By default all jobs are packaged as a JSON string from the producer to the consumer. There are three
+available; Json, Php and Raw.
 
 ``` php
 <?php
@@ -104,8 +106,8 @@ $beanstalk = (new Factory)->createFromArray([
 ```
 
 ## Pool
-The pool allows for work to pushed to and retrieved from multiple servers. The interface for the pool is identical to
-the standard Connection class. It is implemented to be as transparent as possible.
+The pool allows for work to be pushed to and retrieved from multiple servers. The interface for the pool is identical to
+the standard Connection class.
 
 ```php
 use Phlib\Beanstalk\Connection;
@@ -136,16 +138,17 @@ $pool->put(array('my' => 'jobData3')); // <- sent to server 3
 ```
 
 Running the script will provide you with a list of options. Most are self explanatory. By default no configuration is 
-required, the script will assume localhost.
+required, the script will default to localhost.
 
 ### Command Line Configuration
 
-There 2 ways of specifying a configuration.
+There are 2 ways of specifying a configuration.
 
 1. Create a file called beanstalk-config.php either in ```/app/root``` or ```/app/root/config```.
 2. Create a file with a name of your choosing and specify it using the command option ```-c /path/to/my/config.php```
 
-The file must return an array containing the beanstalk configuration.
+The file must return an array containing the beanstalk configuration. This configuration will be passed to the Factory
+to create an instance.
 
 ```php
 return [
