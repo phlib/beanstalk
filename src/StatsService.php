@@ -188,16 +188,6 @@ class StatsService
         return $this->stats;
     }
 
-    public function getTubeStats()
-    {
-
-    }
-
-    public function getJobStats()
-    {
-
-    }
-
     /**
      * @return array
      */
