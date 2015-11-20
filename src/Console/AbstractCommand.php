@@ -22,12 +22,11 @@ abstract class AbstractCommand extends Command
     public function getBeanstalk()
     {
         if (!$this->beanstalk) {
-            $factory = new Factory;
             $config = $this->getHelper('configuration')->fetch();
             if ($config === false) {
-                $this->beanstalk = $factory->create('localhost');
+                $this->beanstalk = Factory::create('localhost');
             } else {
-                $this->beanstalk = $factory->createFromArray($config);
+                $this->beanstalk = Factory::createFromArray($config);
             }
         }
 

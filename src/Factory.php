@@ -18,7 +18,7 @@ class Factory
      * @param array $options
      * @return ConnectionInterface
      */
-    public function create($host, $port = Socket::DEFAULT_PORT, array $options = [])
+    public static function create($host, $port = Socket::DEFAULT_PORT, array $options = [])
     {
         return new Connection(new Socket($host, $port, $options));
     }
@@ -27,17 +27,17 @@ class Factory
      * @param array $config
      * @return ConnectionInterface
      */
-    public function createFromArray(array $config)
+    public static function createFromArray(array $config)
     {
         if (array_key_exists('host', $config)) {
             $config = ['server' => $config];
         }
 
         if (array_key_exists('server', $config)) {
-            $server     = $this->normalizeArgs($config['server']);
-            $connection = $this->create($server['host'], $server['port'], $server['options']);
+            $server     = static::normalizeArgs($config['server']);
+            $connection = static::create($server['host'], $server['port'], $server['options']);
         } elseif (array_key_exists('servers', $config)) {
-            $connection = new Pool($this->createConnections($config['servers']));
+            $connection = new Pool(static::createConnections($config['servers']));
         } else {
             throw new InvalidArgumentException('Missing required server(s) configuration');
         }
@@ -49,15 +49,15 @@ class Factory
      * @param array $servers
      * @return Socket[]
      */
-    public function createConnections(array $servers)
+    public static function createConnections(array $servers)
     {
         $connections = [];
         foreach ($servers as $server) {
             if (array_key_exists('enabled', $server) && $server['enabled'] == false) {
                 continue;
             }
-            $server = $this->normalizeArgs($server);
-            $connection = $this->create($server['host'], $server['port'], $server['options']);
+            $server = static::normalizeArgs($server);
+            $connection = static::create($server['host'], $server['port'], $server['options']);
             $connections[] = $connection;
         }
         return new Pool\Collection($connections);
@@ -67,7 +67,7 @@ class Factory
      * @param array $serverArgs
      * @return array
      */
-    protected function normalizeArgs(array $serverArgs)
+    protected static function normalizeArgs(array $serverArgs)
     {
         return $serverArgs + [
             'host' => null,
