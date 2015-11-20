@@ -47,22 +47,6 @@ $myJobData = $job['body'];
 $beanstalk->delete($job['id']);
 ```
 
-### Changing the Job Packager
-
-Job packagers take the job data and convert it to a string into Beanstalk and then reverse that when the job is
-reserved. By default all jobs are packaged as a JSON string from the producer to the consumer. There are three
-available; Json, Php and Raw.
-
-``` php
-<?php
-use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\Connection\Socket;
-use Phlib\Beanstalk\JobPackager;
-
-$beanstalk = new Connection(new Socket('127.0.0.1'));
-$beanstalk->setJobPackager(new JobPackager\Php);
-```
-
 ## Configuration
 
 |Name|Type|Required|Default|Description|
@@ -90,8 +74,7 @@ $beanstalk = (new Factory)->create('localhost');
 $beanstalk = (new Factory)->createFromArray(['host' => 'localhost']);
 
 $beanstalk = (new Factory)->createFromArray([
-    'server' => ['host' => 'localhost'],
-    'packager' => 'Php'
+    'server' => ['host' => 'localhost']
 ]);
 
 $beanstalk = (new Factory)->createFromArray([
@@ -99,15 +82,14 @@ $beanstalk = (new Factory)->createFromArray([
         ['host' => '10.0.0.1'],
         ['host' => '10.0.0.2'],
         ['host' => '10.0.0.3']
-    ],
-    'packager' => 'Php'
+    ]
 ]);
 
 ```
 
 ## Pool
-The pool allows for work to be pushed to and retrieved from multiple servers. The interface for the pool is identical to
-the standard Connection class.
+The pool allows for work to be pushed to and retrieved from multiple servers. The pool implements the connection 
+interface.
 
 ```php
 use Phlib\Beanstalk\Connection;
@@ -162,8 +144,7 @@ return [
     'server' => [
         'host' => '10.0.0.1',
         'port' => 11300
-    ],
-    'packager' => 'Json'
+    ]
 ];
 ```
 
@@ -184,8 +165,7 @@ return [
             'port' => 11300,
             'enabled' => false
         ]
-    ],
-    'packager' => 'Json'
+    ]
 ];
 ```
 
