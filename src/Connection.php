@@ -5,7 +5,6 @@ namespace Phlib\Beanstalk;
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\NotFoundException;
-use Phlib\Beanstalk\Connection\JobPackager\PackagerInterface;
 
 /**
  * Class Connection
@@ -29,11 +28,6 @@ class Connection implements ConnectionInterface
      * @var array
      */
     protected $watching = [self::DEFAULT_TUBE => true];
-
-    /**
-     * @var PackagerInterface
-     */
-    protected $jobPackager = null;
 
     /**
      * @var boolean
@@ -69,27 +63,6 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @return PackagerInterface
-     */
-    public function getJobPackager()
-    {
-        if (!$this->jobPackager) {
-            $this->jobPackager = new Connection\JobPackager\Json();
-        }
-        return $this->jobPackager;
-    }
-
-    /**
-     * @param PackagerInterface|null $packager
-     * @return $this
-     */
-    public function setJobPackager(PackagerInterface $packager = null)
-    {
-        $this->jobPackager = $packager;
-        return $this;
-    }
-
-    /**
      * @return string
      */
     public function getUniqueIdentifier()
@@ -111,7 +84,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param mixed   $data
+     * @param string   $data
      * @param integer $priority
      * @param integer $delay
      * @param integer $ttr
@@ -124,7 +97,7 @@ class Connection implements ConnectionInterface
         $delay = ConnectionInterface::DEFAULT_DELAY,
         $ttr = ConnectionInterface::DEFAULT_TTR
     ) {
-        $data = $this->getJobPackager()->encode($data);
+        $data = (string)$data;
         return (new Command\Put($data, $priority, $delay, $ttr))
             ->process($this->getSocket());
     }
@@ -138,9 +111,6 @@ class Connection implements ConnectionInterface
     {
         $jobData = (new Command\Reserve($timeout))
             ->process($this->getSocket());
-        if ($jobData !== false) {
-            $jobData['body'] = $this->getJobPackager()->decode($jobData['body']);
-        }
         return $jobData;
     }
 
@@ -248,7 +218,6 @@ class Connection implements ConnectionInterface
     {
         $jobData = (new Command\Peek($id))
             ->process($this->getSocket());
-        $jobData['body'] = $this->getJobPackager()->decode($jobData['body']);
         return $jobData;
     }
 
@@ -260,7 +229,6 @@ class Connection implements ConnectionInterface
         try {
             $jobData = (new Command\Peek(Command\Peek::READY))
                 ->process($this->getSocket());
-            $jobData['body'] = $this->getJobPackager()->decode($jobData['body']);
             return $jobData;
         } catch (NotFoundException $e) {
             return false;
@@ -275,7 +243,6 @@ class Connection implements ConnectionInterface
         try {
             $jobData = (new Command\Peek(Command\Peek::DELAYED))
                 ->process($this->getSocket());
-            $jobData['body'] = $this->getJobPackager()->decode($jobData['body']);
             return $jobData;
         } catch (NotFoundException $e) {
             return false;
@@ -290,7 +257,6 @@ class Connection implements ConnectionInterface
         try {
             $jobData = (new Command\Peek(Command\Peek::BURIED))
                 ->process($this->getSocket());
-            $jobData['body'] = $this->getJobPackager()->decode($jobData['body']);
             return $jobData;
         } catch (NotFoundException $e) {
             return false;

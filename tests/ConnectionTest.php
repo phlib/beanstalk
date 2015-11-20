@@ -3,7 +3,6 @@
 namespace Phlib\Beanstalk\Tests;
 
 use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\Connection\JobPackager\Raw;
 use Phlib\Beanstalk\Connection\Socket;
 
 class ConnectionTest extends \PHPUnit_Framework_TestCase
@@ -49,18 +48,6 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
         $this->beanstalk->getUniqueIdentifier();
     }
 
-    public function testDefaultJobPackager()
-    {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\JobPackager\Json', $this->beanstalk->getJobPackager());
-    }
-
-    public function testCanSetJobPackager()
-    {
-        $packager = new Raw();
-        $this->beanstalk->setJobPackager($packager);
-        $this->assertEquals($packager, $this->beanstalk->getJobPackager());
-    }
-
     public function testPut()
     {
         $this->socket->expects($this->atLeastOnce())
@@ -80,9 +67,10 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
     public function testReserveDecodesData()
     {
         $expectedData = ['foo' => 'bar' , 'bar' => 'baz'];
+        $expectedData = @(string)$expectedData;
         $this->socket->expects($this->atLeastOnce())
             ->method('read')
-            ->will($this->onConsecutiveCalls('RESERVED 123 456', json_encode($expectedData) . "\r\n"));
+            ->will($this->onConsecutiveCalls('RESERVED 123 456', "Array\r\n"));
         $jobData = $this->beanstalk->reserve();
         $this->assertEquals($expectedData, $jobData['body']);
     }
