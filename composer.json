@@ -42,5 +42,5 @@
             "Phlib\\Beanstalk\\Tests\\": "tests/"
         }
     },
-    "bin": ["bin/beanstalk-cli"]
+    "bin": ["bin/beanstalk"]
 }
