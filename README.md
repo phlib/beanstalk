@@ -16,7 +16,7 @@ $ composer require phlib/beanstalk
 or
 ``` JSON
 "require": {
-    "phlib/beanstalk": "0.1.2"
+    "phlib/beanstalk": "0.2"
 }
 ```
 
