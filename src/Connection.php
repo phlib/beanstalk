@@ -15,6 +15,11 @@ class Connection implements ConnectionInterface
     const DEFAULT_TUBE = 'default';
 
     /**
+     * @var string
+     */
+    protected $name;
+
+    /**
      * @var SocketInterface
      */
     protected $socket;
@@ -42,6 +47,7 @@ class Connection implements ConnectionInterface
     public function __construct(SocketInterface $socket)
     {
         $this->setSocket($socket);
+        $this->name = $socket->getUniqueIdentifier();
     }
 
     /**
@@ -65,9 +71,19 @@ class Connection implements ConnectionInterface
     /**
      * @return string
      */
-    public function getUniqueIdentifier()
+    public function getName()
     {
-        return $this->getSocket()->getUniqueIdentifier();
+        return $this->name;
+    }
+
+    /**
+     * @param string $value
+     * @return $this
+     */
+    public function setName($value)
+    {
+        $this->name = $value;
+        return $this;
     }
 
     /**

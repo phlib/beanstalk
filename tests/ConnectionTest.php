@@ -41,13 +41,6 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Phlib\Beanstalk\Connection\Socket', $this->beanstalk->getSocket());
     }
 
-    public function testGetUniqueIdentifierPassesThroughToSocket()
-    {
-        $this->socket->expects($this->once())
-            ->method('getUniqueIdentifier');
-        $this->beanstalk->getUniqueIdentifier();
-    }
-
     public function testPut()
     {
         $this->socket->expects($this->atLeastOnce())

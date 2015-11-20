@@ -33,6 +33,14 @@ class Pool implements ConnectionInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function getName()
+    {
+        return __CLASS__;
+    }
+
+    /**
      * @param string $tube
      * @return $this
      */
@@ -44,7 +52,7 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param mixed   $data
+     * @param string   $data
      * @param integer $priority
      * @param integer $delay
      * @param integer $ttr
@@ -86,7 +94,7 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string|integer $id
+     * @param string $id
      * @return $this
      */
     public function touch($id)
@@ -97,9 +105,9 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string|integer $id
-     * @param integer        $priority
-     * @param integer        $delay
+     * @param string  $id
+     * @param integer $priority
+     * @param integer $delay
      * @return $this
      */
     public function release($id, $priority = self::DEFAULT_PRIORITY, $delay = self::DEFAULT_DELAY)
@@ -110,8 +118,8 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string|integer $id
-     * @param integer        $priority
+     * @param string  $id
+     * @param integer $priority
      * @return $this
      */
     public function bury($id, $priority = self::DEFAULT_PRIORITY)
@@ -122,7 +130,7 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string|integer $id
+     * @param string $id
      * @return $this
      */
     public function delete($id)
@@ -147,7 +155,7 @@ class Pool implements ConnectionInterface
 
     /**
      * @param string $tube
-     * @return int|false
+     * @return integer|false
      */
     public function ignore($tube)
     {
@@ -163,7 +171,7 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string|integer $id
+     * @param string $id
      * @return array
      */
     public function peek($id)
@@ -261,7 +269,7 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string|integer $id
+     * @param string $id
      * @return array
      */
     public function statsJob($id)
@@ -357,16 +365,16 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param Connection $connection
+     * @param ConnectionInterface $connection
      * @param integer $id
      * @return string
      */
-    public function combineId(Connection $connection, $id)
+    public function combineId(ConnectionInterface $connection, $id)
     {
         if (!is_numeric($id)) {
             throw new InvalidArgumentException('Specified job id must be a number.');
         }
-        return "{$connection->getUniqueIdentifier()}.{$id}";
+        return "{$connection->getName()}.{$id}";
     }
 
     /**

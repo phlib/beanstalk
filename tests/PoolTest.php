@@ -416,7 +416,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
             ->disableOriginalConstructor()
             ->getMock();
         $connection->expects($this->any())
-            ->method('getUniqueIdentifier')
+            ->method('getName')
             ->will($this->returnValue($host));
         return $connection;
     }

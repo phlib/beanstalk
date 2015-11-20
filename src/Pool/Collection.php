@@ -39,10 +39,10 @@ class Collection implements CollectionInterface
     {
         $formatted = [];
         foreach ($connections as $connection) {
-            if (!$connection instanceof Connection) {
+            if (!$connection instanceof ConnectionInterface) {
                 throw new InvalidArgumentException('Invalid connection specified for pool collection.');
             }
-            $key = $connection->getUniqueIdentifier();
+            $key = $connection->getName();
             $formatted[$key] = [
                 'connection' => $connection,
                 'retry_at'   => false

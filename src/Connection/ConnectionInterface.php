@@ -17,13 +17,18 @@ interface ConnectionInterface
     const MAX_PRIORITY    = 4294967295; // 2^32
 
     /**
+     * @return string
+     */
+    public function getName();
+
+    /**
      * @param string $tube
      * @return $this
      */
     public function useTube($tube);
 
     /**
-     * @param mixed   $data
+     * @param string  $data
      * @param integer $priority
      * @param integer $delay
      * @param integer $ttr
@@ -49,22 +54,22 @@ interface ConnectionInterface
     public function touch($id);
 
     /**
-     * @param string|integer $id
-     * @param integer        $priority
-     * @param integer        $delay
+     * @param integer $id
+     * @param integer $priority
+     * @param integer $delay
      * @return $this
      */
     public function release($id, $priority = self::DEFAULT_PRIORITY, $delay = self::DEFAULT_DELAY);
 
     /**
-     * @param string|integer $id
-     * @param integer        $priority
+     * @param integer $id
+     * @param integer $priority
      * @return $this
      */
     public function bury($id, $priority = self::DEFAULT_PRIORITY);
 
     /**
-     * @param string|integer $id
+     * @param integer $id
      * @return $this
      */
     public function delete($id);
@@ -82,13 +87,13 @@ interface ConnectionInterface
     public function ignore($tube);
 
     /**
-     * @param string|integer $id
+     * @param integer $id
      * @return array
      */
     public function peek($id);
 
     /**
-     * @param string|integer $id
+     * @param integer $id
      * @return array
      */
     public function statsJob($id);

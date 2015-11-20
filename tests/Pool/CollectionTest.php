@@ -343,7 +343,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         }
         $connection = $builder->getMock();
         $connection->expects($this->any())
-            ->method('getUniqueIdentifier')
+            ->method('getName')
             ->will($this->returnValue($identifier));
         return $connection;
     }
