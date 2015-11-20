@@ -17,16 +17,10 @@
             "role": "developer"
         }
     ],
-    "repositories": [
-        {
-            "type": "vcs",
-            "url": "https://github.com/phlib/console"
-        }
-    ],
     "require": {
         "php": "~5.4",
         "symfony/console": "^2.7",
-        "phlib/console": "dev-master"
+        "phlib/console-configuration": "~0.1"
     },
     "require-dev": {
         "phpunit/phpunit": "~4.4",
