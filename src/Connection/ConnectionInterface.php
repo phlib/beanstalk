@@ -12,6 +12,10 @@ interface ConnectionInterface
     const DEFAULT_DELAY = 0;
     const DEFAULT_TTR = 60;
 
+    const MAX_JOB_LENGTH  = 65536;      // 2^16
+    const MAX_TUBE_LENGTH = 200;
+    const MAX_PRIORITY    = 4294967295; // 2^32
+
     /**
      * @param string $tube
      * @return $this

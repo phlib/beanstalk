@@ -2,6 +2,8 @@
 
 namespace Phlib\Beanstalk\Tests;
 
+use Phlib\Beanstalk\Connection\ConnectionInterface;
+
 class ValidateTraitTest extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -52,6 +54,39 @@ class ValidateTraitTest extends \PHPUnit_Framework_TestCase
 
     public function invalidTubeNameDataProvider()
     {
-        return [[''], [null], [str_repeat('.', 201)]];
+        return [[''], [null], [str_repeat('.', ConnectionInterface::MAX_TUBE_LENGTH + 1)]];
+    }
+
+    /**
+     * @param mixed $data
+     * @dataProvider validJobDataDataProvider
+     */
+    public function testValidJobData($data)
+    {
+        $this->assertTrue($this->validate->validateJobData($data));
+    }
+
+    public function validJobDataDataProvider()
+    {
+        return [
+            ['Foo Bar Baz'],
+            [['my' => 'array']],
+            [new \stdClass()],
+            [1234]
+        ];
+    }
+
+    /**
+     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
+     * @dataProvider invalidJobDataDataProvider
+     */
+    public function testInvalidJobData($data)
+    {
+        $this->validate->validateJobData($data);
+    }
+
+    public function invalidJobDataDataProvider()
+    {
+        return [[''], [str_pad('', ConnectionInterface::MAX_JOB_LENGTH + 1)]];
     }
 }
