@@ -12,7 +12,7 @@ foreach ($autoloadFiles as $autoloadFile) {
 
 // use
 use Symfony\Component\Console\Application;
-use Phlib\Console\Helper\ConfigurationHelper;
+use Phlib\ConsoleConfiguration\Helper\ConfigurationHelper;
 use Phlib\Beanstalk\Console\ServerStatsCommand;
 use Phlib\Beanstalk\Console\ServerTubesCommand;
 use Phlib\Beanstalk\Console\JobStatsCommand;
