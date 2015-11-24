@@ -13,12 +13,6 @@ Via Composer
 ``` bash
 $ composer require phlib/beanstalk
 ```
-or
-``` JSON
-"require": {
-    "phlib/beanstalk": "0.2"
-}
-```
 
 ## Basic Usage
 
