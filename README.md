@@ -63,15 +63,15 @@ created using the factory.
 ```php
 use Phlib\Beanstalk\Factory;
 
-$beanstalk = (new Factory)->create('localhost');
+$beanstalk = Factory::create('localhost');
 
-$beanstalk = (new Factory)->createFromArray(['host' => 'localhost']);
+$beanstalk = Factory::createFromArray(['host' => 'localhost']);
 
-$beanstalk = (new Factory)->createFromArray([
+$beanstalk = Factory::createFromArray([
     'server' => ['host' => 'localhost']
 ]);
 
-$beanstalk = (new Factory)->createFromArray([
+$beanstalk = Factory::createFromArray([
     'servers' => [
         ['host' => '10.0.0.1'],
         ['host' => '10.0.0.2'],
