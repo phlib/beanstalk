@@ -22,7 +22,7 @@ use Phlib\Beanstalk\Console\TubePeekCommand;
 use Phlib\Beanstalk\Console\TubeKickCommand;
 
 // lets go!
-$application = new Application('beanstalk-cli');
+$application = new Application('beanstalk');
 $application->addCommands([
     new ServerStatsCommand(),
     new ServerTubesCommand(),

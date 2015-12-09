@@ -110,7 +110,7 @@ $pool->put(array('my' => 'jobData3')); // <- sent to server 3
 ## Command Line Script
 
 ```bash
-./vendor/bin/beanstalk-cli
+./vendor/bin/beanstalk
 ```
 
 Running the script will provide you with a list of options. Most are self explanatory. By default no configuration is 
