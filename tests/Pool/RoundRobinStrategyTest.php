@@ -39,7 +39,6 @@ class RoundRobinStrategyTest extends \PHPUnit_Framework_TestCase
 
         $newHost = 'host456';
         $keys[] = $newHost;
-        $strategy->pickOne($keys);
         $this->assertEquals($newHost, $strategy->pickOne($keys));
     }
 }
