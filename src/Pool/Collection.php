@@ -103,7 +103,7 @@ class Collection implements CollectionInterface
             }
 
             $keysUsed[$key] = true;
-            if (array_keys($keysUsed) === $keysAvailable) {
+            if (count($keysUsed) == count($keysAvailable)) {
                 $keysExhausted = true;
             }
         }
