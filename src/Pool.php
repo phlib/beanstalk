@@ -4,6 +4,7 @@ namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\RuntimeException;
+use Phlib\Beanstalk\Model\Stats;
 use Phlib\Beanstalk\Pool\CollectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
@@ -253,19 +254,19 @@ class Pool implements ConnectionInterface
      */
     public function stats()
     {
-        $stats     = [];
-        $onSuccess = function ($result) use (&$stats) {
+        $stats = new Stats();
+        $onSuccess  = function ($result) use (&$stats) {
             if (!is_array($result['response'])) {
                 return;
             }
-            $stats = $this->statsCombine($stats, $result['response']);
+            $stats->addStats($result['response']);
         };
         $this->collection->sendToAll('stats', [], $onSuccess);
 
-        if (!is_array($stats) || empty($stats)) {
+        if ($stats->isEmpty()) {
             return false;
         }
-        return $stats;
+        return $stats->toArray();
     }
 
     /**
@@ -287,49 +288,19 @@ class Pool implements ConnectionInterface
      */
     public function statsTube($tube)
     {
-        $stats     = [];
-        $onSuccess = function ($result) use (&$stats) {
+        $stats = new Stats();
+        $onSuccess  = function ($result) use (&$stats) {
             if (!is_array($result['response'])) {
                 return;
             }
-            $stats = $this->statsCombine($stats, $result['response']);
+            $stats->addStats($result['response']);
         };
         $this->collection->sendToAll('statsTube', [$tube], $onSuccess);
 
-        if (!is_array($stats) || empty($stats)) {
+        if ($stats->isEmpty()) {
             return false;
         }
-        return $stats;
-    }
-
-    /**
-     * @param array $cumulative
-     * @param array $stats
-     * @return array
-     */
-    protected function statsCombine(array $cumulative, array $stats)
-    {
-        $list    = ['pid', 'version', 'hostname', 'name', 'uptime', 'binlog-current-index'];
-        $maximum = ['timeouts', 'binlog-max-size', 'binlog-oldest-index'];
-        foreach ($stats as $name => $value) {
-            if (!array_key_exists($name, $cumulative)) {
-                $cumulative[$name] = $value;
-                continue;
-            }
-
-            if (in_array($name, $list)) {
-                if ($cumulative[$name] != $value) {
-                    $cumulative[$name] .= ',' . $value;
-                }
-            } elseif (in_array($name, $maximum)) {
-                if ($value > $cumulative[$name]) {
-                    $cumulative[$name] = $value;
-                }
-            } else {
-                $cumulative[$name] += $value;
-            }
-        }
-        return $cumulative;
+        return $stats->toArray();
     }
 
     /**
