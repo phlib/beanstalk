@@ -30,27 +30,30 @@ class Stats
 
     /**
      * @param array $newData
+     * @return Stats
      */
-    public function addStats(array $newData)
+    public function aggregate(array $newData)
     {
+        $data = $this->data;
         foreach ($newData as $name => $value) {
-            if (!array_key_exists($name, $this->data)) {
-                $this->data[$name] = $value;
+            if (!array_key_exists($name, $data)) {
+                $data[$name] = $value;
                 continue;
             }
 
             if (in_array($name, self::$listStats)) {
-                if ($this->data[$name] != $value) {
-                    $this->data[$name] .= ',' . $value;
+                if ($data[$name] != $value) {
+                    $data[$name] .= ',' . $value;
                 }
             } elseif (in_array($name, self::$maxStats)) {
-                if ($value > $this->data[$name]) {
-                    $this->data[$name] = $value;
+                if ($value > $data[$name]) {
+                    $data[$name] = $value;
                 }
             } else {
-                $this->data[$name] += $value;
+                $data[$name] += $value;
             }
         }
+        return new self($data);
     }
 
     /**

@@ -259,7 +259,7 @@ class Pool implements ConnectionInterface
             if (!is_array($result['response'])) {
                 return;
             }
-            $stats->addStats($result['response']);
+            $stats = $stats->aggregate($result['response']);
         };
         $this->collection->sendToAll('stats', [], $onSuccess);
 
@@ -293,7 +293,7 @@ class Pool implements ConnectionInterface
             if (!is_array($result['response'])) {
                 return;
             }
-            $stats->addStats($result['response']);
+            $stats = $stats->aggregate($result['response']);
         };
         $this->collection->sendToAll('statsTube', [$tube], $onSuccess);
 

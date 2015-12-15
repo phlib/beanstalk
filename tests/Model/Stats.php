@@ -52,7 +52,7 @@ class StatsTest extends \PHPUnit_Framework_TestCase
             'key2' => 'value2',
         ]);
 
-        $stats->addStats([
+        $stats = $stats->aggregate([
             'key3' => 'value3',
             'key4' => 'value4',
         ]);
@@ -72,7 +72,7 @@ class StatsTest extends \PHPUnit_Framework_TestCase
             'name'    => 'first',
         ]);
 
-        $stats->addStats([
+        $stats = $stats->aggregate([
             'version' => '1.0.2',
             'name'    => 'second',
         ]);
@@ -90,7 +90,7 @@ class StatsTest extends \PHPUnit_Framework_TestCase
             'binlog-max-size' => 10,
         ]);
 
-        $stats->addStats([
+        $stats = $stats->aggregate([
             'timeouts'        => 3,
             'binlog-max-size' => 16,
         ]);
@@ -108,7 +108,7 @@ class StatsTest extends \PHPUnit_Framework_TestCase
             'sumvalue2' => 3,
         ]);
 
-        $stats->addStats([
+        $stats = $stats->aggregate([
             'sumvalue1' => 14,
             'sumvalue2' => 1,
         ]);
