@@ -54,6 +54,10 @@ class ServerStatsCommand extends AbstractCommand
         $output->writeln($block);
     }
 
+    /**
+     * @param StatsService $stats
+     * @param OutputInterface $output
+     */
     protected function outputStats(StatsService $stats, OutputInterface $output)
     {
         $binlog  = $stats->getServerStats(StatsService::SERVER_BINLOG);
@@ -92,6 +96,7 @@ class ServerStatsCommand extends AbstractCommand
      * @param StatsService $service
      * @param string $stat
      * @param OutputInterface $output
+     * @throws InvalidArgumentException
      */
     protected function outputStat(StatsService $service, $stat, OutputInterface $output)
     {
