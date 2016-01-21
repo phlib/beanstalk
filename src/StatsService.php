@@ -147,6 +147,17 @@ class StatsService
     }
 
     /**
+     * @param string $tube
+     * @return array
+     */
+    public function getTubeStats($tube)
+    {
+        $stats = $this->beanstalk->statsTube($tube);
+        unset($stats['name']);
+        return $stats;
+    }
+
+    /**
      * @return array
      */
     public function getAllTubeStats()

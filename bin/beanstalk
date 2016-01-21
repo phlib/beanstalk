@@ -20,6 +20,7 @@ use Phlib\Beanstalk\Console\JobPeekCommand;
 use Phlib\Beanstalk\Console\JobDeleteCommand;
 use Phlib\Beanstalk\Console\TubePeekCommand;
 use Phlib\Beanstalk\Console\TubeKickCommand;
+use Phlib\Beanstalk\Console\TubeStatsCommand;
 
 // lets go!
 $application = new Application('beanstalk');
@@ -30,7 +31,8 @@ $application->addCommands([
     new JobPeekCommand(),
     new JobDeleteCommand(),
     new TubePeekCommand(),
-    new TubeKickCommand()
+    new TubeKickCommand(),
+    new TubeStatsCommand()
 ]);
 
 ConfigurationHelper::initHelper(

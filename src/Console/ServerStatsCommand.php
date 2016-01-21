@@ -16,17 +16,24 @@ class ServerStatsCommand extends AbstractCommand
     protected function configure()
     {
         $this->setName('server:stats')
-            ->setDescription('Get a list of details about the beanstalk server(s).');
+            ->setDescription('Get a list of details about the beanstalk server(s).')
+            ->addOption('stat', 's', InputOption::VALUE_REQUIRED, 'Output a specific statistic.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $stat    = $input->getOption('stat');
         $service = new StatsService($this->getBeanstalk());
-        $this->outputServerInfo($service, $output);
-        $this->outputServerStats($service, $output);
+
+        if ($stat == '') {
+            $this->outputInfo($service, $output);
+            $this->outputStats($service, $output);
+        } else {
+            $this->outputStat($service, $stat, $output);
+        }
     }
 
-    protected function outputServerInfo(StatsService $stats, OutputInterface $output)
+    protected function outputInfo(StatsService $stats, OutputInterface $output)
     {
         $info = $stats->getServerInfo();
 
@@ -47,7 +54,7 @@ class ServerStatsCommand extends AbstractCommand
         $output->writeln($block);
     }
 
-    protected function outputServerStats(StatsService $stats, OutputInterface $output)
+    protected function outputStats(StatsService $stats, OutputInterface $output)
     {
         $binlog  = $stats->getServerStats(StatsService::SERVER_BINLOG);
         $command = $stats->getServerStats(StatsService::SERVER_COMMAND);
@@ -79,5 +86,20 @@ class ServerStatsCommand extends AbstractCommand
 
         $output->writeln('<info>Server Statistics</info>');
         $table->render();
+    }
+
+    /**
+     * @param StatsService $service
+     * @param string $stat
+     * @param OutputInterface $output
+     */
+    protected function outputStat(StatsService $service, $stat, OutputInterface $output)
+    {
+        $stats = $service->getServerStats(StatsService::SERVER_ALL);
+        if (!isset($stats[$stat])) {
+            throw new InvalidArgumentException("Specified statistic '$stat' is not valid.");
+        }
+
+        $output->writeln($stats[$stat]);
     }
 }
