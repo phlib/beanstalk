@@ -18,7 +18,7 @@
         }
     ],
     "require": {
-        "php": "~5.4",
+        "php": ">=5.4",
         "symfony/console": "^2.7",
         "phlib/console-configuration": "~1.0.0"
     },
