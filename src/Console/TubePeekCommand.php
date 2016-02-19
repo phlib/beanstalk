@@ -33,7 +33,7 @@ class TubePeekCommand extends AbstractCommand
         $job = call_user_func([$this->getBeanstalk(), $method]);
 
         if ($job === false) {
-            $output->writeln("No jobs found in $status status.");
+            $output->writeln("No jobs found in '$status' status.");
         } else {
             $this->displayJob($job, $output);
         }
