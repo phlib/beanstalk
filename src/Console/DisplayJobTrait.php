@@ -14,7 +14,7 @@ trait DisplayJobTrait
     {
         /* @var $formatter \Symfony\Component\Console\Helper\FormatterHelper */
         $formatter = $this->getHelper('formatter');
-        $section = $formatter->formatSection("Job ID: {$job['id']}", var_export($job['body'], true));
+        $section   = $formatter->formatSection("Job ID: {$job['id']}", var_export($job['body'], true));
         $output->writeln($section);
     }
 }
