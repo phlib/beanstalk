@@ -4,6 +4,7 @@ namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\StatsService;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
