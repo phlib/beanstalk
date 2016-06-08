@@ -101,7 +101,7 @@ class ServerStatsCommand extends AbstractCommand
      */
     protected function outputStat(StatsService $service, $stat, OutputInterface $output)
     {
-        $stats = $service->getServerStats(StatsService::SERVER_ALL);
+        $stats = $service->getServerStats(StatsService::SERVER_ALL) + $service->getServerInfo();
         if (!isset($stats[$stat])) {
             throw new InvalidArgumentException("Specified statistic '$stat' is not valid.");
         }
