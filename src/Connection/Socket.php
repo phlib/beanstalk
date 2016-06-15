@@ -141,6 +141,7 @@ class Socket implements SocketInterface
         } else {
             $data = stream_get_line($this->connection, self::READ_LENGTH, self::EOL);
             if ($data === false) {
+                $this->disconnect();
                 throw new Exception\SocketException('Failed to read data.');
             }
         }
