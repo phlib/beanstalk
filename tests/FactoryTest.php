@@ -76,28 +76,16 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @param string $strategyClass
-     * @param string $expectedException
-     * @dataProvider creatingPoolFailsWithBadStrategyClassDataProvider
+     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
      */
-    public function testCreatingPoolFailsWithBadStrategyClass($strategyClass, $expectedException)
+    public function testCreatingPoolFailsWithInvalidStrategyClass()
     {
-        $this->setExpectedException($expectedException);
-
         $hostConfig = ['host' => 'localhost'];
         $poolConfig = [
             'servers' => [$hostConfig, $hostConfig],
-            'strategyClass' => $strategyClass
+            'strategyClass' => '\Some\RandomClass\ThatDoesnt\Exist'
         ];
         Factory::createFromArray($poolConfig);
-    }
-
-    public function creatingPoolFailsWithBadStrategyClassDataProvider()
-    {
-        return [
-            ['\stdClass', 'TypeError'],
-            ['\Some\RandomClass\ThatDoesnt\Exist', InvalidArgumentException::class]
-        ];
     }
 
     /**
