@@ -243,7 +243,7 @@ class Pool implements ConnectionInterface
                 return false;
             }
         };
-        $this->collection->sendToAll('statTube', [$this->using], $onSuccess);
+        $this->collection->sendToAll('statsTube', [$this->using], $onSuccess);
 
         return $kicked;
     }
