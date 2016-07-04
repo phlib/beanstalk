@@ -5,6 +5,9 @@ namespace Phlib\Beanstalk;
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Pool\Collection;
+use Phlib\Beanstalk\Pool\RandomStrategy;
+use Phlib\Beanstalk\Pool\SelectionStrategyInterface;
 
 /**
  * Class Factory
@@ -16,7 +19,7 @@ class Factory
      * @param string $host
      * @param integer $port
      * @param array $options
-     * @return ConnectionInterface
+     * @return Connection
      */
     public static function create($host, $port = Socket::DEFAULT_PORT, array $options = [])
     {
@@ -37,7 +40,12 @@ class Factory
             $server     = static::normalizeArgs($config['server']);
             $connection = static::create($server['host'], $server['port'], $server['options']);
         } elseif (array_key_exists('servers', $config)) {
-            $connection = new Pool(static::createConnections($config['servers']));
+            if (!isset($config['strategyClass'])) {
+                $config['strategyClass'] = RandomStrategy::class;
+            }
+            $servers    = static::createConnections($config['servers']);
+            $strategy   = static::createStrategy($config['strategyClass']);
+            $connection = new Pool(new Collection($servers, $strategy));
         } else {
             throw new InvalidArgumentException('Missing required server(s) configuration');
         }
@@ -47,7 +55,7 @@ class Factory
 
     /**
      * @param array $servers
-     * @return Socket[]
+     * @return Connection[]
      */
     public static function createConnections(array $servers)
     {
@@ -60,7 +68,19 @@ class Factory
             $connection = static::create($server['host'], $server['port'], $server['options']);
             $connections[] = $connection;
         }
-        return new Pool\Collection($connections);
+        return $connections;
+    }
+
+    /**
+     * @param string $class
+     * @return SelectionStrategyInterface
+     */
+    public static function createStrategy($class)
+    {
+        if (!class_exists($class)) {
+            throw new InvalidArgumentException("Specified Pool strategy class '{$class}' does not exist.");
+        }
+        return new $class;
     }
 
     /**
