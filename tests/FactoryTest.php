@@ -22,7 +22,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testCreate()
     {
-        $this->assertInstanceOf(ConnectionInterface::class, Factory::create('localhost'));
+        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\ConnectionInterface', Factory::create('localhost'));
     }
 
     /**
@@ -30,13 +30,13 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateFromArray($expectedClass, $config)
     {
-        $this->assertInstanceOf(ConnectionInterface::class, Factory::create('localhost'));
+        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\ConnectionInterface', Factory::create('localhost'));
     }
 
     public function createFromArrayDataProvider()
     {
-        $connectionClass = Connection::class;
-        $poolClass       = Pool::class;
+        $connectionClass = '\Phlib\Beanstalk\Connection';
+        $poolClass       = '\Phlib\Beanstalk\Pool';
         $defaultHost     = ['host' => 'localhost'];
 
         return [
@@ -70,8 +70,8 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     public function creatingPoolUsesStrategyDataProvider()
     {
         return [
-            [Pool\RoundRobinStrategy::class],
-            [Pool\RandomStrategy::class]
+            ['\Phlib\Beanstalk\Pool\RoundRobinStrategy'],
+            ['\Phlib\Beanstalk\Pool\RandomStrategy']
         ];
     }
 
