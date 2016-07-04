@@ -41,6 +41,14 @@ class Pool implements ConnectionInterface
     }
 
     /**
+     * @return CollectionInterface
+     */
+    public function getCollection()
+    {
+        return $this->collection;
+    }
+
+    /**
      * @param string $tube
      * @return $this
      */
