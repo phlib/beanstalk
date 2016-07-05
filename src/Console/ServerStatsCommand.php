@@ -23,12 +23,26 @@ class ServerStatsCommand extends AbstractCommand
         $stat    = $input->getOption('stat');
         $service = new StatsService($this->getBeanstalk());
 
+        $this->outputDetectedConfig($output);
         if ($stat == '') {
             $this->outputInfo($service, $output);
             $this->outputStats($service, $output);
         } else {
             $this->outputStat($service, $stat, $output);
         }
+    }
+
+    protected function outputDetectedConfig(OutputInterface $output)
+    {
+        if (!$output->isVerbose()) {
+            return;
+        }
+        $configPath = $this->getHelper('configuration')->getConfigPath();
+        if ($configPath == '[default]') {
+            $configPath = '[default fallback localhost]';
+        }
+
+        $output->writeln('Configuration: ' . $configPath);
     }
 
     protected function outputInfo(StatsService $stats, OutputInterface $output)
