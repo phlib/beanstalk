@@ -29,6 +29,11 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Phlib\Beanstalk\Pool\CollectionInterface', new Collection([], $this->strategy));
     }
 
+    public function testImplementsArrayAggregateInterface()
+    {
+        $this->assertInstanceOf('\IteratorAggregate', new Collection([], $this->strategy));
+    }
+
     public function testDefaultStrategyIsRoundRobin()
     {
         $collection = new Collection([]);
