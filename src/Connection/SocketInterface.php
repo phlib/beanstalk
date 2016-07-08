@@ -24,4 +24,9 @@ interface SocketInterface
      * @return string
      */
     public function read($length = null);
+
+    /**
+     * @return bool
+     */
+    public function disconnect();
 }

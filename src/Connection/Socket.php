@@ -149,12 +149,15 @@ class Socket implements SocketInterface
         return $data;
     }
 
-    protected function disconnect()
+    /**
+     * @return $this
+     */
+    public function disconnect()
     {
         if (is_resource($this->connection)) {
             fclose($this->connection);
             $this->connection = null;
         }
-        return $this;
+        return true;
     }
 }
