@@ -69,6 +69,14 @@ class Connection implements ConnectionInterface
     }
 
     /**
+     * @inheritdoc
+     */
+    public function disconnect()
+    {
+        return $this->socket->disconnect();
+    }
+
+    /**
      * @return string
      */
     public function getName()

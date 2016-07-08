@@ -26,6 +26,16 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         }
     }
 
+    public function testReconnectingAfterDisconnect()
+    {
+        $this->beanstalk->listTubes(); // make sure we connect
+        $this->beanstalk->disconnect();
+
+        $tube = 'test-tube';
+        $this->beanstalk->useTube($tube);
+        $this->assertContains($tube, $this->beanstalk->listTubes());
+    }
+
     public function testStartWithDefaultTube()
     {
         $this->assertEquals('default', $this->beanstalk->listTubeUsed());

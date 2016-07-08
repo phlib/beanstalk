@@ -35,6 +35,18 @@ class Pool implements ConnectionInterface
     /**
      * @inheritdoc
      */
+    public function disconnect()
+    {
+        $result = true;
+        foreach ($this->collection as $connection) {
+            $result = $result && $connection->disconnect();
+        }
+        return $result;
+    }
+
+    /**
+     * @inheritdoc
+     */
     public function getName()
     {
         return __CLASS__;

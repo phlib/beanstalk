@@ -41,6 +41,22 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\Phlib\Beanstalk\Connection\Socket', $this->beanstalk->getSocket());
     }
 
+    public function testDisconnectCallsSocket()
+    {
+        $this->socket->expects($this->once())
+            ->method('disconnect')
+            ->willReturn(true);
+        $this->beanstalk->disconnect();
+    }
+
+    public function testDisconnectReturnsValue()
+    {
+        $this->socket->expects($this->any())
+            ->method('disconnect')
+            ->willReturn(true);
+        $this->assertTrue($this->beanstalk->disconnect());
+    }
+
     public function testPut()
     {
         $this->socket->expects($this->atLeastOnce())

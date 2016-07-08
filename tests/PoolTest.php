@@ -37,6 +37,51 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $this->pool = null;
     }
 
+    public function testDisconnectCallsAllConnections()
+    {
+        $connection = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $connection->expects($this->exactly(2))
+            ->method('disconnect')
+            ->willReturn(true);
+        $collection = new \ArrayIterator([$connection, $connection]);
+        $this->collection->expects($this->any())
+            ->method('getIterator')
+            ->willReturn($collection);
+        $this->pool->disconnect();
+    }
+
+    /**
+     * @param bool $expected
+     * @param array $returnValues
+     * @dataProvider disconnectReturnsValueDataProvider
+     */
+    public function testDisconnectReturnsValue($expected, array $returnValues)
+    {
+        $connection = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $connection->expects($this->any())
+            ->method('disconnect')
+            ->will(call_user_func_array([$this, 'onConsecutiveCalls'], $returnValues));
+        $collection = new \ArrayIterator([$connection, $connection]);
+        $this->collection->expects($this->any())
+            ->method('getIterator')
+            ->willReturn($collection);
+        $this->assertEquals($expected, $this->pool->disconnect());
+    }
+
+    public function disconnectReturnsValueDataProvider()
+    {
+        return [
+            [true, [true, true]],
+            [false, [false, true]],
+            [false, [true, false]],
+            [false, [false, false]],
+        ];
+    }
+
     public function testUseTubeCallsAllConnections()
     {
         $tube = 'test-tube';
