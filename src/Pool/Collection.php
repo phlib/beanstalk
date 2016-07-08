@@ -12,7 +12,7 @@ use Phlib\Beanstalk\Exception\RuntimeException;
  * Class Collection
  * @package Phlib\Beanstalk\Pool
  */
-class Collection implements CollectionInterface
+class Collection implements CollectionInterface, \IteratorAggregate
 {
     /**
      * @var array
@@ -63,6 +63,14 @@ class Collection implements CollectionInterface
     public function getSelectionStrategy()
     {
         return $this->strategy;
+    }
+
+    /**
+     * @return \ArrayIterator
+     */
+    public function getIterator()
+    {
+        return new \ArrayIterator($this->connections);
     }
 
     /**
