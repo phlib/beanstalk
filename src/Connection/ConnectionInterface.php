@@ -22,6 +22,11 @@ interface ConnectionInterface
     public function getName();
 
     /**
+     * @return bool
+     */
+    public function disconnect();
+
+    /**
      * @param string $tube
      * @return $this
      */
