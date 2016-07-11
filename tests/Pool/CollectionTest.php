@@ -34,6 +34,26 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf('\IteratorAggregate', new Collection([], $this->strategy));
     }
 
+    public function testArrayAggregateReturnsConnections()
+    {
+        $result = true;
+        $collection = new Collection([$this->getMockConnection('id-123'), $this->getMockConnection('id-456')]);
+        foreach ($collection as $connection) {
+            $result = $result && ($connection instanceof Connection);
+        }
+        $this->assertTrue($result);
+    }
+
+    public function testArrayAggregateReturnsAllConnections()
+    {
+        $count = 0;
+        $collection = new Collection([$this->getMockConnection('id-123'), $this->getMockConnection('id-456')]);
+        foreach ($collection as $connection) {
+            $count++;
+        }
+        $this->assertEquals(2, $count);
+    }
+
     public function testDefaultStrategyIsRoundRobin()
     {
         $collection = new Collection([]);

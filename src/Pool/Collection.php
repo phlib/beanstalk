@@ -70,7 +70,11 @@ class Collection implements CollectionInterface
      */
     public function getIterator()
     {
-        return new \ArrayIterator($this->connections);
+        $connections = [];
+        foreach ($this->connections as $meta) {
+            $connections[] = $meta['connection'];
+        }
+        return new \ArrayIterator($connections);
     }
 
     /**
