@@ -12,7 +12,7 @@ use Phlib\Beanstalk\Exception\RuntimeException;
  * Class Collection
  * @package Phlib\Beanstalk\Pool
  */
-class Collection implements CollectionInterface, \IteratorAggregate
+class Collection implements CollectionInterface
 {
     /**
      * @var array

@@ -6,7 +6,7 @@ namespace Phlib\Beanstalk\Pool;
  * Interface CollectionInterface
  * @package Phlib\Beanstalk\Pool
  */
-interface CollectionInterface
+interface CollectionInterface extends \IteratorAggregate
 {
     /**
      * @param string $key
