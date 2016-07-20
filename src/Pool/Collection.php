@@ -163,21 +163,15 @@ class Collection implements CollectionInterface
                 $result = ['response' => false];
             }
 
-            if ($result['response'] === false) {
-                if (!is_null($failure)) {
-                    $continue = call_user_func($failure);
-                    if ($continue === false) {
-                        return;
-                    }
-                }
-                continue;
+            $continue = true;
+            if ($result['response'] === false && !is_null($failure)) {
+                $continue = call_user_func($failure);
+            } elseif ($result['response'] !== false && !is_null($success)) {
+                $continue = call_user_func($success, $result);
             }
 
-            if (!is_null($success)) {
-                $continue = call_user_func($success, $result);
-                if ($continue === false) {
-                    return;
-                }
+            if ($continue === false) {
+                return;
             }
         }
     }
