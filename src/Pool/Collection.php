@@ -4,6 +4,7 @@ namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\Exception\Exception as BeanstalkException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
@@ -154,7 +155,10 @@ class Collection implements CollectionInterface
         foreach (array_keys($this->connections) as $key) {
             try {
                 $result = $this->sendToExact($key, $command, $arguments);
-            } catch (RuntimeException $e) {
+            } catch (\Exception $e) {
+                if (!($e instanceof BeanstalkException)) {
+                    throw $e;
+                }
                 // ignore
                 $result = ['response' => false];
             }

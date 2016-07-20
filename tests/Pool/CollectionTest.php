@@ -3,6 +3,7 @@
 namespace Phlib\Tests\Pool;
 
 use Phlib\Beanstalk\Connection;
+use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool\Collection;
 use Phlib\Beanstalk\Pool\SelectionStrategyInterface;
@@ -192,6 +193,22 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $connection2->expects($this->any())
             ->method($command)
             ->will($this->throwException(new RuntimeException()));
+
+        $collection = new Collection([$connection1, $connection2]);
+        $collection->sendToAll($command);
+    }
+
+    public function testSendToAllIgnoreErrorsOfNotFound()
+    {
+        $command     = 'stats';
+        $connection1 = $this->getMockConnection('id-123');
+        $connection1->expects($this->once())
+            ->method($command);
+
+        $connection2 = $this->getMockConnection('id-456');
+        $connection2->expects($this->any())
+            ->method($command)
+            ->will($this->throwException(new NotFoundException()));
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command);
