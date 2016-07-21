@@ -36,7 +36,7 @@ class Kick implements CommandInterface
 
     /**
      * @param SocketInterface $socket
-     * @return $this
+     * @return integer
      * @throws CommandException
      */
     public function process(SocketInterface $socket)

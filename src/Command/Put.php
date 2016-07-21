@@ -63,7 +63,7 @@ class Put implements CommandInterface
 
     /**
      * @param SocketInterface $socket
-     * @return string|integer
+     * @return integer
      * @throws CommandException
      */
     public function process(SocketInterface $socket)

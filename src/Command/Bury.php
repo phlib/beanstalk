@@ -48,7 +48,7 @@ class Bury implements CommandInterface
 
     /**
      * @param SocketInterface $socket
-     * @return string|integer
+     * @return $this
      * @throws NotFoundException
      * @throws CommandException
      */
