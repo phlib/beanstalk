@@ -82,11 +82,6 @@ class StatsService
     protected $stats;
 
     /**
-     * @var array
-     */
-    protected $tubes;
-
-    /**
      * @param ConnectionInterface $beanstalk
      */
     public function __construct(ConnectionInterface $beanstalk)
@@ -162,11 +157,9 @@ class StatsService
      */
     public function getAllTubeStats()
     {
-        if (!$this->tubes) {
-            $this->tubes = $this->beanstalk->listTubes();
-        }
+        $tubes     = $this->beanstalk->listTubes();
         $tubeStats = [];
-        foreach ($this->tubes as $tube) {
+        foreach ($tubes as $tube) {
             $stats = $this->beanstalk->statsTube($tube);
             $tubeStats[] = array_slice($stats, 0, -3); // @see getTubeHeaderMapping
         }
