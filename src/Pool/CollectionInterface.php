@@ -9,6 +9,11 @@ namespace Phlib\Beanstalk\Pool;
 interface CollectionInterface extends \IteratorAggregate
 {
     /**
+     * @return array
+     */
+    public function getAvailableKeys();
+
+    /**
      * @param string $key
      * @return Connection
      */

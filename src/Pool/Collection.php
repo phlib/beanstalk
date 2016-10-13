@@ -66,13 +66,17 @@ class Collection implements CollectionInterface
     }
 
     /**
-     * @return \ArrayIterator
+     * @return \Traversable
      */
     public function getIterator()
     {
         $connections = [];
-        foreach ($this->connections as $meta) {
-            $connections[] = $meta['connection'];
+        foreach (array_keys($this->connections) as $key) {
+            try {
+                $connections[] = $this->getConnection($key);
+            } catch (RuntimeException $e) {
+                // ignore bad connections
+            }
         }
         return new \ArrayIterator($connections);
     }
@@ -92,6 +96,23 @@ class Collection implements CollectionInterface
             $this->connections[$key]['retry_at'] = false;
         }
         return $this->connections[$key]['connection'];
+    }
+
+    /**
+     * @return array
+     */
+    public function getAvailableKeys()
+    {
+        $keys = [];
+        foreach (array_keys($this->connections) as $key) {
+            try {
+                $this->getConnection($key);
+                $keys[] = $key;
+            } catch (RuntimeException $e) {
+                // ignore bad connections
+            }
+        }
+        return $keys;
     }
 
     /**
