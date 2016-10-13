@@ -141,10 +141,13 @@ class Collection implements CollectionInterface
             }
         }
 
+        $message = "Failed to send command '{$command}' to one of the connections.";
         if ($e instanceof \Exception) {
-            throw $e;
+            $final = new RuntimeException($message, 0 , $e);
+        } else {
+            $final = new RuntimeException($message);
         }
-        return ['connection' => null, 'response' => false];
+        throw $final;
     }
 
     /**
