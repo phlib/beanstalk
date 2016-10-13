@@ -2,7 +2,6 @@
 
 namespace Phlib\Beanstalk\Pool;
 
-use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\Exception as BeanstalkException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
