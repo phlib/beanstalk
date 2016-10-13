@@ -38,6 +38,7 @@ class Pool implements ConnectionInterface
     public function disconnect()
     {
         $result = true;
+        /** @var ConnectionInterface $connection */
         foreach ($this->collection as $connection) {
             $result = $result && $connection->disconnect();
         }
