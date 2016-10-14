@@ -100,12 +100,21 @@ class Pool implements ConnectionInterface
     {
         $startTime = time();
         do {
-            $result = $this->collection->sendToOne('reserve', [0]);
-            if (is_array($result['response'])) {
-                if (array_key_exists('id', $result['response'])) {
+            /** @var \ArrayIterator $connections */
+            $keys = $this->collection->getAvailableKeys();
+            shuffle($keys);
+            foreach ($keys as $key) {
+                try {
+                    $result = $this->collection->sendToExact($key, 'reserve', [0]);
+                    if ($result['response'] === false) {
+                        continue;
+                    }
+
                     $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
+                    return $result['response'];
+                } catch (RuntimeException $e) {
+                    // ignore servers not responding
                 }
-                return $result['response'];
             }
 
             usleep(25 * 1000);

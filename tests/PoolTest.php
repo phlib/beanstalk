@@ -161,11 +161,54 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $jobId      = '123';
         $host       = 'host:123';
         $response   = ['id' => $jobId, 'body' => 'jobData'];
-        $expected   = ['id' => "host:123.$jobId", 'body' => 'jobData'];
+        $expected   = ['id' => "{$host}.{$jobId}", 'body' => 'jobData'];
         $connection = $this->createMockConnection($host);
 
         $this->collection->expects($this->any())
-            ->method('sendToOne')
+            ->method('getAvailableKeys')
+            ->will($this->returnValue([$host]));
+        $this->collection->expects($this->any())
+            ->method('sendToExact')
+            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
+        $this->assertEquals($expected, $this->pool->reserve());
+    }
+
+    public function testReserveWithNoJobsOnFirstServer()
+    {
+        $jobId      = '123';
+        $host       = 'host:123';
+        $response   = ['id' => $jobId, 'body' => 'jobData'];
+        $expected   = ['id' => "{$host}.{$jobId}", 'body' => 'jobData'];
+        $connection = $this->createMockConnection($host);
+
+        $this->collection->expects($this->any())
+            ->method('getAvailableKeys')
+            ->will($this->returnValue(['host:456', $host]));
+        $this->collection->expects($this->at(0))
+            ->method('sendToExact')
+            ->will($this->returnValue(false)); // <-- should ignore this one
+        $this->collection->expects($this->at(1))
+            ->method('sendToExact')
+            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
+        $this->assertEquals($expected, $this->pool->reserve());
+    }
+
+    public function testReserveWithFailingServer()
+    {
+        $jobId      = '123';
+        $host       = 'host:123';
+        $response   = ['id' => $jobId, 'body' => 'jobData'];
+        $expected   = ['id' => "{$host}.{$jobId}", 'body' => 'jobData'];
+        $connection = $this->createMockConnection($host);
+
+        $this->collection->expects($this->any())
+            ->method('getAvailableKeys')
+            ->will($this->returnValue(['host:456', $host]));
+        $this->collection->expects($this->at(0))
+            ->method('sendToExact')
+            ->will($this->throwException(new RuntimeException())); // <-- should continue after this one
+        $this->collection->expects($this->at(1))
+            ->method('sendToExact')
             ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
         $this->assertEquals($expected, $this->pool->reserve());
     }
