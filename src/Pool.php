@@ -108,7 +108,7 @@ class Pool implements ConnectionInterface
                 return $result['response'];
             }
 
-            usleep(250 * 1000);
+            usleep(25 * 1000);
         } while (time() - $startTime < $timeout);
 
         return false;
