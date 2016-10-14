@@ -127,10 +127,7 @@ class Collection implements CollectionInterface
         $keysExhausted = false;
         while (!$keysExhausted && ($key = $this->strategy->pickOne($keysAvailable)) !== false) {
             try {
-                $result = $this->sendToExact($key, $command, $arguments);
-                if ($result['response'] !== false) {
-                    return $result;
-                }
+                return $this->sendToExact($key, $command, $arguments);
             } catch (RuntimeException $e) {
                 // ignore
             }

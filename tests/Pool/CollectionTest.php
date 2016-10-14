@@ -276,29 +276,6 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $collection->sendToOne($command);
     }
 
-    public function testSendToOneLooksForNonFalseResult()
-    {
-        $command     = 'stats';
-        $identifier1 = 'id-123';
-        $connection1 = $this->getMockConnection($identifier1);
-        $connection1->expects($this->any())
-            ->method($command)
-            ->will($this->returnValue(false));
-
-        $identifier2 = 'id-456';
-        $connection2 = $this->getMockConnection($identifier2);
-        $connection2->expects($this->once())
-            ->method($command)
-            ->will($this->returnValue(234));
-
-        $this->strategy->expects($this->any())
-            ->method('pickOne')
-            ->will($this->onConsecutiveCalls($identifier1, $identifier2));
-
-        $collection = new Collection([$connection1, $connection2], $this->strategy);
-        $collection->sendToOne($command);
-    }
-
     public function testSendToOneWhenAllConnectionsAreUsed()
     {
         $command     = 'stats';
