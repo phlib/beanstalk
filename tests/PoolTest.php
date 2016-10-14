@@ -149,6 +149,13 @@ class PoolTest extends \PHPUnit_Framework_TestCase
      */
     public function testReserveWithNoJobsDoesNotTakeLongerThanTimeout()
     {
+        $connection = $this->createMockConnection('host:123');
+        $this->collection->expects($this->any())
+            ->method('getAvailableKeys')
+            ->will($this->returnValue(['host:123', 'host:456']));
+        $this->collection->expects($this->any())
+            ->method('sendToExact')
+            ->will($this->returnValue(['connection' => $connection, 'response' => false]));
         $startTime = time();
         $this->pool->reserve(2);
         $totalTime = time() - $startTime;
