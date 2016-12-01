@@ -266,8 +266,7 @@ class Pool implements ConnectionInterface
             }
 
             $kick   = min($buriedJobs, $quantity - $kicked);
-            $result = $result['connection']->kick($kick);
-            $kicked += (int)$result['response'];
+            $kicked += (int)$result['connection']->kick($kick);
 
             if ($kicked >= $quantity) {
                 return false;
