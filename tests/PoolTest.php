@@ -402,11 +402,17 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     public function testKick(array $kickValues, $kickAmount, $expected)
     {
         $connection = $this->createMockConnection('host:123');
-        $connection->expects($this->any())
-            ->method('kick')
-            ->will($this->returnCallback(function ($quantity) {
-                return ['response' => $quantity];
-            }));
+        $at = 0;
+        foreach ($kickValues as $index => $kickValue) {
+            if ($kickValue == 0) {
+                continue;
+            }
+            $connection->expects($this->at($at++))
+                ->method('kick')
+                ->will($this->returnCallback(function ($quantity) use ($kickValue) {
+                    return $quantity < $kickValue ? $quantity : $kickValue;
+                }));
+        }
 
         $this->collection->expects($this->any())
             ->method('sendToAll')
