@@ -250,13 +250,7 @@ class Connection implements ConnectionInterface
      */
     public function peekReady()
     {
-        try {
-            $jobData = (new Command\Peek(Command\Peek::READY))
-                ->process($this->getSocket());
-            return $jobData;
-        } catch (NotFoundException $e) {
-            return false;
-        }
+        return $this->peekStatus(Command\Peek::READY);
     }
 
     /**
@@ -264,13 +258,7 @@ class Connection implements ConnectionInterface
      */
     public function peekDelayed()
     {
-        try {
-            $jobData = (new Command\Peek(Command\Peek::DELAYED))
-                ->process($this->getSocket());
-            return $jobData;
-        } catch (NotFoundException $e) {
-            return false;
-        }
+        return $this->peekStatus(Command\Peek::DELAYED);
     }
 
     /**
@@ -278,8 +266,17 @@ class Connection implements ConnectionInterface
      */
     public function peekBuried()
     {
+        return $this->peekStatus(Command\Peek::BURIED);
+    }
+
+    /**
+     * @param string $status
+     * @return array|false
+     */
+    protected function peekStatus($status)
+    {
         try {
-            $jobData = (new Command\Peek(Command\Peek::BURIED))
+            $jobData = (new Command\Peek($status))
                 ->process($this->getSocket());
             return $jobData;
         } catch (NotFoundException $e) {

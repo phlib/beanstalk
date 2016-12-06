@@ -218,11 +218,7 @@ class Pool implements ConnectionInterface
      */
     public function peekReady()
     {
-        $result = $this->collection->sendToOne('peekReady');
-        if (isset($result['response']['id'])) {
-            $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
-        }
-        return $result['response'];
+        return $this->peekStatus('peekReady');
     }
 
     /**
@@ -230,11 +226,7 @@ class Pool implements ConnectionInterface
      */
     public function peekDelayed()
     {
-        $result = $this->collection->sendToOne('peekDelayed');
-        if (isset($result['response']['id'])) {
-            $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
-        }
-        return $result['response'];
+        return $this->peekStatus('peekDelayed');
     }
 
     /**
@@ -242,8 +234,21 @@ class Pool implements ConnectionInterface
      */
     public function peekBuried()
     {
-        $result = $this->collection->sendToOne('peekBuried');
-        if (isset($result['response']['id'])) {
+        return $this->peekStatus('peekBuried');
+    }
+
+    /**
+     * @param string $command
+     * @return array|false
+     */
+    protected function peekStatus($command)
+    {
+        try {
+            $result = $this->collection->sendToOne($command, [], true);
+        } catch (RuntimeException $e) {
+            return false;
+        }
+        if (isset($result['response']) && is_array($result['response']) && isset($result['response']['id'])) {
             $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
         }
         return $result['response'];
