@@ -35,11 +35,6 @@ class Connection implements ConnectionInterface
     protected $watching = [self::DEFAULT_TUBE => true];
 
     /**
-     * @var boolean
-     */
-    protected $askServer = false;
-
-    /**
      * Constructor
      *
      * @param SocketInterface $socket
@@ -337,10 +332,6 @@ class Connection implements ConnectionInterface
      */
     public function listTubeUsed()
     {
-        if ($this->askServer) {
-            $this->using = (new Command\ListTubeUsed())
-                ->process($this->getSocket());
-        }
         return $this->using;
     }
 
@@ -349,10 +340,6 @@ class Connection implements ConnectionInterface
      */
     public function listTubesWatched()
     {
-        if ($this->askServer) {
-            return (new Command\ListTubesWatched())
-                ->process($this->getSocket());
-        }
         return array_keys($this->watching);
     }
 }
