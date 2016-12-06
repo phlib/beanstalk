@@ -80,7 +80,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function testConstructorChecksForValidConnections()
     {
-        $collection = new Collection(['sdfdsf']);
+        new Collection(['sdfdsf']);
     }
 
     /**
