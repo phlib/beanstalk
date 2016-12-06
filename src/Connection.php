@@ -338,7 +338,7 @@ class Connection implements ConnectionInterface
     public function listTubeUsed()
     {
         if ($this->askServer) {
-            $this->using = (new Command\ListTubesUsed())
+            $this->using = (new Command\ListTubeUsed())
                 ->process($this->getSocket());
         }
         return $this->using;
