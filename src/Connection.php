@@ -89,9 +89,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param string $tube
-     * @return ConnectionInterface
-     * @throws Exception\CommandException
+     * @inheritdoc
      */
     public function useTube(string $tube): ConnectionInterface
     {
@@ -121,9 +119,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param int $timeout
-     * @return array|false
-     * @throws Exception\CommandException
+     * @inheritdoc
      */
     public function reserve(int $timeout = null)
     {
@@ -191,9 +187,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param string $tube
-     * @return ConnectionInterface
-     * @throws Exception\CommandException
+     * @inheritdoc
      */
     public function watch(string $tube): ConnectionInterface
     {
@@ -209,9 +203,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param string $tube
-     * @return int|false
-     * @throws Exception\CommandException
+     * @inheritdoc
      */
     public function ignore(string $tube)
     {
@@ -232,7 +224,7 @@ class Connection implements ConnectionInterface
      * @param int $id
      * @return array
      */
-    public function peek($id)
+    public function peek($id): array
     {
         $jobData = (new Command\Peek($id))
             ->process($this->getSocket());
@@ -240,7 +232,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @return array|false
+     * @inheritdoc
      */
     public function peekReady()
     {
@@ -248,7 +240,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @return array|false
+     * @inheritdoc
      */
     public function peekDelayed()
     {
@@ -256,7 +248,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @return array|false
+     * @inheritdoc
      */
     public function peekBuried()
     {
@@ -279,7 +271,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @return array
+     * @inheritdoc
      */
     public function stats(): array
     {
@@ -298,8 +290,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param string $tube
-     * @return array
+     * @inheritdoc
      */
     public function statsTube(string $tube): array
     {
@@ -308,8 +299,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param int $quantity
-     * @return int
+     * @inheritdoc
      */
     public function kick(int $quantity): int
     {
@@ -318,7 +308,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @return array
+     * @inheritdoc
      */
     public function listTubes(): array
     {
@@ -327,7 +317,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @return string
+     * @inheritdoc
      */
     public function listTubeUsed(): string
     {
@@ -335,7 +325,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @return array
+     * @inheritdoc
      */
     public function listTubesWatched(): array
     {

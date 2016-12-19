@@ -16,6 +16,11 @@ class Pool implements ConnectionInterface
     protected $collection;
 
     /**
+     * @var ConnectionInterface[]
+     */
+    protected $connections = [];
+
+    /**
      * @var string
      */
     protected $using = Connection::DEFAULT_TUBE;
@@ -26,21 +31,53 @@ class Pool implements ConnectionInterface
     protected $watching = [Connection::DEFAULT_TUBE => true];
 
     /**
-     * @param CollectionInterface $collection
+     * @param ConnectionInterface[] $connections
      */
-    public function __construct(CollectionInterface $collection)
+    public function __construct(array $connections)
     {
-        $this->collection = $collection;
+        if (empty($connections)) {
+            throw new InvalidArgumentException('Specified connections for pool is empty.');
+        }
+        $this->addConnections($connections);
+    }
+
+    /**
+     * @param array $connections
+     * @return Pool
+     */
+    public function addConnections(array $connections): self
+    {
+        foreach ($connections as $connection) {
+            $this->addConnection($connection);
+        }
+        return $this;
+    }
+
+    /**
+     * @param ConnectionInterface $connection
+     * @return Pool
+     */
+    public function addConnection(ConnectionInterface $connection): self
+    {
+        $this->connections[] = $connection;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getConnections(): array
+    {
+        return $this->collection;
     }
 
     /**
      * @inheritdoc
      */
-    public function disconnect()
+    public function disconnect(): bool
     {
         $result = true;
-        /** @var ConnectionInterface $connection */
-        foreach ($this->collection as $connection) {
+        foreach ($this->connections as $connection) {
             $result = $result && $connection->disconnect();
         }
         return $result;
@@ -49,24 +86,15 @@ class Pool implements ConnectionInterface
     /**
      * @inheritdoc
      */
-    public function getName()
+    public function getName(): string
     {
-        return __CLASS__;
+        return spl_object_hash($this);
     }
 
     /**
-     * @return CollectionInterface
+     * @inheritdoc
      */
-    public function getCollection()
-    {
-        return $this->collection;
-    }
-
-    /**
-     * @param string $tube
-     * @return $this
-     */
-    public function useTube($tube)
+    public function useTube(string $tube): ConnectionInterface
     {
         $this->collection->sendToAll('useTube', [$tube]);
         $this->using = $tube;
@@ -74,17 +102,17 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string   $data
-     * @param integer $priority
-     * @param integer $delay
-     * @param integer $ttr
+     * @param string $data
+     * @param int $priority
+     * @param int $delay
+     * @param int $ttr
      * @return string
      */
     public function put(
-        $data,
-        $priority = self::DEFAULT_PRIORITY,
-        $delay = self::DEFAULT_DELAY,
-        $ttr = self::DEFAULT_TTR
+        string $data,
+        int $priority = self::DEFAULT_PRIORITY,
+        int $delay = self::DEFAULT_DELAY,
+        int $ttr = self::DEFAULT_TTR
     ) {
         $result = $this->collection->sendToOne('put', func_get_args());
         if (!$result['connection'] instanceof ConnectionInterface || $result['response'] === false) {
@@ -94,10 +122,9 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param integer $timeout
-     * @return array|false
+     * @inheritdoc
      */
-    public function reserve($timeout = null)
+    public function reserve(int $timeout = null)
     {
         $startTime = time();
         do {
@@ -126,9 +153,9 @@ class Pool implements ConnectionInterface
 
     /**
      * @param string $id
-     * @return $this
+     * @return ConnectionInterface
      */
-    public function touch($id)
+    public function touch($id): ConnectionInterface
     {
         list($key, $jobId) = $this->splitId($id);
         $this->collection->sendToExact($key, 'touch', [$jobId]);
@@ -136,24 +163,27 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string  $id
-     * @param integer $priority
-     * @param integer $delay
-     * @return $this
+     * @param string $id
+     * @param int $priority
+     * @param int $delay
+     * @return ConnectionInterface
      */
-    public function release($id, $priority = self::DEFAULT_PRIORITY, $delay = self::DEFAULT_DELAY)
-    {
+    public function release(
+        $id,
+        int $priority = self::DEFAULT_PRIORITY,
+        int $delay = self::DEFAULT_DELAY
+    ): ConnectionInterface {
         list($key, $jobId) = $this->splitId($id);
         $this->collection->sendToExact($key, 'release', [$jobId, $priority, $delay]);
         return $this;
     }
 
     /**
-     * @param string  $id
-     * @param integer $priority
-     * @return $this
+     * @param string $id
+     * @param int $priority
+     * @return ConnectionInterface
      */
-    public function bury($id, $priority = self::DEFAULT_PRIORITY)
+    public function bury($id, int $priority = self::DEFAULT_PRIORITY): ConnectionInterface
     {
         list($key, $jobId) = $this->splitId($id);
         $this->collection->sendToExact($key, 'bury', [$jobId, $priority]);
@@ -162,9 +192,9 @@ class Pool implements ConnectionInterface
 
     /**
      * @param string $id
-     * @return $this
+     * @return ConnectionInterface
      */
-    public function delete($id)
+    public function delete($id): ConnectionInterface
     {
         list($key, $jobId) = $this->splitId($id);
         $this->collection->sendToExact($key, 'delete', [$jobId]);
@@ -172,10 +202,9 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string $tube
-     * @return $this
+     * @inheritdoc
      */
-    public function watch($tube)
+    public function watch(string $tube): ConnectionInterface
     {
         if (!isset($this->watching[$tube])) {
             $this->collection->sendToAll('watch', [$tube]);
@@ -185,10 +214,9 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string $tube
-     * @return integer|false
+     * @inheritdoc
      */
-    public function ignore($tube)
+    public function ignore(string $tube)
     {
         $index = array_search($tube, $this->watching);
         if ($index !== false) {
@@ -205,7 +233,7 @@ class Pool implements ConnectionInterface
      * @param string $id
      * @return array
      */
-    public function peek($id)
+    public function peek($id): array
     {
         list($key, $jobId) = $this->splitId($id);
         $result    = $this->collection->sendToExact($key, 'peek', [$jobId]);
@@ -215,7 +243,7 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @return array|false
+     * @inheritdoc
      */
     public function peekReady()
     {
@@ -223,7 +251,7 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @return array|false
+     * @inheritdoc
      */
     public function peekDelayed()
     {
@@ -231,7 +259,7 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @return array|false
+     * @inheritdoc
      */
     public function peekBuried()
     {
@@ -256,10 +284,9 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param integer $quantity
-     * @return integer
+     * @inheritdoc
      */
-    public function kick($quantity)
+    public function kick(int $quantity): int
     {
         $kicked    = 0;
         $onSuccess = function ($result) use ($quantity, &$kicked) {
@@ -284,9 +311,9 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @return array
+     * @inheritdoc
      */
-    public function stats()
+    public function stats(): array
     {
         $stats     = [];
         $onSuccess = function ($result) use (&$stats) {
@@ -307,7 +334,7 @@ class Pool implements ConnectionInterface
      * @param string $id
      * @return array
      */
-    public function statsJob($id)
+    public function statsJob($id): array
     {
         list($key, $jobId) = $this->splitId($id);
         $result    = $this->collection->sendToExact($key, 'statsJob', [$jobId]);
@@ -317,10 +344,9 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string $tube
-     * @return array
+     * @inheritdoc
      */
-    public function statsTube($tube)
+    public function statsTube(string $tube): array
     {
         $stats     = [];
         $onSuccess = function ($result) use (&$stats) {
@@ -368,9 +394,9 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @return array
+     * @inheritdoc
      */
-    public function listTubes()
+    public function listTubes(): array
     {
         $tubes     = [];
         $onSuccess = function ($result) use (&$tubes) {
@@ -384,24 +410,24 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @return string
+     * @inheritdoc
      */
-    public function listTubeUsed()
+    public function listTubeUsed(): string
     {
         return $this->using;
     }
 
     /**
-     * @return array
+     * @inheritdoc
      */
-    public function listTubesWatched()
+    public function listTubesWatched(): array
     {
         return array_keys($this->watching);
     }
 
     /**
      * @param ConnectionInterface $connection
-     * @param integer $id
+     * @param int $id
      * @return string
      */
     public function combineId(ConnectionInterface $connection, $id)
