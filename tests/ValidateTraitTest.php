@@ -3,6 +3,7 @@
 namespace Phlib\Beanstalk\Tests;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 class ValidateTraitTest extends \PHPUnit_Framework_TestCase
 {
@@ -24,17 +25,23 @@ class ValidateTraitTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @param mixed $priority
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
      * @dataProvider invalidPriorityDataProvider
      */
     public function testInvalidPriority($priority)
     {
+        $this->setExpectedException(InvalidArgumentException::class);
         $this->validate->validatePriority($priority);
     }
 
     public function invalidPriorityDataProvider()
     {
-        return [['string'], [-123], [12.43]];
+        return [[-123], [-1], [ConnectionInterface::MAX_PRIORITY + 1]];
+    }
+
+    public function testPriorityOnlyAcceptsIntegers()
+    {
+        $this->setExpectedException(\TypeError::class);
+        $this->validate->validatePriority('string');
     }
 
     public function testValidTubeName()
@@ -54,7 +61,7 @@ class ValidateTraitTest extends \PHPUnit_Framework_TestCase
 
     public function invalidTubeNameDataProvider()
     {
-        return [[''], [null], [str_repeat('.', ConnectionInterface::MAX_TUBE_LENGTH + 1)]];
+        return [[''], [str_repeat('.', ConnectionInterface::MAX_TUBE_LENGTH + 1)]];
     }
 
     /**

@@ -13,11 +13,11 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
 trait ValidateTrait
 {
     /**
-     * @param integer $priority
-     * @return true
+     * @param int $priority
+     * @return bool
      * @throws InvalidArgumentException
      */
-    public function validatePriority($priority)
+    public function validatePriority(int $priority): bool
     {
         $options = ['options' => ['min_range' => 0, 'max_range' => ConnectionInterface::MAX_PRIORITY]];
         if (filter_var($priority, FILTER_VALIDATE_INT, $options) === false) {
@@ -28,10 +28,10 @@ trait ValidateTrait
 
     /**
      * @param string $name
-     * @return true
+     * @return bool
      * @throws InvalidArgumentException
      */
-    public function validateTubeName($name)
+    public function validateTubeName(string $name): bool
     {
         $bytes   = strlen($name);
         $options = ['options' => ['min_range' => 1, 'max_range' => ConnectionInterface::MAX_TUBE_LENGTH]];
@@ -43,9 +43,10 @@ trait ValidateTrait
 
     /**
      * @param mixed $data
-     * @return true
+     * @return bool
+     * @throws InvalidArgumentException
      */
-    public function validateJobData($data)
+    public function validateJobData($data): bool
     {
         if (is_array($data)) {
             $data = 'Array';
@@ -57,7 +58,7 @@ trait ValidateTrait
             }
         }
         $options = ['options' => ['min_range' => 1, 'max_range' => ConnectionInterface::MAX_JOB_LENGTH]];
-        if (filter_var(strlen($data), FILTER_VALIDATE_INT, $options) === false) {
+        if (filter_var(strlen((string)$data), FILTER_VALIDATE_INT, $options) === false) {
             throw new InvalidArgumentException("The job data is too large. Maximum allowed size is 65,536.");
         }
         return true;
