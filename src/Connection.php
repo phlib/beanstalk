@@ -45,18 +45,18 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @return Socket
+     * @return SocketInterface
      */
-    public function getSocket(): Socket
+    public function getSocket(): SocketInterface
     {
         return $this->socket;
     }
 
     /**
-     * @param Socket $socket
+     * @param SocketInterface $socket
      * @return $this
      */
-    public function setSocket(Socket $socket)
+    public function setSocket(SocketInterface $socket)
     {
         $this->socket = $socket;
         return $this;
