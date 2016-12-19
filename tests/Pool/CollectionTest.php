@@ -276,6 +276,9 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $collection->sendToOne($command);
     }
 
+    /**
+     * @expectedException \Phlib\Beanstalk\Exception\RuntimeException
+     */
     public function testSendToOneWhenAllConnectionsAreUsed()
     {
         $command     = 'stats';
@@ -296,7 +299,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
             ->will($this->onConsecutiveCalls($identifier1, $identifier2));
 
         $collection = new Collection([$connection1, $connection2], $this->strategy);
-        $this->assertFalse($collection->sendToOne($command)['response']);
+        $collection->sendToOne($command);
     }
 
     public function testSendToOneIgnoresErrors()

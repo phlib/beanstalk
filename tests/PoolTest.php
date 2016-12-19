@@ -335,7 +335,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     {
         $this->collection->expects($this->any())
             ->method('sendToOne')
-            ->will($this->returnValue(['connection' => null, 'response' => false]));
+            ->will($this->throwException(new RuntimeException()));
         $this->assertFalse($this->pool->peekBuried());
     }
 
