@@ -21,10 +21,9 @@ $ composer require phlib/beanstalk
 ``` php
 <?php
 use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\Connection\Socket;
 
 // producer
-$beanstalk = new Connection(new Socket('127.0.0.1'));
+$beanstalk = new Connection('127.0.0.1');
 $beanstalk->useTube('my-tube');
 $beanstalk->put(array('my' => 'jobData'));
 ```
@@ -32,10 +31,9 @@ $beanstalk->put(array('my' => 'jobData'));
 ``` php
 <?php
 use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\Connection\Socket;
 
 // consumer
-$beanstalk = new Connection(new Socket('127.0.0.1'));
+$beanstalk = new Connection('127.0.0.1');
 $beanstalk->watch('my-tube')
     ->ignore('default');
 $job = $beanstalk->reserve();
@@ -93,16 +91,15 @@ The pool implements the connection interface.
 
 ```php
 use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Pool;
 use Phlib\Beanstalk\Pool\Collection;
 use Phlib\Beanstalk\Pool\RoundRobinStrategy;
 
 $servers = [
-    new Connection(new Socket('10.0.0.1')),
-    new Connection(new Socket('10.0.0.2')),
-    new Connection(new Socket('10.0.0.3')),
-    new Connection(new Socket('10.0.0.4'))
+    new Connection('10.0.0.1'),
+    new Connection('10.0.0.2'),
+    new Connection('10.0.0.3'),
+    new Connection('10.0.0.4'),
 ];
 $strategy = new RoundRobinStrategy
 $pool = new Pool(new Collection($servers, $strategy, ['retry_delay' => '120']));

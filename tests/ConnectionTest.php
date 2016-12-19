@@ -23,7 +23,12 @@ class ConnectionTest extends TestCase
     protected function setUp(): void
     {
         $this->socket = $this->createMock(Socket::class);
-        $this->beanstalk = new Connection($this->socket);
+        $this->beanstalk = new Connection(
+            'hostname',
+            Socket::DEFAULT_PORT,
+            [],
+            fn () => $this->socket,
+        );
         parent::setUp();
     }
 

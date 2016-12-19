@@ -18,7 +18,7 @@ class Factory
 {
     public function create(string $host, int $port = Socket::DEFAULT_PORT, array $options = []): Connection
     {
-        return new Connection(new Socket($host, $port, $options));
+        return new Connection($host, $port, $options);
     }
 
     public function createFromArray(array $config): ConnectionInterface

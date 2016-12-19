@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   mode and cannot accept new jobs.
   Previously this threw `CommandException` which the new exception extends.
 ### Changed
+- **BC break**: Constructor for `Connection` no longer needs a `Socket`.
+  Pass the same parameters directly to `Connection`.
 - **BC break**: Deprecated static Factory methods are now instance-based.
 
 ## [2.1.0] - 2023-07-05

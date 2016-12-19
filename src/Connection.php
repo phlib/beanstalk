@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
@@ -26,21 +27,27 @@ class Connection implements ConnectionInterface
         self::DEFAULT_TUBE => true,
     ];
 
-    public function __construct(SocketInterface $socket)
-    {
-        $this->setSocket($socket);
-        $this->name = $socket->getUniqueIdentifier();
+    /**
+     * @param \Closure|null $createSocket This parameter is not part of the BC promise. Used for unit test DI.
+     */
+    public function __construct(
+        string $host,
+        int $port = Socket::DEFAULT_PORT,
+        array $options = [],
+        \Closure $createSocket = null
+    ) {
+        if (isset($createSocket)) {
+            $this->socket = $createSocket($host, $port, $options);
+        } else {
+            $this->socket = new Socket($host, $port, $options);
+        }
+
+        $this->name = $this->socket->getUniqueIdentifier();
     }
 
     private function getSocket(): SocketInterface
     {
         return $this->socket;
-    }
-
-    private function setSocket(SocketInterface $socket): self
-    {
-        $this->socket = $socket;
-        return $this;
     }
 
     public function disconnect(): bool
