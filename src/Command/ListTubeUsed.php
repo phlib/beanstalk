@@ -1,14 +1,11 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\CommandException;
 
-/**
- * Class ListTubeUsed
- * @package Phlib\Beanstalk\Command
- */
 class ListTubeUsed implements CommandInterface
 {
     use ToStringTrait;

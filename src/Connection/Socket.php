@@ -1,14 +1,11 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Connection;
 
 use Phlib\Beanstalk\Exception;
 use Phlib\Beanstalk\Connection\SocketInterface;
 
-/**
- * Class Socket
- * @package Phlib\Beanstalk
- */
 class Socket implements SocketInterface
 {
     const DEFAULT_PORT = 11300;

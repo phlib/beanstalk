@@ -1,11 +1,8 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Connection;
 
-/**
- * Interface ConnectionInterface
- * @package Phlib\Beanstalk
- */
 interface ConnectionInterface
 {
     const DEFAULT_PRIORITY = 1024;

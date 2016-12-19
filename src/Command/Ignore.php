@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Command;
 
@@ -6,10 +7,6 @@ use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\ValidateTrait;
 
-/**
- * Class Ignore
- * @package Phlib\Beanstalk\Command
- */
 class Ignore implements CommandInterface
 {
     use ValidateTrait;

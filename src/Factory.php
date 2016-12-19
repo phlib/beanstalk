@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk;
 
@@ -8,10 +9,6 @@ use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Pool\Collection;
 use Phlib\Beanstalk\Pool\SelectionStrategyInterface;
 
-/**
- * Class Factory
- * @package Phlib\Beanstalk
- */
 class Factory
 {
     /**

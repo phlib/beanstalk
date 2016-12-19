@@ -1,14 +1,11 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Console;
 
 use Symfony\Component\Console\Command\Command;
 use Phlib\Beanstalk\Factory;
 
-/**
- * Class AbstractCommand
- * @package Phlib\Beanstalk\Console
- */
 abstract class AbstractCommand extends Command
 {
     /**

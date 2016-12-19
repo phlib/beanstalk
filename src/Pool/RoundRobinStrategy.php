@@ -4,10 +4,6 @@ namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
-/**
- * Class RoundRobinStrategy
- * @package Phlib\Beanstalk\Pool
- */
 class RoundRobinStrategy implements SelectionStrategyInterface
 {
     /**

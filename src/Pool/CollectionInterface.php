@@ -1,13 +1,10 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 
-/**
- * Interface CollectionInterface
- * @package Phlib\Beanstalk\Pool
- */
 interface CollectionInterface extends \IteratorAggregate
 {
     /**

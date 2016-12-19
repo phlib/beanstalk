@@ -1,11 +1,8 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Command;
 
-/**
- * Class StatsJob
- * @package Phlib\Beanstalk\Command
- */
 class StatsJob implements CommandInterface
 {
     use StatsTrait;

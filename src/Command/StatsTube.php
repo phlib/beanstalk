@@ -1,13 +1,10 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\ValidateTrait;
 
-/**
- * Class StatsTube
- * @package Phlib\Beanstalk\Command
- */
 class StatsTube implements CommandInterface
 {
     use StatsTrait;

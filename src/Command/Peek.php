@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Command;
 
@@ -7,10 +8,6 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\CommandException;
 
-/**
- * Class Peek
- * @package Phlib\Beanstalk\Command
- */
 class Peek implements CommandInterface
 {
     use ToStringTrait;

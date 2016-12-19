@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Command;
 
@@ -7,10 +8,6 @@ use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\ValidateTrait;
 
-/**
- * Class Bury
- * @package Phlib\Beanstalk\Command
- */
 class Bury implements CommandInterface
 {
     use ValidateTrait;

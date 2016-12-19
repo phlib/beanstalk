@@ -1,13 +1,10 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
-/**
- * Class RandomStrategy
- * @package Phlib\Beanstalk\Pool
- */
 class RandomStrategy implements SelectionStrategyInterface
 {
     /**

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk;
 
@@ -6,10 +7,6 @@ use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
-/**
- * Class Connection
- * @package Phlib\Beanstalk
- */
 class Connection implements ConnectionInterface
 {
     const DEFAULT_TUBE = 'default';

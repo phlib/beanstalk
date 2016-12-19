@@ -1,4 +1,5 @@
 <?php
+declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Pool;
 
@@ -8,10 +9,6 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 
-/**
- * Class Collection
- * @package Phlib\Beanstalk\Pool
- */
 class Collection implements CollectionInterface
 {
     /**
