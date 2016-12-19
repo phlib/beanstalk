@@ -8,22 +8,22 @@ interface SocketInterface
     /**
      * @return string
      */
-    public function getUniqueIdentifier();
+    public function getUniqueIdentifier(): string;
 
     /**
      * @param string $data
-     * @return $this
+     * @return SocketInterface
      */
-    public function write($data);
+    public function write(string $data): self;
 
     /**
-     * @param integer|null $length
+     * @param integer $length
      * @return string
      */
-    public function read($length = null);
+    public function read(int $length = null): string;
 
     /**
      * @return bool
      */
-    public function disconnect();
+    public function disconnect(): bool;
 }
