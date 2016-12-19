@@ -79,8 +79,12 @@ class StatsTraitTest extends CommandTestCase
     public function getMockStat(array $mockFns)
     {
         $availableFns = ['process', 'decode', 'getCommand'];
-        return $this->getMockBuilder('\Phlib\Beanstalk\Command\StatsTrait')
+        $mock = $this->getMockBuilder('\Phlib\Beanstalk\Command\StatsTrait')
             ->setMethods(array_diff($availableFns, $mockFns))
             ->getMockForTrait();
+        $mock->expects($this->any())
+            ->method('getCommand')
+            ->willReturn('');
+        return $mock;
     }
 }
