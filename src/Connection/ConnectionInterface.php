@@ -31,9 +31,9 @@ interface ConnectionInterface
 
     /**
      * @param string  $data
-     * @param integer $priority
-     * @param integer $delay
-     * @param integer $ttr
+     * @param int $priority
+     * @param int $delay
+     * @param int $ttr
      * @return string|int
      */
     public function put(
@@ -44,10 +44,10 @@ interface ConnectionInterface
     );
 
     /**
-     * @param integer $timeout
-     * @return array
+     * @param int $timeout
+     * @return array|false
      */
-    public function reserve(int $timeout = null): array;
+    public function reserve(int $timeout = null);
 
     /**
      * @param int|string $id
@@ -93,7 +93,7 @@ interface ConnectionInterface
     public function ignore(string $tube);
 
     /**
-     * @param integer $id
+     * @param int $id
      * @return array
      */
     public function peek($id);
@@ -149,5 +149,5 @@ interface ConnectionInterface
     /**
      * @return array
      */
-    public function listTubesWatched(): string;
+    public function listTubesWatched(): array;
 }
