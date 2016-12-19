@@ -96,7 +96,7 @@ interface ConnectionInterface
      * @param int $id
      * @return array
      */
-    public function peek($id);
+    public function peek($id): array;
 
     /**
      * @param int|string $id
@@ -129,7 +129,7 @@ interface ConnectionInterface
      * @param string $tube
      * @return array
      */
-    public function statsTube(string $tube): string;
+    public function statsTube(string $tube): array;
 
     /**
      * @return array
