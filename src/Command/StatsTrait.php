@@ -9,14 +9,13 @@ use Phlib\Beanstalk\Exception\CommandException;
 
 trait StatsTrait
 {
-
     /**
      * @param SocketInterface $socket
      * @return array
      * @throws NotFoundException
      * @throws CommandException
      */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): array
     {
         $socket->write($this->getCommand());
         $status = strtok($socket->read(), ' ');
@@ -39,7 +38,7 @@ trait StatsTrait
      * @param  string $response
      * @return array
      */
-    protected function decode($response)
+    protected function decode(string $response): array
     {
         $lines = array_slice(explode("\n", trim($response)), 1);
 

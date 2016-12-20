@@ -57,7 +57,7 @@ class Socket implements SocketInterface
     /**
      * @return string
      */
-    public function getUniqueIdentifier()
+    public function getUniqueIdentifier(): string
     {
         return "{$this->host}:{$this->port}";
     }
@@ -96,10 +96,10 @@ class Socket implements SocketInterface
      * Write to the socket.
      *
      * @param  string $data
-     * @return $this
+     * @return SocketInterface
      * @throws Exception\SocketException
      */
-    public function write($data)
+    public function write(string $data): SocketInterface
     {
         $this->connect();
 
@@ -116,11 +116,11 @@ class Socket implements SocketInterface
     }
 
     /**
-     * @param integer|null $length
+     * @param int $length
      * @return string
      * @throws Exception\SocketException
      */
-    public function read($length = null)
+    public function read(int $length = null): string
     {
         $this->connect();
 
@@ -147,9 +147,9 @@ class Socket implements SocketInterface
     }
 
     /**
-     * @return $this
+     * @return bool
      */
-    public function disconnect()
+    public function disconnect(): bool
     {
         if (is_resource($this->connection)) {
             fclose($this->connection);
