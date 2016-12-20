@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Pool;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\Exception as BeanstalkException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;

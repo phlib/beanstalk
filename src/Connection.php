@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;

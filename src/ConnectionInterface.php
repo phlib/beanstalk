@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Phlib\Beanstalk\Connection;
+namespace Phlib\Beanstalk;
 
 /**
  * @package Phlib\Beanstalk

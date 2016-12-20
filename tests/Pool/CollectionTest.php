@@ -215,7 +215,7 @@ class CollectionTest extends TestCase
     {
         /**
          * Allow calls to all command methods in
-         * @see Connection\ConnectionInterface
+         * @see \Phlib\Beanstalk\ConnectionInterface
          */
         foreach (self::SEND_COMMANDS_ALLOWED as $command => $map) {
             $result = array_pop($map);
