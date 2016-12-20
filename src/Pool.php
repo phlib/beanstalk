@@ -273,17 +273,18 @@ class Pool implements ConnectionInterface
      */
     protected function peekStatus($command)
     {
-        try {
-            $result = $this->sendToOne($command);
-        } catch (NotFoundException $e) {
-            // what?!?!
-        } catch (RuntimeException $e) {
-            return false;
+        foreach ($this->getAvailableConnections() as $connection) {
+            try {
+                $result = $connection->send($command);
+                if ($result['response'] !== false) {
+                    $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
+                    return $result['response'];
+                }
+            } catch (RuntimeException $e) {
+                // ignore
+            }
         }
-        if (is_array($result['response']) && isset($result['response']['id'])) {
-            $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
-        }
-        return $result['response'];
+        return false;
     }
 
     /**
