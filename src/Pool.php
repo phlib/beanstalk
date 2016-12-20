@@ -3,20 +3,13 @@ declare(strict_types = 1);
 
 namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\ConnectionInterface;
+use Phlib\Beanstalk\Pool\ManagedConnection;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\Pool\CollectionInterface;
-use Phlib\Beanstalk\Pool\ManagedConnection;
 
 class Pool implements ConnectionInterface
 {
-    /**
-     * @var CollectionInterface
-     */
-    protected $collection;
-
     /**
      * @var ManagedConnection[]
      */
