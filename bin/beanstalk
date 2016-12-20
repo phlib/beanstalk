@@ -15,6 +15,7 @@ use Symfony\Component\Console\Application;
 use Phlib\ConsoleConfiguration\Helper\ConfigurationHelper;
 use Phlib\Beanstalk\Console\ServerStatsCommand;
 use Phlib\Beanstalk\Console\ServerTubesCommand;
+use Phlib\Beanstalk\Console\ServerDistribCommand;
 use Phlib\Beanstalk\Console\JobStatsCommand;
 use Phlib\Beanstalk\Console\JobPeekCommand;
 use Phlib\Beanstalk\Console\JobDeleteCommand;
@@ -27,6 +28,7 @@ $application = new Application('beanstalk');
 $application->addCommands([
     new ServerStatsCommand(),
     new ServerTubesCommand(),
+    new ServerDistribCommand(),
     new JobStatsCommand(),
     new JobPeekCommand(),
     new JobDeleteCommand(),
