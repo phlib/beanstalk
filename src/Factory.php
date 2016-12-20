@@ -21,19 +21,11 @@ class Factory
     public function createFromArray(array $config): ConnectionInterface
     {
         if (array_key_exists('host', $config)) {
-            $config = [
-                'server' => $config,
-            ];
-        }
-
-        if (array_key_exists('server', $config)) {
-            $server = $this->normalizeArgs($config['server']);
-            $connection = $this->create($server['host'], $server['port'], $server['options']);
-        } elseif (array_key_exists('servers', $config)) {
-            $servers = $this->createConnections($config['servers']);
-            $connection = new Pool(new Collection($servers));
+            $config = $this->normalizeArgs($config);
+            $connection = $this->create($config['host'], $config['port'], $config['options']);
         } else {
-            throw new InvalidArgumentException('Missing required server(s) configuration');
+            $connections = $this->createConnections($config);
+            $connection = new Pool(new Collection($connections));
         }
 
         return $connection;
@@ -44,13 +36,17 @@ class Factory
      */
     public function createConnections(array $servers): array
     {
+        if (empty($servers)) {
+            throw new InvalidArgumentException('Missing server configurations');
+        }
+
         $connections = [];
-        foreach ($servers as $server) {
-            if (array_key_exists('enabled', $server) && $server['enabled'] === false) {
+        foreach ($servers as $config) {
+            if (array_key_exists('enabled', $config) && $config['enabled'] === false) {
                 continue;
             }
-            $server = $this->normalizeArgs($server);
-            $connection = $this->create($server['host'], $server['port'], $server['options']);
+            $config = $this->normalizeArgs($config);
+            $connection = $this->create($config['host'], $config['port'], $config['options']);
             $connections[] = $connection;
         }
         return $connections;

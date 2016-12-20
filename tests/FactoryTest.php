@@ -26,34 +26,25 @@ class FactoryTest extends TestCase
 
     public function createFromArrayDataProvider(): array
     {
-        $connectionClass = Connection::class;
-        $poolClass = Pool::class;
-        $defaultHost = [
-            'host' => 'localhost',
-        ];
-
         return [
             'local' => [
-                $connectionClass,
-                $defaultHost,
+                Connection::class,
+                [
+                    'host' => 'localhost',
+                ],
             ],
             'localWithPort' => [
-                $connectionClass,
+                Connection::class,
                 [
                     'host' => 'localhost',
                     'port' => 123456,
                 ],
             ],
-            'localArray' => [
-                $connectionClass,
-                [
-                    'server' => $defaultHost,
-                ],
-            ],
             'pool' => [
-                $poolClass,
+                Pool::class,
                 [
-                    'servers' => [$defaultHost, $defaultHost],
+                    ['host' => 'localhost1'],
+                    ['host' => 'localhost2'],
                 ],
             ],
         ];
