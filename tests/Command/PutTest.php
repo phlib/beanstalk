@@ -19,7 +19,7 @@ class PutTest extends CommandTestCase
     }
 
     /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
+     * @expectedException \TypeError
      */
     public function testWithInvalidPriority()
     {
