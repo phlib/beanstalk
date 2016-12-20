@@ -4,9 +4,7 @@ declare(strict_types = 1);
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
-use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Connection\Socket;
-use Phlib\Beanstalk\Pool\Collection;
 
 class Factory
 {
