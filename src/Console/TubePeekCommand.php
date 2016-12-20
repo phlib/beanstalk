@@ -18,12 +18,12 @@ class TubePeekCommand extends AbstractCommand
         $this->setName('tube:peek')
             ->setDescription('Look at a job in the job based on status.')
             ->addArgument('tube', InputArgument::REQUIRED, 'The tube name.')
-            ->addOption('status', 's', InputOption::VALUE_OPTIONAL, 'The tube status. Value can be ready, delayed or buried.', 'buried');
+            ->addArgument('status', InputArgument::REQUIRED, 'The tube status. Value can be ready, delayed or buried.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $status = $input->getOption('status');
+        $status = $input->getArgument('status');
         if (!in_array($status, ['ready', 'delayed', 'buried'], true)) {
             throw new InvalidArgumentException("Specified status '$status' is not valid.");
         }
