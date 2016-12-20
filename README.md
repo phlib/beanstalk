@@ -14,15 +14,24 @@ Via Composer
 $ composer require phlib/beanstalk
 ```
 
+## Version 1 -> 2
+Goals:
+* Simplify usage
+* Simplify Pool implementation
+* PHP >= 7.0
+
+Migration:
+* Factory
+* Connection no longer requires Socket
+
 ## Basic Usage
 
 ``` php
 <?php
 use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\Connection\Socket;
 
 // producer
-$beanstalk = new Connection(new Socket('127.0.0.1'));
+$beanstalk = new Connection('127.0.0.1');
 $beanstalk->useTube('my-tube');
 $beanstalk->put(array('my' => 'jobData'));
 ```
@@ -30,10 +39,9 @@ $beanstalk->put(array('my' => 'jobData'));
 ``` php
 <?php
 use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\Connection\Socket;
 
 // consumer
-$beanstalk = new Connection(new Socket('127.0.0.1'));
+$beanstalk = new Connection('127.0.0.1');
 $beanstalk->watch('my-tube')
     ->ignore('default');
 $job = $beanstalk->reserve();
@@ -41,7 +49,7 @@ $myJobData = $job['body'];
 $beanstalk->delete($job['id']);
 ```
 
-## Configuration
+## Connection Configuration
 
 |Name|Type|Required|Default|Description|
 |----|----|--------|-------|-----------|
@@ -55,6 +63,12 @@ $beanstalk->delete($job['id']);
 |----|----|-------|-----------|
 |`timeout`|*Integer*|`60`|The connection timeout.|
 
+## Pool Configuration (`array $options`)
+
+|Name|Type|Default|Description|
+|----|----|-------|-----------|
+|`retry_delay`|*Integer*|`600`|How long to delay retrying a connection for after an error.|
+
 ## Factory
 The factory allows for easy setup of the objects. This especially useful when creating a pool of beanstalk servers. The
 following example lists the various ways it can be used. The configuration examples in the command line section are 
@@ -67,17 +81,28 @@ $beanstalk = Factory::create('localhost');
 
 $beanstalk = Factory::createFromArray(['host' => 'localhost']);
 
-$beanstalk = Factory::createFromArray([
-    'server' => ['host' => 'localhost']
-]);
-
-$beanstalk = Factory::createFromArray([
-    'servers' => [
+$beanstalk = Factory::createFromArray(
+    [
         ['host' => '10.0.0.1'],
         ['host' => '10.0.0.2'],
         ['host' => '10.0.0.3']
     ]
-]);
+);
+
+```
+
+### Factory Configuration
+The configuration options are as specified above. With the exception that when creating a pool there is an optional 
+`enabled`.
+
+```php
+$beanstalk = Factory::createFromArray(
+    [
+        ['host' => '10.0.0.1', 'enabled' => true],
+        ['host' => '10.0.0.2', 'enabled' => false],
+        ['host' => '10.0.0.3', 'enabled' => true]
+    ]
+);
 
 ```
 
@@ -87,19 +112,15 @@ interface.
 
 ```php
 use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Pool;
-use Phlib\Beanstalk\Pool\Collection;
-use Phlib\Beanstalk\Pool\RoundRobinStrategy;
 
-$servers = [
-    new Connection(new Socket('10.0.0.1')),
-    new Connection(new Socket('10.0.0.2')),
-    new Connection(new Socket('10.0.0.3')),
-    new Connection(new Socket('10.0.0.4'))
+$connections = [
+    new Connection('10.0.0.1'),
+    new Connection('10.0.0.2'),
+    new Connection('10.0.0.3'),
+    new Connection('10.0.0.4')
 ];
-$strategy = new RoundRobinStrategy
-$pool = new Pool(new Collection($servers, $strategy, ['retry_delay' => '120']));
+$pool = new Pool($connections, ['retry_delay' => '120']);
 
 $pool->useTube('my-tube');
 $pool->put(array('my' => 'jobData1')); // <- sent to server 1
@@ -134,31 +155,20 @@ return [
 ```
 
 ```php
-return [
-    'server' => [
-        'host' => '10.0.0.1',
-        'port' => 11300
-    ]
-];
-```
-
-```php
 // pool configuration
 return [
-    'servers' => [
-        [
-            'host' => '10.0.0.1',
-            'port' => 11300
-        ],
-        [
-            'host' => '10.0.0.2',
-            'port' => 11300
-        ],
-        [
-            'host' => '10.0.0.3',
-            'port' => 11300,
-            'enabled' => false
-        ]
+    [
+        'host' => '10.0.0.1',
+        'port' => 11300
+    ],
+    [
+        'host' => '10.0.0.2',
+        'port' => 11300
+    ],
+    [
+        'host' => '10.0.0.3',
+        'port' => 11300,
+        'enabled' => false
     ]
 ];
 ```
