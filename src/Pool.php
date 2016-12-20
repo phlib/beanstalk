@@ -4,9 +4,11 @@ declare(strict_types = 1);
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
-use Phlib\Beanstalk\Pool\CollectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\Pool\CollectionInterface;
+use Phlib\Beanstalk\Pool\ManagedConnection;
 
 class Pool implements ConnectionInterface
 {
@@ -16,7 +18,7 @@ class Pool implements ConnectionInterface
     protected $collection;
 
     /**
-     * @var ConnectionInterface[]
+     * @var ManagedConnection[]
      */
     protected $connections = [];
 
@@ -31,14 +33,21 @@ class Pool implements ConnectionInterface
     protected $watching = [Connection::DEFAULT_TUBE => true];
 
     /**
-     * @param ConnectionInterface[] $connections
+     * @var array
      */
-    public function __construct(array $connections)
+    private $options;
+
+    /**
+     * @param ConnectionInterface[] $connections
+     * @param array $options
+     */
+    public function __construct(array $connections, array $options = [])
     {
         if (empty($connections)) {
             throw new InvalidArgumentException('Specified connections for pool is empty.');
         }
         $this->addConnections($connections);
+        $this->options = $options + ['retry_delay' => 600];
     }
 
     /**
@@ -59,16 +68,24 @@ class Pool implements ConnectionInterface
      */
     public function addConnection(ConnectionInterface $connection): self
     {
-        $this->connections[] = $connection;
+        $key = $connection->getName();
+        if (array_key_exists($key, $this->connections)) {
+            throw new InvalidArgumentException("Specifed connection '{$key}' already exists.");
+        }
+        $this->connections[$key] = new ManagedConnection($connection, $this->options['retry_delay']);
         return $this;
     }
 
     /**
-     * @return array
+     * @return ConnectionInterface[]
      */
     public function getConnections(): array
     {
-        return $this->collection;
+        $connections = [];
+        foreach ($this->connections as $connection) {
+            $connections[] = $connection->getConnection();
+        }
+        return $connections;
     }
 
     /**
@@ -77,7 +94,7 @@ class Pool implements ConnectionInterface
     public function disconnect(): bool
     {
         $result = true;
-        foreach ($this->connections as $connection) {
+        foreach ($this->getConnections() as $connection) {
             $result = $result && $connection->disconnect();
         }
         return $result;
@@ -96,7 +113,10 @@ class Pool implements ConnectionInterface
      */
     public function useTube(string $tube): ConnectionInterface
     {
-        $this->collection->sendToAll('useTube', [$tube]);
+        $this->sendToAll('useTube', $tube);
+//        foreach ($this->getAvailableConnections() as $connection) {
+//            $connection->send('useTube', $tube);
+//        }
         $this->using = $tube;
         return $this;
     }
@@ -114,10 +134,7 @@ class Pool implements ConnectionInterface
         int $delay = self::DEFAULT_DELAY,
         int $ttr = self::DEFAULT_TTR
     ) {
-        $result = $this->collection->sendToOne('put', func_get_args());
-        if (!$result['connection'] instanceof ConnectionInterface || $result['response'] === false) {
-            throw new RuntimeException('Failed to put the job into the tube.');
-        }
+        $result = $this->sendToOne('put', $data, $priority, $delay, $ttr);
         return $this->combineId($result['connection'], $result['response']);
     }
 
@@ -128,23 +145,19 @@ class Pool implements ConnectionInterface
     {
         $startTime = time();
         do {
-            /** @var \ArrayIterator $connections */
-            $keys = $this->collection->getAvailableKeys();
-            shuffle($keys);
-            foreach ($keys as $key) {
+            foreach ($this->getAvailableConnections() as $connection) {
                 try {
-                    $result = $this->collection->sendToExact($key, 'reserve', [0]);
+                    // override timeout, return as quickly as possible
+                    $result = $connection->send('reserve', $timeout = 0);
                     if ($result['response'] === false) {
                         continue;
                     }
-
                     $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
                     return $result['response'];
                 } catch (RuntimeException $e) {
                     // ignore servers not responding
                 }
             }
-
             usleep(25 * 1000);
         } while (time() - $startTime < $timeout);
 
@@ -157,8 +170,7 @@ class Pool implements ConnectionInterface
      */
     public function touch($id): ConnectionInterface
     {
-        list($key, $jobId) = $this->splitId($id);
-        $this->collection->sendToExact($key, 'touch', [$jobId]);
+        $this->sendToExact('touch', $id);
         return $this;
     }
 
@@ -173,8 +185,7 @@ class Pool implements ConnectionInterface
         int $priority = self::DEFAULT_PRIORITY,
         int $delay = self::DEFAULT_DELAY
     ): ConnectionInterface {
-        list($key, $jobId) = $this->splitId($id);
-        $this->collection->sendToExact($key, 'release', [$jobId, $priority, $delay]);
+        $this->sendToExact('release', $id, $priority, $delay);
         return $this;
     }
 
@@ -185,8 +196,7 @@ class Pool implements ConnectionInterface
      */
     public function bury($id, int $priority = self::DEFAULT_PRIORITY): ConnectionInterface
     {
-        list($key, $jobId) = $this->splitId($id);
-        $this->collection->sendToExact($key, 'bury', [$jobId, $priority]);
+        $this->sendToExact('bury', $id, $priority);
         return $this;
     }
 
@@ -196,8 +206,7 @@ class Pool implements ConnectionInterface
      */
     public function delete($id): ConnectionInterface
     {
-        list($key, $jobId) = $this->splitId($id);
-        $this->collection->sendToExact($key, 'delete', [$jobId]);
+        $this->sendToExact('delete', $id);
         return $this;
     }
 
@@ -207,7 +216,7 @@ class Pool implements ConnectionInterface
     public function watch(string $tube): ConnectionInterface
     {
         if (!isset($this->watching[$tube])) {
-            $this->collection->sendToAll('watch', [$tube]);
+            $this->sendToAll('watch', $tube);
             $this->watching[$tube] = true;
         }
         return $this;
@@ -223,7 +232,7 @@ class Pool implements ConnectionInterface
             if (count($this->watching) == 1) {
                 return false;
             }
-            $this->collection->sendToAll('ignore', [$tube]);
+            $this->sendToAll('ignore', $tube);
             unset($this->watching[$index]);
         }
         return count($this->watching);
@@ -235,8 +244,7 @@ class Pool implements ConnectionInterface
      */
     public function peek($id): array
     {
-        list($key, $jobId) = $this->splitId($id);
-        $result    = $this->collection->sendToExact($key, 'peek', [$jobId]);
+        $result    = $this->sendToExact('peek', $id);
         $job       = $result['response'];
         $job['id'] = $id;
         return $job;
@@ -273,11 +281,13 @@ class Pool implements ConnectionInterface
     protected function peekStatus($command)
     {
         try {
-            $result = $this->collection->sendToOne($command, [], true);
+            $result = $this->sendToOne($command);
+        } catch (NotFoundException $e) {
+            // what?!?!
         } catch (RuntimeException $e) {
             return false;
         }
-        if (isset($result['response']) && is_array($result['response']) && isset($result['response']['id'])) {
+        if (is_array($result['response']) && isset($result['response']['id'])) {
             $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
         }
         return $result['response'];
@@ -288,24 +298,30 @@ class Pool implements ConnectionInterface
      */
     public function kick(int $quantity): int
     {
-        $kicked    = 0;
-        $onSuccess = function ($result) use ($quantity, &$kicked) {
-            $stats = $result['response'];
-            $buriedJobs = isset($stats['current-jobs-buried'])
-                ? $stats['current-jobs-buried'] : 0;
+        $kicked = 0;
+        foreach ($this->getAvailableConnections() as $connection) {
+            try {
+                $result = $connection->send('statsTube', $this->using);
+                $stats  = $result['response'];
 
-            if ($buriedJobs == 0) {
-                return true;
+                $buriedJobs = isset($stats['current-jobs-buried'])
+                    ? $stats['current-jobs-buried'] : 0;
+
+                if ($buriedJobs == 0) {
+                    continue;
+                }
+
+                $kick   = min($buriedJobs, $quantity - $kicked);
+                $result = $connection->kick($kick);
+                $kicked += $result['response'];
+
+                if ($kicked >= $quantity) {
+                    break;
+                }
+            } catch (RuntimeException $e) {
+                // ignore
             }
-
-            $kick   = min($buriedJobs, $quantity - $kicked);
-            $kicked += (int)$result['connection']->kick($kick);
-
-            if ($kicked >= $quantity) {
-                return false;
-            }
-        };
-        $this->collection->sendToAll('statsTube', [$this->using], $onSuccess);
+        }
 
         return $kicked;
     }
@@ -315,19 +331,7 @@ class Pool implements ConnectionInterface
      */
     public function stats(): array
     {
-        $stats     = [];
-        $onSuccess = function ($result) use (&$stats) {
-            if (!is_array($result['response'])) {
-                return;
-            }
-            $stats = $this->statsCombine($stats, $result['response']);
-        };
-        $this->collection->sendToAll('stats', [], $onSuccess);
-
-        if (!is_array($stats) || empty($stats)) {
-            return false;
-        }
-        return $stats;
+        return $this->doStats('stats');
     }
 
     /**
@@ -336,8 +340,7 @@ class Pool implements ConnectionInterface
      */
     public function statsJob($id): array
     {
-        list($key, $jobId) = $this->splitId($id);
-        $result    = $this->collection->sendToExact($key, 'statsJob', [$jobId]);
+        $result    = $this->sendToExact('statsJob', $id);
         $job       = $result['response'];
         $job['id'] = $id;
         return $job;
@@ -348,17 +351,26 @@ class Pool implements ConnectionInterface
      */
     public function statsTube(string $tube): array
     {
-        $stats     = [];
-        $onSuccess = function ($result) use (&$stats) {
-            if (!is_array($result['response'])) {
-                return;
-            }
-            $stats = $this->statsCombine($stats, $result['response']);
-        };
-        $this->collection->sendToAll('statsTube', [$tube], $onSuccess);
+        return $this->doStats('statsTube', $tube);
+    }
 
-        if (!is_array($stats) || empty($stats)) {
-            return false;
+    /**
+     * @param string $command
+     * @param array ...$arguments
+     * @return array
+     */
+    protected function doStats(string $command, ...$arguments): array
+    {
+        $stats = [];
+        foreach ($this->getAvailableConnections() as $connection) {
+            try {
+                $result = $connection->send($command, ...$arguments);
+                $stats = $this->statsCombine($stats, $result['response']);
+            } catch (NotFoundException $e) {
+                // ignore
+            } catch (RuntimeException $e) {
+                // ignore
+            }
         }
         return $stats;
     }
@@ -398,14 +410,15 @@ class Pool implements ConnectionInterface
      */
     public function listTubes(): array
     {
-        $tubes     = [];
-        $onSuccess = function ($result) use (&$tubes) {
-            if (!is_array($result['response'])) {
-                return;
+        $tubes = [];
+        foreach ($this->getAvailableConnections() as $connection) {
+            try {
+                $result = $connection->send('listTubes');
+                $tubes = array_merge($result['response'], $tubes);
+            } catch (RuntimeException $e) {
+                // ignore
             }
-            $tubes = array_merge($result['response'], $tubes);
-        };
-        $this->collection->sendToAll('listTubes', [], $onSuccess);
+        }
         return array_unique($tubes);
     }
 
@@ -454,5 +467,71 @@ class Pool implements ConnectionInterface
         $jobId    = substr($id, $position + 1);
 
         return [$key, $jobId];
+    }
+
+    protected function sendToExact(string $command, string $id, ...$arguments)
+    {
+        list($key, $id) = $this->splitId($id);
+        if (!array_key_exists($key, $this->connections)) {
+            throw new NotFoundException("Specified key '{$key}' is not in the pool.");
+        }
+        $connection = $this->connections[$key];
+        if (!$connection->isAvailable()) {
+            throw new RuntimeException("Specified connection '{$key}' is not currently available.");
+        }
+
+        array_unshift($arguments, $id);
+        return $connection->send($command, ...$arguments);
+    }
+
+    /**
+     * @param string $command
+     * @param array ...$arguments
+     * @return array
+     */
+    protected function sendToOne(string $command, ...$arguments): array
+    {
+        foreach ($this->getAvailableConnections() as $connection) {
+            try {
+                $result = $connection->send($command, ...$arguments);
+                if (is_array($result)) {
+                    return $result;
+                }
+            } catch (RuntimeException $e) {
+                // ignore and try a different connection
+            }
+        }
+        throw new RuntimeException('Failed send command to one of the available servers in the pool.');
+    }
+
+    /**
+     * @param string $command
+     * @param array ...$arguments
+     */
+    protected function sendToAll(string $command, ...$arguments)
+    {
+        foreach ($this->getAvailableConnections() as $connection) {
+            try {
+                $connection->send($command, ...$arguments);
+            } catch (RuntimeException $e) {
+                // ignore
+            }
+        }
+    }
+
+    /**
+     * @return \Generator
+     */
+    protected function getAvailableConnections(): \Generator
+    {
+        $keys = array_keys($this->connections);
+        shuffle($keys);
+        foreach ($keys as $key) {
+            $connection = $this->connections[$key];
+            if (!$connection->isAvailable()) {
+                continue;
+            }
+            yield $connection;
+        }
     }
 }
