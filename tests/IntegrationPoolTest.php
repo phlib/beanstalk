@@ -24,10 +24,10 @@ class IntegrationPoolTest extends \PHPUnit_Framework_TestCase
             $this->markTestSkipped();
         } else {
             $connections = [
-                new Connection(new Socket($GLOBALS['BSTALK1_HOST'], $GLOBALS['BSTALK1_PORT'])),
-                new Connection(new Socket($GLOBALS['BSTALK2_HOST'], $GLOBALS['BSTALK2_PORT']))
+                new Connection($GLOBALS['BSTALK1_HOST'], $GLOBALS['BSTALK1_PORT']),
+                new Connection($GLOBALS['BSTALK2_HOST'], $GLOBALS['BSTALK2_PORT'])
             ];
-            $this->beanstalk = new Pool(new Pool\Collection($connections), new Pool\RandomStrategy());
+            $this->beanstalk = new Pool($connections);
         }
     }
 

@@ -22,7 +22,7 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         if (!isset($GLOBALS['BSTALK_ENABLED']) || $GLOBALS['BSTALK_ENABLED'] != true) {
             $this->markTestSkipped();
         } else {
-            $this->beanstalk = new Connection(new Socket($GLOBALS['BSTALK1_HOST'], $GLOBALS['BSTALK1_PORT']));
+            $this->beanstalk = new Connection($GLOBALS['BSTALK1_HOST'], $GLOBALS['BSTALK1_PORT']);
         }
     }
 

@@ -5,50 +5,56 @@ namespace Phlib\Beanstalk\Tests;
 use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool;
-use Phlib\Beanstalk\Pool\Collection;
 
 class PoolTest extends \PHPUnit_Framework_TestCase
 {
-
     /**
      * @var Pool
      */
     protected $pool;
 
     /**
-     * @var Collection|\PHPUnit_Framework_MockObject_MockObject
+     * @var Connection|\PHPUnit_Framework_MockObject_MockObject
      */
-    protected $collection;
+    protected $connection1;
+
+    /**
+     * @var Connection|\PHPUnit_Framework_MockObject_MockObject
+     */
+    protected $connection2;
 
     public function setUp()
     {
         parent::setUp();
 
-        $this->collection = $this->getMockBuilder('\Phlib\Beanstalk\Pool\Collection')
+        $this->connection1 = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
             ->disableOriginalConstructor()
             ->getMock();
-        $this->pool = new Pool($this->collection);
+        $this->connection1->expects($this->any())->method('getName')->willReturn('connection1');
+        $this->connection2 = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
+            ->disableOriginalConstructor()
+            ->getMock();
+        $this->connection1->expects($this->any())->method('getName')->willReturn('connection2');
+
+        $this->pool = new Pool([$this->connection1, $this->connection2]);
     }
 
     public function tearDown()
     {
         parent::tearDown();
-        $this->servers = null;
         $this->pool = null;
+        $this->connection1 = null;
+        $this->connection2 = null;
     }
 
     public function testDisconnectCallsAllConnections()
     {
-        $connection = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
-            ->disableOriginalConstructor()
-            ->getMock();
-        $connection->expects($this->exactly(2))
+        $this->connection1->expects($this->once())
             ->method('disconnect')
             ->willReturn(true);
-        $collection = new \ArrayIterator([$connection, $connection]);
-        $this->collection->expects($this->any())
-            ->method('getIterator')
-            ->willReturn($collection);
+        $this->connection2->expects($this->once())
+            ->method('disconnect')
+            ->willReturn(true);
         $this->pool->disconnect();
     }
 
@@ -59,16 +65,12 @@ class PoolTest extends \PHPUnit_Framework_TestCase
      */
     public function testDisconnectReturnsValue($expected, array $returnValues)
     {
-        $connection = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
-            ->disableOriginalConstructor()
-            ->getMock();
-        $connection->expects($this->any())
+        $this->connection1->expects($this->any())
             ->method('disconnect')
-            ->will(call_user_func_array([$this, 'onConsecutiveCalls'], $returnValues));
-        $collection = new \ArrayIterator([$connection, $connection]);
-        $this->collection->expects($this->any())
-            ->method('getIterator')
-            ->willReturn($collection);
+            ->willReturn($returnValues[0]);
+        $this->connection2->expects($this->any())
+            ->method('disconnect')
+            ->willReturn($returnValues[1]);
         $this->assertEquals($expected, $this->pool->disconnect());
     }
 

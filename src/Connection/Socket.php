@@ -39,7 +39,7 @@ class Socket implements SocketInterface
      * @param integer $port
      * @param array   $options
      */
-    public function __construct($host, $port = self::DEFAULT_PORT, array $options = [])
+    public function __construct(string $host, int $port = self::DEFAULT_PORT, array $options = [])
     {
         $this->host    = $host;
         $this->port    = $port;

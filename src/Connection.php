@@ -37,7 +37,7 @@ class Connection implements ConnectionInterface
      * @param int $port
      * @param array $options
      */
-    public function __construct($host, $port = Socket::DEFAULT_PORT, array $options = [])
+    public function __construct(string $host, int $port = Socket::DEFAULT_PORT, array $options = [])
     {
         $socket = new Socket($host, $port, $options);
         $this->name = $socket->getUniqueIdentifier();
