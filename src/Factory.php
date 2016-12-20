@@ -8,6 +8,17 @@ use Phlib\Beanstalk\Connection\Socket;
 class Factory
 {
     /**
+     * @param string $host
+     * @param int $port
+     * @param array $options
+     * @return Connection
+     */
+    public static function create(string $host, int $port = Socket::DEFAULT_PORT, array $options = []): Connection
+    {
+        return new Connection($host, $port, $options);
+    }
+
+    /**
      * @param array $config
      * @return ConnectionInterface
      */
@@ -15,7 +26,7 @@ class Factory
     {
         if (array_key_exists('host', $config)) {
             $server     = static::normalizeArgs($config);
-            $connection = new Connection($server['host'], $server['port'], $server['options']);
+            $connection = static::create($server['host'], $server['port'], $server['options']);
         } else {
             $servers    = static::createConnections($config);
             $connection = new Pool($servers);
@@ -36,7 +47,7 @@ class Factory
                 continue;
             }
             $server     = static::normalizeArgs($server);
-            $connection = new Connection($server['host'], $server['port'], $server['options']);
+            $connection = static::create($server['host'], $server['port'], $server['options']);
             if (!is_int($index)) {
                 $connection->setName($index);
             }
