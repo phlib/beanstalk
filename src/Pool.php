@@ -514,7 +514,7 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @return \Generator
+     * @return ManagedConnection[]
      */
     protected function getAvailableConnections(): \Generator
     {
