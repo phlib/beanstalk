@@ -7,8 +7,6 @@ namespace Phlib\Beanstalk;
 use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Pool\Collection;
-use Phlib\Beanstalk\Pool\RoundRobinStrategy;
-use Phlib\Beanstalk\Pool\SelectionStrategyInterface;
 
 /**
  * @package Phlib\Beanstalk
@@ -32,12 +30,8 @@ class Factory
             $server = $this->normalizeArgs($config['server']);
             $connection = $this->create($server['host'], $server['port'], $server['options']);
         } elseif (array_key_exists('servers', $config)) {
-            if (!isset($config['strategyClass'])) {
-                $config['strategyClass'] = RoundRobinStrategy::class;
-            }
             $servers = $this->createConnections($config['servers']);
-            $strategy = $this->createStrategy($config['strategyClass']);
-            $connection = new Pool(new Collection($servers, $strategy));
+            $connection = new Pool(new Collection($servers));
         } else {
             throw new InvalidArgumentException('Missing required server(s) configuration');
         }
@@ -60,14 +54,6 @@ class Factory
             $connections[] = $connection;
         }
         return $connections;
-    }
-
-    public function createStrategy(string $class): SelectionStrategyInterface
-    {
-        if (!class_exists($class)) {
-            throw new InvalidArgumentException("Specified Pool strategy class '{$class}' does not exist.");
-        }
-        return new $class();
     }
 
     private function normalizeArgs(array $serverArgs): array

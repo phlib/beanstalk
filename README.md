@@ -93,7 +93,6 @@ The pool implements the connection interface.
 use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Pool;
 use Phlib\Beanstalk\Pool\Collection;
-use Phlib\Beanstalk\Pool\RoundRobinStrategy;
 
 $servers = [
     new Connection('10.0.0.1'),
@@ -101,8 +100,7 @@ $servers = [
     new Connection('10.0.0.3'),
     new Connection('10.0.0.4'),
 ];
-$strategy = new RoundRobinStrategy
-$pool = new Pool(new Collection($servers, $strategy, ['retry_delay' => '120']));
+$pool = new Pool(new Collection($servers, ['retry_delay' => '120']));
 
 $pool->useTube('my-tube');
 $pool->put(array('my' => 'jobData1')); // <- sent to server 1
