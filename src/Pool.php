@@ -141,12 +141,11 @@ class Pool implements ConnectionInterface
             foreach ($this->getAvailableConnections() as $connection) {
                 try {
                     // override timeout, return as quickly as possible
-                    $result = $connection->send('reserve', $timeout = 0);
-                    if ($result['response'] === false) {
-                        continue;
+                    $result = $connection->send('reserve', 0);
+                    if ($result['response'] !== false) {
+                        $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
+                        return $result['response'];
                     }
-                    $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
-                    return $result['response'];
                 } catch (RuntimeException $e) {
                     // ignore servers not responding
                 }
