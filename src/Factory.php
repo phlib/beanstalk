@@ -25,11 +25,11 @@ class Factory
     public static function createFromArray(array $config): ConnectionInterface
     {
         if (array_key_exists('host', $config)) {
-            $server     = static::normalizeArgs($config);
-            $connection = static::create($server['host'], $server['port'], $server['options']);
+            $config     = static::normalizeArgs($config);
+            $connection = static::create($config['host'], $config['port'], $config['options']);
         } else {
-            $servers    = static::createConnections($config);
-            $connection = new Pool($servers);
+            $connections = static::createConnections($config);
+            $connection  = new Pool($connections);
         }
 
         return $connection;
@@ -42,12 +42,12 @@ class Factory
     public static function createConnections(array $servers): array
     {
         $connections = [];
-        foreach ($servers as $index => $server) {
-            if (array_key_exists('enabled', $server) && $server['enabled'] == false) {
+        foreach ($servers as $index => $config) {
+            if (array_key_exists('enabled', $config) && $config['enabled'] == false) {
                 continue;
             }
-            $server     = static::normalizeArgs($server);
-            $connection = static::create($server['host'], $server['port'], $server['options']);
+            $config     = static::normalizeArgs($config);
+            $connection = static::create($config['host'], $config['port'], $config['options']);
             if (!is_int($index)) {
                 $connection->setName($index);
             }
