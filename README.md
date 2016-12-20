@@ -55,11 +55,12 @@ $beanstalk->delete($job['id']);
 |----|----|-------|-----------|
 |`timeout`|*Integer*|`60`|The connection timeout.|
 
-## Pool Collection configuration (`array $options`)
+## Pool configuration
 
-|Name|Type|Default|Description|
-|----|----|-------|-----------|
-|`retry_delay`|*Integer*|`600`|How long to delay retrying a connection for after an error.|
+|Name|Type|Required|Default|Description|
+|----|----|--------|-------|-----------|
+|`connections`|*ConnectionInterface[]*|Yes| |Array of server connections.|
+|`retryDelay`|*Integer*|No|`600`|How long to delay retrying a connection for after an error.|
 
 ## Factory
 The factory allows for easy setup of the objects.
@@ -112,7 +113,7 @@ $connections = [
     new Connection('10.0.0.3'),
     new Connection('10.0.0.4'),
 ];
-$pool = new Pool($connections /* @todo , ['retry_delay' => '120'] */);
+$pool = new Pool($connections, 120);
 
 $pool->useTube('my-tube');
 $pool->put(array('my' => 'jobData1')); // )

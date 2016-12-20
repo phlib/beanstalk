@@ -9,6 +9,7 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Model\Stats;
+use Phlib\Beanstalk\Pool\ManagedConnection;
 
 /**
  * @package Phlib\Beanstalk
@@ -16,7 +17,7 @@ use Phlib\Beanstalk\Model\Stats;
 class Pool implements ConnectionInterface
 {
     /**
-     * @var ConnectionInterface[]
+     * @var ManagedConnection[]
      */
     private array $connections = [];
 
@@ -26,11 +27,15 @@ class Pool implements ConnectionInterface
         Connection::DEFAULT_TUBE => true,
     ];
 
+    private int $retryDelay;
+
     /**
      * @param ConnectionInterface[] $connections
      */
-    public function __construct(array $connections)
+    public function __construct(array $connections, int $retryDelay = 600)
     {
+        $this->retryDelay = $retryDelay;
+
         if (empty($connections)) {
             throw new InvalidArgumentException('Connections for Pool are empty');
         }
@@ -51,7 +56,7 @@ class Pool implements ConnectionInterface
             throw new InvalidArgumentException("Specified connection '{$key}' already exists.");
         }
 
-        $this->connections[$key] = $connection;
+        $this->connections[$key] = new ManagedConnection($connection, $this->retryDelay);
     }
 
     /**
@@ -59,7 +64,11 @@ class Pool implements ConnectionInterface
      */
     public function getConnections(): array
     {
-        return array_values($this->connections);
+        $connections = [];
+        foreach ($this->connections as $connection) {
+            $connections[] = $connection->getConnection();
+        }
+        return $connections;
     }
 
     public function disconnect(): bool
@@ -353,7 +362,12 @@ class Pool implements ConnectionInterface
             throw new InvalidArgumentException("Specified connection '{$key}' is not in the pool");
         }
 
-        return [$this->connections[$key], $jobId];
+        $connection = $this->connections[$key];
+        if (!$connection->isAvailable()) {
+            throw new RuntimeException("Specified connection '{$key}' is not currently available");
+        }
+
+        return [$connection, $jobId];
     }
 
     /**
@@ -389,7 +403,9 @@ class Pool implements ConnectionInterface
         shuffle($keys);
         foreach ($keys as $key) {
             $connection = $this->connections[$key];
-            // @todo Implement handling for failed connections
+            if (!$connection->isAvailable()) {
+                continue;
+            }
             yield $key => $connection;
         }
     }

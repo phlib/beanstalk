@@ -146,6 +146,25 @@ class PoolTest extends TestCase
         $this->pool->useTube($tube);
     }
 
+    public function testUseTubeSkipsUnavailableConnections(): void
+    {
+        $tube = sha1(uniqid('tube'));
+
+        // Force a connection error so ManagedConnection treats it as unavailable
+        $this->connection1->expects(static::once())
+            ->method('watch')
+            ->willThrowException(new RuntimeException());
+        $this->pool->watch($tube);
+
+        $this->connection1->expects(static::never())
+            ->method('useTube');
+        $this->connection2->expects(static::once())
+            ->method('useTube')
+            ->with($tube);
+
+        $this->pool->useTube($tube);
+    }
+
     public function testUseTubeSkipsConnectionErrors(): void
     {
         $tube = sha1(uniqid('tube'));
@@ -437,6 +456,29 @@ class PoolTest extends TestCase
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage("Specified connection '{$server}' is not in the pool");
+
+        $jobId = '123';
+
+        $this->connection1->expects(static::never())
+            ->method('peek');
+        $this->connection2->expects(static::never())
+            ->method('peek');
+
+        $this->pool->peek("{$server}.{$jobId}");
+    }
+
+    public function testPeekUnavailableConnection(): void
+    {
+        $server = self::NAME_CONN_1;
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage("Specified connection '{$server}' is not currently available");
+
+        // Force a connection error so ManagedConnection treats it as unavailable
+        $this->connection1->expects(static::once())
+            ->method('watch')
+            ->willThrowException(new RuntimeException());
+        $this->pool->watch('tube');
 
         $jobId = '123';
 
