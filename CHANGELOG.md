@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add value to `--watch` CLI options, to specify the refresh interval.
   Add info line to show the interval and current datetime.
 ### Changed
+- Status is a required argument for the `tube:peek` CLI command.
 - **BC break**: Constructor for `Connection` no longer needs a `Socket`.
   Pass the same parameters directly to `Connection`.
 - **BC break**: Move core `ConnectionInterface` up to package root namespace.
