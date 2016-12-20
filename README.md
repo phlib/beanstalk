@@ -63,7 +63,14 @@ $beanstalk->delete($job['id']);
 |----|----|-------|-----------|
 |`timeout`|*Integer*|`60`|The connection timeout.|
 
-## Pool Configuration (`array $options`)
+## Pool Configuration 
+
+|Name|Type|Required|Default|Description|
+|----|----|--------|-------|-----------|
+|`connections`|*ConnectionInterface[]*|Yes| |Array of server connections.|
+|`options`|*Array*|No|`<empty>`|Pool options.|
+
+### Options
 
 |Name|Type|Default|Description|
 |----|----|-------|-----------|
