@@ -28,7 +28,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
     public function testImplementsInterface()
     {
-        $this->assertInstanceOf(Connection\ConnectionInterface::class, $this->beanstalk);
+        $this->assertInstanceOf(\Phlib\Beanstalk\ConnectionInterface::class, $this->beanstalk);
     }
 
     public function testSocketIsSetCorrectly()

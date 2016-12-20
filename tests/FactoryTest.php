@@ -3,7 +3,7 @@
 namespace Phlib\Beanstalk\Tests;
 
 use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Factory;
 use Phlib\Beanstalk\Pool;

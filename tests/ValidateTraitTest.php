@@ -2,7 +2,7 @@
 
 namespace Phlib\Beanstalk\Tests;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 class ValidateTraitTest extends \PHPUnit_Framework_TestCase

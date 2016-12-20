@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Pool;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\ConnectionInterface;
 
 interface CollectionInterface extends \IteratorAggregate
 {

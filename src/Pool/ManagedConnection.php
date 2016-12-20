@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\RuntimeException;
 
 class ManagedConnection
