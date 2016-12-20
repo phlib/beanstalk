@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Exception\BuriedException;
 use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\DrainingException;
 use Phlib\Beanstalk\ValidateTrait;
 
 /**
@@ -51,12 +53,14 @@ class Put implements CommandInterface
         $status = strtok($socket->read(), ' ');
         switch ($status) {
             case 'INSERTED':
-            case 'BURIED':
                 return (int)strtok(' '); // job id
-
+            case 'BURIED':
+                $jobId = (int)strtok(' ');
+                throw BuriedException::create($jobId);
+            case 'DRAINING':
+                throw new DrainingException('Server in a draining status');
             case 'EXPECTED_CRLF':
             case 'JOB_TOO_BIG':
-            case 'DRAINING':
             default:
                 throw new CommandException("Put failed '{$status}'");
         }

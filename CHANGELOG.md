@@ -5,6 +5,13 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Add new `BuriedException` thrown by `put()` and `release()` when the server
+  returns this error. This is a minor **BC break** because these commands
+  previously returned a positive response for this error.
+- Add new `DrainingException` thrown by `put()` when the server is in draining
+  mode and cannot accept new jobs.
+  Previously this threw `CommandException` which the new exception extends.
 ### Changed
 - **BC break**: Deprecated static Factory methods are now instance-based.
 
