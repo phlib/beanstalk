@@ -3,6 +3,7 @@
 namespace Phlib\Beanstalk\Tests\Connection;
 
 use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Connection\SocketInterface;
 use phpmock\phpunit\PHPMock;
 
 class SocketTest extends \PHPUnit_Framework_TestCase
@@ -11,7 +12,7 @@ class SocketTest extends \PHPUnit_Framework_TestCase
 
     public function testImplementsInterface()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\SocketInterface', new Socket('localhost'));
+        $this->assertInstanceOf(SocketInterface::class, new Socket('localhost'));
     }
 
     public function testGetUniqueIdentifier()
