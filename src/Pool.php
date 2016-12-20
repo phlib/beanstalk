@@ -151,7 +151,8 @@ class Pool implements ConnectionInterface
                 }
             }
             usleep(25 * 1000);
-        } while (time() - $startTime < $timeout);
+            $timeTaken = time() - $startTime;
+        } while ($timeTaken < $timeout);
 
         return false;
     }
