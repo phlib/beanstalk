@@ -2,6 +2,8 @@
 
 namespace Phlib\Beanstalk\Tests\Command;
 
+use Phlib\Beanstalk\Connection\SocketInterface;
+
 class CommandTestCase extends \PHPUnit_Framework_TestCase
 {
     /**
@@ -12,7 +14,8 @@ class CommandTestCase extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->socket = $this->getMockForAbstractClass('\Phlib\Beanstalk\Connection\SocketInterface');
+        $this->socket = $this->getMockBuilder(SocketInterface::class)
+            ->getMockForAbstractClass();
     }
 
     public function tearDown()
