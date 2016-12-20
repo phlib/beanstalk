@@ -12,38 +12,17 @@ use Phlib\Beanstalk\Pool\SelectionStrategyInterface;
 class Factory
 {
     /**
-     * @param string $host
-     * @param integer $port
-     * @param array $options
-     * @return Connection
-     */
-    public static function create($host, $port = Socket::DEFAULT_PORT, array $options = [])
-    {
-        return new Connection(new Socket($host, $port, $options));
-    }
-
-    /**
      * @param array $config
      * @return ConnectionInterface
      */
-    public static function createFromArray(array $config)
+    public static function createFromArray(array $config): ConnectionInterface
     {
         if (array_key_exists('host', $config)) {
-            $config = ['server' => $config];
-        }
-
-        if (array_key_exists('server', $config)) {
-            $server     = static::normalizeArgs($config['server']);
-            $connection = static::create($server['host'], $server['port'], $server['options']);
-        } elseif (array_key_exists('servers', $config)) {
-            if (!isset($config['strategyClass'])) {
-                $config['strategyClass'] = '\Phlib\Beanstalk\Pool\RoundRobinStrategy';
-            }
-            $servers    = static::createConnections($config['servers']);
-            $strategy   = static::createStrategy($config['strategyClass']);
-            $connection = new Pool(new Collection($servers, $strategy));
+            $server     = static::normalizeArgs($config);
+            $connection = new Connection($server['host'], $server['port'], $server['options']);
         } else {
-            throw new InvalidArgumentException('Missing required server(s) configuration');
+            $servers    = static::createConnections($config);
+            $connection = new Pool($servers);
         }
 
         return $connection;
@@ -53,37 +32,28 @@ class Factory
      * @param array $servers
      * @return Connection[]
      */
-    public static function createConnections(array $servers)
+    public static function createConnections(array $servers): array
     {
         $connections = [];
-        foreach ($servers as $server) {
+        foreach ($servers as $index => $server) {
             if (array_key_exists('enabled', $server) && $server['enabled'] == false) {
                 continue;
             }
-            $server = static::normalizeArgs($server);
-            $connection = static::create($server['host'], $server['port'], $server['options']);
+            $server     = static::normalizeArgs($server);
+            $connection = new Connection($server['host'], $server['port'], $server['options']);
+            if (!is_int($index)) {
+                $connection->setName($index);
+            }
             $connections[] = $connection;
         }
         return $connections;
     }
 
     /**
-     * @param string $class
-     * @return SelectionStrategyInterface
-     */
-    public static function createStrategy($class)
-    {
-        if (!class_exists($class)) {
-            throw new InvalidArgumentException("Specified Pool strategy class '{$class}' does not exist.");
-        }
-        return new $class;
-    }
-
-    /**
      * @param array $serverArgs
      * @return array
      */
-    protected static function normalizeArgs(array $serverArgs)
+    protected static function normalizeArgs(array $serverArgs): array
     {
         return $serverArgs + [
             'host' => null,
