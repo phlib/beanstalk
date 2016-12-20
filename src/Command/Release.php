@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Exception\BuriedException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\ValidateTrait;
@@ -63,12 +64,11 @@ class Release implements CommandInterface
         $response = $socket->read();
         switch ($response) {
             case 'RELEASED':
-            case 'BURIED':
                 return $this;
-
+            case 'BURIED':
+                throw BuriedException::create($this->id);
             case 'NOT_FOUND':
                 throw new NotFoundException("Job id '$this->id' could not be found.");
-
             default:
                 throw new CommandException("Release '$this->id' failed '$response'");
         }
