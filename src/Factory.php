@@ -6,7 +6,6 @@ namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\Pool\Collection;
 
 /**
  * @package Phlib\Beanstalk
@@ -25,7 +24,7 @@ class Factory
             $connection = $this->create($config['host'], $config['port'], $config['options']);
         } else {
             $connections = $this->createConnections($config);
-            $connection = new Pool(new Collection($connections));
+            $connection = new Pool($connections);
         }
 
         return $connection;

@@ -105,7 +105,6 @@ The pool implements the connection interface.
 ```php
 use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Pool;
-use Phlib\Beanstalk\Pool\Collection;
 
 $connections = [
     new Connection('10.0.0.1'),
@@ -113,12 +112,12 @@ $connections = [
     new Connection('10.0.0.3'),
     new Connection('10.0.0.4'),
 ];
-$pool = new Pool(new Collection($connections, ['retry_delay' => '120']));
+$pool = new Pool($connections /* @todo , ['retry_delay' => '120'] */);
 
 $pool->useTube('my-tube');
-$pool->put(array('my' => 'jobData1')); // <- sent to server 1
-$pool->put(array('my' => 'jobData2')); // <- sent to server 2
-$pool->put(array('my' => 'jobData3')); // <- sent to server 3
+$pool->put(array('my' => 'jobData1')); // )
+$pool->put(array('my' => 'jobData2')); // )-> distributed between random servers
+$pool->put(array('my' => 'jobData3')); // )
 ```
 
 ## Command Line Script
