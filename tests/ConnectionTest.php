@@ -22,7 +22,8 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
         $this->socket = $this->getMockBuilder(Socket::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->beanstalk = new Connection($this->socket);
+        $this->beanstalk = new Connection('hostname');
+        $this->beanstalk->setSocket($this->socket);
         parent::setUp();
     }
 
