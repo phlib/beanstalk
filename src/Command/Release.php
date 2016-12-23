@@ -46,7 +46,7 @@ class Release implements CommandInterface
     /**
      * @return string
      */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('release %d %d %d', $this->id, $this->priority, $this->delay);
     }

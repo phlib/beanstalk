@@ -11,7 +11,7 @@ class Stats implements CommandInterface
     /**
      * @return string
      */
-    public function getCommand()
+    public function getCommand(): string
     {
         return 'stats';
     }

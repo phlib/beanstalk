@@ -24,7 +24,7 @@ class StatsJob implements CommandInterface
     /**
      * @return string
      */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('stats-job %d', $this->id);
     }

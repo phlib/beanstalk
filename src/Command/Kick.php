@@ -26,7 +26,7 @@ class Kick implements CommandInterface
     /**
      * @return string
      */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('kick %d', $this->bound);
     }

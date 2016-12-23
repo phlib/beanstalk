@@ -38,7 +38,7 @@ class Bury implements CommandInterface
     /**
      * @return string
      */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('bury %d %d', $this->id, $this->priority);
     }

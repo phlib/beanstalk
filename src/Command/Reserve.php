@@ -26,7 +26,7 @@ class Reserve implements CommandInterface
     /**
      * @return string
      */
-    public function getCommand()
+    public function getCommand(): string
     {
         if (is_null($this->timeout)) {
             return 'reserve';

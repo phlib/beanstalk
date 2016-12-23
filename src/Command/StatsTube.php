@@ -28,7 +28,7 @@ class StatsTube implements CommandInterface
     /**
      * @return string
      */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('stats-tube %s', $this->tube);
     }

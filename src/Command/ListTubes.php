@@ -11,7 +11,7 @@ class ListTubes implements CommandInterface
     /**
      * @return string
      */
-    public function getCommand()
+    public function getCommand(): string
     {
         return 'list-tubes';
     }

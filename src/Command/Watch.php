@@ -29,7 +29,7 @@ class Watch implements CommandInterface
     /**
      * @return string
      */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('watch %s', $this->tube);
     }

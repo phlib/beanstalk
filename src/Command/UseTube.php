@@ -29,7 +29,7 @@ class UseTube implements CommandInterface
     /**
      * @return string
      */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('use %s', $this->tube);
     }

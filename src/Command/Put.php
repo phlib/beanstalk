@@ -54,7 +54,7 @@ class Put implements CommandInterface
     /**
      * @return string
      */
-    public function getCommand()
+    public function getCommand(): string
     {
         $bytesSent = strlen($this->data);
         return sprintf('put %d %d %d %d', $this->priority, $this->delay, $this->ttr, $bytesSent);

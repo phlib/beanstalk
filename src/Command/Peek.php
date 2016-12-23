@@ -53,7 +53,7 @@ class Peek implements CommandInterface
     /**
      * @return string
      */
-    public function getCommand()
+    public function getCommand(): string
     {
         return isset($this->jobId) ?
             sprintf('peek %u', $this->jobId) :

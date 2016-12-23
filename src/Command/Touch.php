@@ -27,7 +27,7 @@ class Touch implements CommandInterface
     /**
      * @return string
      */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('touch %d', $this->id);
     }
