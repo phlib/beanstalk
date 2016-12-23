@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Connection;
 
-use Phlib\Beanstalk\Exception;
+use Phlib\Beanstalk\Exception\SocketException;
 
 /**
  * @package Phlib\Beanstalk
@@ -57,7 +57,7 @@ class Socket
                     $errStr,
                     $errNum
                 );
-                throw new Exception\SocketException($message);
+                throw new SocketException($message);
             }
 
             // remove timeout on the stream, allows blocking reserve
@@ -75,7 +75,7 @@ class Socket
 
         if ($bytesSent !== $bytesWritten) {
             $this->disconnect();
-            throw new Exception\SocketException('Failed to write data.');
+            throw new SocketException('Failed to write data');
         }
 
         return $this;
@@ -91,7 +91,7 @@ class Socket
             while ($read < $length && !feof($this->connection)) {
                 $chunk = fread($this->connection, $length - $read);
                 if ($chunk === false) {
-                    throw new Exception\SocketException('Failed to read data.');
+                    throw new SocketException('Failed to read data');
                 }
                 $read += strlen($chunk);
                 $data .= $chunk;
@@ -100,7 +100,7 @@ class Socket
             $data = stream_get_line($this->connection, self::READ_LENGTH, self::EOL);
             if ($data === false) {
                 $this->disconnect();
-                throw new Exception\SocketException('Failed to read data.');
+                throw new SocketException('Failed to read data');
             }
         }
 
