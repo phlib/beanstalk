@@ -3,8 +3,7 @@ declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Connection;
 
-use Phlib\Beanstalk\Exception;
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Exception\SocketException;
 
 class Socket implements SocketInterface
 {
@@ -33,8 +32,6 @@ class Socket implements SocketInterface
     protected $connection;
 
     /**
-     * Constructor
-     *
      * @param string  $host
      * @param integer $port
      * @param array   $options
@@ -65,10 +62,10 @@ class Socket implements SocketInterface
     /**
      * Connect the socket to the beanstalk server.
      *
-     * @return $this
-     * @throws Exception\SocketException
+     * @return SocketInterface
+     * @throws SocketException
      */
-    public function connect()
+    public function connect(): SocketInterface
     {
         if (!$this->connection) {
             $errNum = $errStr = null;
@@ -82,7 +79,7 @@ class Socket implements SocketInterface
                     $errStr,
                     $errNum
                 );
-                throw new Exception\SocketException($message);
+                throw new SocketException($message);
             }
 
             // remove timeout on the stream, allows blocking reserve
@@ -97,7 +94,7 @@ class Socket implements SocketInterface
      *
      * @param  string $data
      * @return SocketInterface
-     * @throws Exception\SocketException
+     * @throws SocketException
      */
     public function write(string $data): SocketInterface
     {
@@ -109,7 +106,7 @@ class Socket implements SocketInterface
 
         if ($bytesSent !== $bytesWritten) {
             $this->disconnect();
-            throw new Exception\SocketException('Failed to write data.');
+            throw new SocketException('Failed to write data.');
         }
 
         return $this;
@@ -118,7 +115,7 @@ class Socket implements SocketInterface
     /**
      * @param int $length
      * @return string
-     * @throws Exception\SocketException
+     * @throws SocketException
      */
     public function read(int $length = null): string
     {
@@ -130,7 +127,7 @@ class Socket implements SocketInterface
             while ($read < $length && !feof($this->connection)) {
                 $chunk = fread($this->connection, $length - $read);
                 if ($chunk === false) {
-                    throw new Exception\SocketException('Failed to read data.');
+                    throw new SocketException('Failed to read data.');
                 }
                 $read += strlen($chunk);
                 $data .= $chunk;
@@ -139,7 +136,7 @@ class Socket implements SocketInterface
             $data = stream_get_line($this->connection, self::READ_LENGTH, self::EOL);
             if ($data === false) {
                 $this->disconnect();
-                throw new Exception\SocketException('Failed to read data.');
+                throw new SocketException('Failed to read data.');
             }
         }
 
