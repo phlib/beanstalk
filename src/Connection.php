@@ -104,7 +104,6 @@ class Connection implements ConnectionInterface
      * @param int $delay
      * @param int $ttr
      * @return int
-     * @throws Exception\CommandException
      */
     public function put(
         string $data,
@@ -130,8 +129,6 @@ class Connection implements ConnectionInterface
     /**
      * @param int $id
      * @return ConnectionInterface
-     * @throws Exception\NotFoundException
-     * @throws Exception\CommandException
      */
     public function delete($id): ConnectionInterface
     {
@@ -145,8 +142,6 @@ class Connection implements ConnectionInterface
      * @param int $priority
      * @param int $delay
      * @return ConnectionInterface
-     * @throws Exception\NotFoundException
-     * @throws Exception\CommandException
      */
     public function release(
         $id,
@@ -162,8 +157,6 @@ class Connection implements ConnectionInterface
      * @param int $id
      * @param int $priority
      * @return ConnectionInterface
-     * @throws Exception\NotFoundException
-     * @throws Exception\CommandException
      */
     public function bury($id, int $priority = ConnectionInterface::DEFAULT_PRIORITY): ConnectionInterface
     {
@@ -175,8 +168,6 @@ class Connection implements ConnectionInterface
     /**
      * @param int $id
      * @return ConnectionInterface
-     * @throws Exception\NotFoundException
-     * @throws Exception\CommandException
      */
     public function touch($id): ConnectionInterface
     {
