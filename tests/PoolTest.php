@@ -431,9 +431,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
      */
     protected function createMockConnection($host)
     {
-        $connection = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
-            ->disableOriginalConstructor()
-            ->getMock();
+        $connection = $this->createMock(Connection::class);
         $connection->expects($this->any())
             ->method('getName')
             ->will($this->returnValue($host));

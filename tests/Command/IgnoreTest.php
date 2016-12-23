@@ -2,13 +2,14 @@
 
 namespace Phlib\Beanstalk\Tests\Command;
 
+use Phlib\Beanstalk\Command\CommandInterface;
 use Phlib\Beanstalk\Command\Ignore;
 
 class IgnoreTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Ignore('test-tube'));
+        $this->assertInstanceOf(CommandInterface::class, new Ignore('test-tube'));
     }
 
     public function testGetCommand()

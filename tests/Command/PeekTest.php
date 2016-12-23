@@ -2,13 +2,14 @@
 
 namespace Phlib\Beanstalk\Tests\Command;
 
+use Phlib\Beanstalk\Command\CommandInterface;
 use Phlib\Beanstalk\Command\Peek;
 
 class PeekTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Peek('ready'));
+        $this->assertInstanceOf(CommandInterface::class, new Peek('ready'));
     }
 
     /**

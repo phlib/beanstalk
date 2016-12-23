@@ -2,13 +2,14 @@
 
 namespace Phlib\Beanstalk\Tests\Command;
 
+use Phlib\Beanstalk\Command\CommandInterface;
 use Phlib\Beanstalk\Command\UseTube;
 
 class UseTubeTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new UseTube('test-tube'));
+        $this->assertInstanceOf(CommandInterface::class, new UseTube('test-tube'));
     }
 
     public function testGetCommand()

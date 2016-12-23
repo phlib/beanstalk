@@ -29,7 +29,7 @@ class SocketTest extends \PHPUnit_Framework_TestCase
         $stream_set_timeout = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'stream_set_timeout');
         $stream_set_timeout->expects($this->any())->willReturn(true);
 
-        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\Socket', (new Socket('host'))->connect());
+        $this->assertInstanceOf(Socket::class, (new Socket('host'))->connect());
     }
 
     /**
@@ -168,7 +168,7 @@ class SocketTest extends \PHPUnit_Framework_TestCase
     {
         $availableFns = ['connect', 'disconnect', 'read', 'write', 'getUniqueIdentifier'];
 
-        return $this->getMockBuilder('\Phlib\Beanstalk\Connection\Socket')
+        return $this->getMockBuilder(Socket::class)
             ->disableOriginalConstructor()
             ->setMethods(array_diff($availableFns, $mockFns))
             ->getMock();

@@ -2,13 +2,14 @@
 
 namespace Phlib\Beanstalk\Tests\Command;
 
+use Phlib\Beanstalk\Command\CommandInterface;
 use Phlib\Beanstalk\Command\Put;
 
 class PutTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Put('data', 1, 0, 60));
+        $this->assertInstanceOf(CommandInterface::class, new Put('data', 1, 0, 60));
     }
 
     public function testGetCommand()

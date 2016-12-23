@@ -2,6 +2,7 @@
 
 namespace Phlib\Beanstalk\Tests\Command;
 
+use Phlib\Beanstalk\Command\ValidateTrait;
 use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
@@ -14,7 +15,7 @@ class ValidateTraitTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->validate = $this->getMockForTrait('\Phlib\Beanstalk\Command\ValidateTrait');
+        $this->validate = $this->getMockForTrait(ValidateTrait::class);
         parent::setUp();
     }
 

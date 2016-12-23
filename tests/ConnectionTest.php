@@ -39,7 +39,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
     public function testDefaultSocketImplementation()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\Socket', $this->beanstalk->getSocket());
+        $this->assertInstanceOf(Socket::class, $this->beanstalk->getSocket());
     }
 
     public function testDisconnectCallsSocket()
