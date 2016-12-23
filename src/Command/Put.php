@@ -7,7 +7,6 @@ use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\BuriedException;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\DrainingException;
-use Phlib\Beanstalk\ValidateTrait;
 
 class Put implements CommandInterface
 {

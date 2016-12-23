@@ -7,7 +7,6 @@ use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\BuriedException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\CommandException;
-use Phlib\Beanstalk\ValidateTrait;
 
 class Release implements CommandInterface
 {

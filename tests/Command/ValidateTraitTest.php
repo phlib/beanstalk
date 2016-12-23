@@ -1,6 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests;
+namespace Phlib\Beanstalk\Tests\Command;
 
 use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
@@ -8,7 +8,7 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
 class ValidateTraitTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Phlib\Beanstalk\ValidateTrait
+     * @var \Phlib\Beanstalk\Command\ValidateTrait
      */
     protected $validate;
 

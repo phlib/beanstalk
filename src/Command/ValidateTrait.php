@@ -1,7 +1,7 @@
 <?php
 declare(strict_types = 1);
 
-namespace Phlib\Beanstalk;
+namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;

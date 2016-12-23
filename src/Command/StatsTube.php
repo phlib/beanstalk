@@ -3,8 +3,6 @@ declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\ValidateTrait;
-
 class StatsTube implements CommandInterface
 {
     use StatsTrait;
