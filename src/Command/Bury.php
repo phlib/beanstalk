@@ -7,7 +7,6 @@ namespace Phlib\Beanstalk\Command;
 use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\NotFoundException;
-use Phlib\Beanstalk\ValidateTrait;
 
 /**
  * @package Phlib\Beanstalk

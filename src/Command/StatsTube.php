@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\ValidateTrait;
-
 /**
  * @package Phlib\Beanstalk
  */
