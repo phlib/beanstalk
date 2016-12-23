@@ -10,8 +10,6 @@ use Phlib\Beanstalk\Exception\CommandException;
 
 class Peek implements CommandInterface
 {
-    use ToStringTrait;
-
     const READY   = 'ready';
     const DELAYED = 'delayed';
     const BURIED  = 'buried';

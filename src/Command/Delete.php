@@ -9,8 +9,6 @@ use Phlib\Beanstalk\Exception\CommandException;
 
 class Delete implements CommandInterface
 {
-    use ToStringTrait;
-
     /**
      * @var string|integer
      */

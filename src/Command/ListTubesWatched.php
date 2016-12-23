@@ -6,7 +6,6 @@ namespace Phlib\Beanstalk\Command;
 class ListTubesWatched implements CommandInterface
 {
     use StatsTrait;
-    use ToStringTrait;
 
     /**
      * @return string

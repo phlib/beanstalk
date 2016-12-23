@@ -11,7 +11,6 @@ use Phlib\Beanstalk\ValidateTrait;
 class Bury implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
     /**
      * @var string|integer
@@ -25,7 +24,7 @@ class Bury implements CommandInterface
 
     /**
      * @param string|integer $id
-     * @param integer        $priority
+     * @param integer $priority
      */
     public function __construct($id, $priority)
     {

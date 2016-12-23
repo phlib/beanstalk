@@ -8,8 +8,6 @@ use Phlib\Beanstalk\Exception\CommandException;
 
 class Reserve implements CommandInterface
 {
-    use ToStringTrait;
-
     /**
      * @var integer|null
      */

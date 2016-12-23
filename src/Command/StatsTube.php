@@ -9,7 +9,6 @@ class StatsTube implements CommandInterface
 {
     use StatsTrait;
     use ValidateTrait;
-    use ToStringTrait;
 
     /**
      * @var string

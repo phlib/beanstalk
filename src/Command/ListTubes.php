@@ -6,7 +6,6 @@ namespace Phlib\Beanstalk\Command;
 class ListTubes implements CommandInterface
 {
     use StatsTrait;
-    use ToStringTrait;
 
     /**
      * @return string

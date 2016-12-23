@@ -12,7 +12,6 @@ use Phlib\Beanstalk\ValidateTrait;
 class Put implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
     /**
      * @var string

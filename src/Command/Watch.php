@@ -10,7 +10,6 @@ use Phlib\Beanstalk\ValidateTrait;
 class Watch implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
     /**
      * @var string

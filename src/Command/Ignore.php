@@ -10,7 +10,6 @@ use Phlib\Beanstalk\ValidateTrait;
 class Ignore implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
     /**
      * @var string

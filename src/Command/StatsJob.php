@@ -6,7 +6,6 @@ namespace Phlib\Beanstalk\Command;
 class StatsJob implements CommandInterface
 {
     use StatsTrait;
-    use ToStringTrait;
 
     /**
      * @var string|integer
