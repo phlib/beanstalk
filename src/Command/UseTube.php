@@ -18,7 +18,7 @@ class UseTube implements CommandInterface
     /**
      * @param string $tube
      */
-    public function __construct($tube)
+    public function __construct(string $tube)
     {
         $this->validateTubeName($tube);
         $this->tube = $tube;

@@ -13,26 +13,26 @@ class Release implements CommandInterface
     use ValidateTrait;
 
     /**
-     * @var string|integer
+     * @var string|int
      */
     protected $id;
 
     /**
-     * @var integer
+     * @var int
      */
     protected $priority;
 
     /**
-     * @var integer
+     * @var int
      */
     protected $delay;
 
     /**
      * @param string  $id
-     * @param integer $priority
-     * @param integer $delay
+     * @param int $priority
+     * @param int $delay
      */
-    public function __construct($id, $priority, $delay)
+    public function __construct($id, int $priority, int $delay)
     {
         $this->validatePriority($priority);
 

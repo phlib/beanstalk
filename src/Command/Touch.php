@@ -10,12 +10,12 @@ use Phlib\Beanstalk\Exception\CommandException;
 class Touch implements CommandInterface
 {
     /**
-     * @var string|integer
+     * @var string|int
      */
     protected $id;
 
     /**
-     * @param string $id
+     * @param string|int $id
      */
     public function __construct($id)
     {

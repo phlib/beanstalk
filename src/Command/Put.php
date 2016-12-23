@@ -18,27 +18,27 @@ class Put implements CommandInterface
     protected $data;
 
     /**
-     * @var integer
+     * @var int
      */
     protected $priority;
 
     /**
-     * @var integer
+     * @var int
      */
     protected $delay;
 
     /**
-     * @var integer
+     * @var int
      */
     protected $ttr;
 
     /**
      * @param string  $data
-     * @param integer $priority
-     * @param integer $delay
-     * @param integer $ttr
+     * @param int $priority
+     * @param int $delay
+     * @param int $ttr
      */
-    public function __construct($data, $priority, $delay, $ttr)
+    public function __construct(string $data, int $priority, int $delay, int $ttr)
     {
         $this->validateJobData($data);
         $this->validatePriority($priority);
@@ -60,7 +60,7 @@ class Put implements CommandInterface
 
     /**
      * @param SocketInterface $socket
-     * @return integer
+     * @return int
      * @throws CommandException
      */
     public function process(SocketInterface $socket)

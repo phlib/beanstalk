@@ -8,12 +8,12 @@ class StatsJob implements CommandInterface
     use StatsTrait;
 
     /**
-     * @var string|integer
+     * @var string|int
      */
     protected $id;
 
     /**
-     * @param integer|string $id
+     * @param string|int $id
      */
     public function __construct($id)
     {

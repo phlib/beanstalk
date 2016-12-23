@@ -10,12 +10,12 @@ use Phlib\Beanstalk\Exception\CommandException;
 class Delete implements CommandInterface
 {
     /**
-     * @var string|integer
+     * @var string|int
      */
     protected $id;
 
     /**
-     * @param string|integer $id
+     * @param string|int $id
      */
     public function __construct($id)
     {

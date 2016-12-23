@@ -12,20 +12,20 @@ class Bury implements CommandInterface
     use ValidateTrait;
 
     /**
-     * @var string|integer
+     * @var string|int
      */
     protected $id;
 
     /**
-     * @var integer
+     * @var int
      */
     protected $priority;
 
     /**
-     * @param string|integer $id
-     * @param integer $priority
+     * @param string|int $id
+     * @param int $priority
      */
-    public function __construct($id, $priority)
+    public function __construct($id, int $priority)
     {
         $this->validatePriority($priority);
 

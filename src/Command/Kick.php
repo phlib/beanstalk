@@ -9,14 +9,14 @@ use Phlib\Beanstalk\Exception\CommandException;
 class Kick implements CommandInterface
 {
     /**
-     * @var integer
+     * @var int
      */
     protected $bound;
 
     /**
-     * @param integer $bound
+     * @param int $bound
      */
-    public function __construct($bound)
+    public function __construct(int $bound)
     {
         $this->bound = $bound;
     }

@@ -9,14 +9,14 @@ use Phlib\Beanstalk\Exception\CommandException;
 class Reserve implements CommandInterface
 {
     /**
-     * @var integer|null
+     * @var int|null
      */
     protected $timeout;
 
     /**
-     * @param integer|null $timeout
+     * @param int|null $timeout
      */
-    public function __construct($timeout = null)
+    public function __construct(int $timeout = null)
     {
         $this->timeout = $timeout;
     }

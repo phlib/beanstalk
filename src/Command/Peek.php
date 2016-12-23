@@ -15,7 +15,7 @@ class Peek implements CommandInterface
     const BURIED  = 'buried';
 
     /**
-     * @var string|integer
+     * @var string|int
      */
     protected $jobId = null;
 
@@ -37,7 +37,7 @@ class Peek implements CommandInterface
      * @param string $subject
      * @throws InvalidArgumentException
      */
-    public function __construct($subject)
+    public function __construct(string $subject)
     {
         if (is_int($subject) || ctype_digit($subject)) {
             $this->jobId = $subject;
