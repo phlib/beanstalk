@@ -8,6 +8,11 @@ use Phlib\Beanstalk\Connection\SocketInterface;
 interface CommandInterface
 {
     /**
+     * @return string
+     */
+    public function getCommand(): string;
+
+    /**
      * @param SocketInterface $socket
      * @return mixed
      */
