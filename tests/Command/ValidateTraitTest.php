@@ -14,7 +14,7 @@ class ValidateTraitTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->validate = $this->getMockForTrait('\Phlib\Beanstalk\ValidateTrait');
+        $this->validate = $this->getMockForTrait('\Phlib\Beanstalk\Command\ValidateTrait');
         parent::setUp();
     }
 
