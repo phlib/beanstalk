@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Added
+- Reply tube selections when reconnecting a failed Pool connection.
+
+### Added
 - Add new `BuriedException` thrown by `put()` and `release()` when the server
   returns this error. This is a minor **BC break** because these commands
   previously returned a positive response for this error.
