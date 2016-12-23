@@ -14,8 +14,7 @@ class CommandTestCase extends \PHPUnit_Framework_TestCase
     public function setUp()
     {
         parent::setUp();
-        $this->socket = $this->getMockBuilder(SocketInterface::class)
-            ->getMockForAbstractClass();
+        $this->socket = $this->createMock(SocketInterface::class);
     }
 
     public function tearDown()
