@@ -37,7 +37,7 @@ class Peek implements CommandInterface
      * @param string $subject
      * @throws InvalidArgumentException
      */
-    public function __construct(string $subject)
+    public function __construct($subject)
     {
         if (is_int($subject) || ctype_digit($subject)) {
             $this->jobId = $subject;
