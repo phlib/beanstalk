@@ -27,14 +27,17 @@ class ManagedConnection
     /**
      * @var string
      */
-    private $tube = Connection::DEFAULT_TUBE;
+    private $using = Connection::DEFAULT_TUBE;
 
     /**
      * @var array
      */
-    private $watching = [Connection::DEFAULT_TUBE];
+    private $watching = [Connection::DEFAULT_TUBE => true];
 
-    private $ignore = [];
+    /**
+     * @var array
+     */
+    private $ignoring = [];
 
     /**
      * @param ConnectionInterface $connection
@@ -69,11 +72,22 @@ class ManagedConnection
      */
     public function send(string $command, ...$arguments)
     {
+        $this->intercept($command, ...$arguments);
+        return $this->doSend($command, ...$arguments);
+    }
+
+    /**
+     * @param string $command
+     * @param array ...$arguments
+     * @return array
+     */
+    protected function doSend(string $command, ...$arguments)
+    {
         try {
-            $result = $this->connection->{$command}(...$arguments);
             if ($this->retryAt !== false) {
                 $this->reset();
             }
+            $result = $this->connection->{$command}(...$arguments);
             return ['connection' => $this->connection, 'response' => $result];
         } catch (RuntimeException $e) {
             if ($this->retryAt === false) {
@@ -83,17 +97,77 @@ class ManagedConnection
         }
     }
 
-    protected function reset()
+    /**
+     * Records certain commands to maintain a required re-initialisation state.
+     * @param string $command
+     * @param array ...$arguments
+     */
+    protected function intercept(string $command, ...$arguments)
     {
-        $this->retryAt = false;
-        // in case during the missing connection we're no longer using or watching the right tubes.
-        // $this->connection->useTube($this->tube);
-        // foreach(array_keys($this->watching) as $watch) {$this->connection->watch(}
-        // ignore
+        switch ($command) {
+            case 'useTube':
+                $this->useTube($arguments[0]);
+                break;
+            case 'watch':
+                $this->watch($arguments[0]);
+                break;
+            case 'ignore':
+                $this->ignore($arguments[0]);
+                break;
+        }
     }
 
+    /**
+     *
+     */
     protected function delay()
     {
         $this->retryAt = time() + $this->retryDelay;
+    }
+
+    /**
+     * When a connection has been lost, it could have missed important commands like use, watch and ignore.
+     * These are recorded and replayed when the connection comes back.
+     */
+    protected function reset()
+    {
+        $this->retryAt = false;
+        $this->doSend('useTube', $this->using);
+        foreach (array_keys($this->watching) as $tube) {
+            $this->doSend('watch', $tube);
+        }
+        foreach (array_keys($this->ignoring) as $tube) {
+            $this->doSend('ignore', $tube);
+        }
+    }
+
+    /**
+     * @param string $tube
+     */
+    protected function useTube(string $tube)
+    {
+        $this->using = $tube;
+    }
+
+    /**
+     * @param string $tube
+     */
+    protected function watch(string $tube)
+    {
+        if (array_key_exists($tube, $this->ignoring)) {
+            unset($this->ignoring[$tube]);
+        }
+        $this->watching[$tube] = true;
+    }
+
+    /**
+     * @param string $tube
+     */
+    protected function ignore(string $tube)
+    {
+        if (array_key_exists($tube, $this->watching)) {
+            unset($this->watching[$tube]);
+        }
+        $this->ignoring[$tube] = true;
     }
 }
