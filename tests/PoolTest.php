@@ -3,6 +3,7 @@
 namespace Phlib\Beanstalk\Tests;
 
 use Phlib\Beanstalk\Connection;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool;
 use phpmock\phpunit\PHPMock;
@@ -130,11 +131,9 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $this->assertContains($jobId, $this->pool->put('myJobData'));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\RuntimeException
-     */
     public function testPutTotalFailure()
     {
+        $this->expectException(RuntimeException::class);
         $this->connection1->method('put')->will($this->throwException(new RuntimeException()));
         $this->connection2->method('put')->will($this->throwException(new RuntimeException()));
         $this->pool->put('myJobData');
@@ -189,11 +188,9 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expected, $this->pool->reserve());
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testPoolIdWithInvalidFormat()
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->pool->release('123');
     }
 

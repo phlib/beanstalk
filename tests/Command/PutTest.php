@@ -4,6 +4,7 @@ namespace Phlib\Beanstalk\Tests\Command;
 
 use Phlib\Beanstalk\Command\CommandInterface;
 use Phlib\Beanstalk\Command\Put;
+use Phlib\Beanstalk\Exception\CommandException;
 
 class PutTest extends CommandTestCase
 {
@@ -19,11 +20,9 @@ class PutTest extends CommandTestCase
         $this->assertEquals("put 123 456 789 $bytes", (new Put($data, 123, 456, 789))->getCommand());
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testWithInvalidPriority()
     {
+        $this->expectException(\TypeError::class);
         new Put('data', 'foo', 123, 456);
     }
 
@@ -37,22 +36,18 @@ class PutTest extends CommandTestCase
         $this->assertEquals($id, (new Put('data', 123, 456, 789))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testErrorThrowsException()
     {
+        $this->expectException(CommandException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('DRAINING');
         (new Put('data', 123, 456, 789))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
+        $this->expectException(CommandException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');

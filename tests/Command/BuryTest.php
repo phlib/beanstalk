@@ -4,6 +4,8 @@ namespace Phlib\Beanstalk\Tests\Command;
 
 use Phlib\Beanstalk\Command\Bury;
 use Phlib\Beanstalk\Command\CommandInterface;
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 class BuryTest extends CommandTestCase
 {
@@ -27,22 +29,18 @@ class BuryTest extends CommandTestCase
         $this->assertInstanceOf(Bury::class, (new Bury(123, 123))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testNotFoundThrowsException()
     {
+        $this->expectException(NotFoundException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('NOT_FOUND');
         (new Bury(123, 123))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
+        $this->expectException(CommandException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');

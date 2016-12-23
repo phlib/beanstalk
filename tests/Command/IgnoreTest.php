@@ -4,6 +4,7 @@ namespace Phlib\Beanstalk\Tests\Command;
 
 use Phlib\Beanstalk\Command\CommandInterface;
 use Phlib\Beanstalk\Command\Ignore;
+use Phlib\Beanstalk\Exception\CommandException;
 
 class IgnoreTest extends CommandTestCase
 {
@@ -26,22 +27,18 @@ class IgnoreTest extends CommandTestCase
         $this->assertInternalType('int', (new Ignore('test-tube'))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testNotFoundThrowsException()
     {
+        $this->expectException(CommandException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('NOT_IGNORED');
         (new Ignore('test-tube'))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
+        $this->expectException(CommandException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');

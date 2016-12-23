@@ -4,6 +4,7 @@ namespace Phlib\Beanstalk\Tests\Command;
 
 use Phlib\Beanstalk\Command\CommandInterface;
 use Phlib\Beanstalk\Command\ListTubeUsed;
+use Phlib\Beanstalk\Exception\CommandException;
 
 class ListTubeUsedTest extends CommandTestCase
 {
@@ -26,11 +27,9 @@ class ListTubeUsedTest extends CommandTestCase
         $this->assertEquals($tube, (new ListTubeUsed())->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
+        $this->expectException(CommandException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');

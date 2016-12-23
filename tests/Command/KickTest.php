@@ -4,6 +4,7 @@ namespace Phlib\Beanstalk\Tests\Command;
 
 use Phlib\Beanstalk\Command\CommandInterface;
 use Phlib\Beanstalk\Command\Kick;
+use Phlib\Beanstalk\Exception\CommandException;
 
 class KickTest extends CommandTestCase
 {
@@ -26,11 +27,9 @@ class KickTest extends CommandTestCase
         $this->assertInternalType('int', (new Kick(10))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
+        $this->expectException(CommandException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');

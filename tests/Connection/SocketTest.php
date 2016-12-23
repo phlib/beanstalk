@@ -4,6 +4,7 @@ namespace Phlib\Beanstalk\Tests\Connection;
 
 use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Exception\SocketException;
 use phpmock\phpunit\PHPMock;
 
 class SocketTest extends \PHPUnit_Framework_TestCase
@@ -32,11 +33,9 @@ class SocketTest extends \PHPUnit_Framework_TestCase
         $this->assertInstanceOf(Socket::class, (new Socket('host'))->connect());
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\SocketException
-     */
     public function testConnectOnFailureThrowsError()
     {
+        $this->expectException(SocketException::class);
         $fsockopen = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'fsockopen');
         $fsockopen->expects($this->any())->willReturnCallback(function ($host, $port, &$errNum, &$errStr, $timeout) {
             $errNum = 123;
@@ -117,11 +116,9 @@ class SocketTest extends \PHPUnit_Framework_TestCase
             ->write($data);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\SocketException
-     */
     public function testWriteThrowsExceptionOnError()
     {
+        $this->expectException(SocketException::class);
         $fwrite = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'fwrite');
         $fwrite->expects($this->any())
             ->willReturn(0);
@@ -150,11 +147,9 @@ class SocketTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($expectedData, $this->getMockSocket(['read'])->read(9));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\SocketException
-     */
     public function testReadFailsWithBadData()
     {
+        $this->expectException(SocketException::class);
         $stream_get_line = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'stream_get_line');
         $stream_get_line->expects($this->any())->willReturn(false);
         $this->getMockSocket(['read'])->read();

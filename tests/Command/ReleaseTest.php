@@ -4,6 +4,8 @@ namespace Phlib\Beanstalk\Tests\Command;
 
 use Phlib\Beanstalk\Command\CommandInterface;
 use Phlib\Beanstalk\Command\Release;
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 class ReleaseTest extends CommandTestCase
 {
@@ -17,11 +19,9 @@ class ReleaseTest extends CommandTestCase
         $this->assertEquals('release 123 456 789', (new Release(123, 456, 789))->getCommand());
     }
 
-    /**
-     * @expectedException \TypeError
-     */
     public function testWithInvalidPriority()
     {
+        $this->expectException(\TypeError::class);
         new Release(123, 'foo', 456);
     }
 
@@ -35,22 +35,18 @@ class ReleaseTest extends CommandTestCase
         $this->assertInstanceOf(Release::class, $release->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testNotFoundThrowsException()
     {
+        $this->expectException(NotFoundException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('NOT_FOUND');
         (new Release(123, 456, 789))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
+        $this->expectException(CommandException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');

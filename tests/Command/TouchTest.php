@@ -4,6 +4,8 @@ namespace Phlib\Beanstalk\Tests\Command;
 
 use Phlib\Beanstalk\Command\CommandInterface;
 use Phlib\Beanstalk\Command\Touch;
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 class TouchTest extends CommandTestCase
 {
@@ -29,22 +31,18 @@ class TouchTest extends CommandTestCase
         $this->assertInstanceOf(Touch::class, $touch->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testErrorThrowsException()
     {
+        $this->expectException(NotFoundException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('NOT_TOUCHED');
         (new Touch(123))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
+        $this->expectException(CommandException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');

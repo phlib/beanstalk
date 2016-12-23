@@ -52,11 +52,11 @@ class ValidateTraitTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @param mixed $name
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
      * @dataProvider invalidTubeNameDataProvider
      */
     public function testInvalidTubeName($name)
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->validate->validateTubeName($name);
     }
 
@@ -85,11 +85,11 @@ class ValidateTraitTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
      * @dataProvider invalidJobDataDataProvider
      */
     public function testInvalidJobData($data)
     {
+        $this->expectException(InvalidArgumentException::class);
         $this->validate->validateJobData($data);
     }
 

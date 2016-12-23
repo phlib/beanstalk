@@ -4,6 +4,7 @@ namespace Phlib\Beanstalk\Tests;
 
 use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 class ConnectionTest extends \PHPUnit_Framework_TestCase
 {
@@ -170,11 +171,9 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
         $this->execute("peek-buried", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekBuried');
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testPeekNotFound()
     {
+        $this->expectException(NotFoundException::class);
         $id = 245;
         $this->assertFalse($this->execute("peek $id", 'NOT_FOUND', 'peek', [$id]));
     }

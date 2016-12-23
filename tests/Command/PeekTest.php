@@ -4,6 +4,9 @@ namespace Phlib\Beanstalk\Tests\Command;
 
 use Phlib\Beanstalk\Command\CommandInterface;
 use Phlib\Beanstalk\Command\Peek;
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 class PeekTest extends CommandTestCase
 {
@@ -32,11 +35,9 @@ class PeekTest extends CommandTestCase
         ];
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testWithInvalidSubject()
     {
+        $this->expectException(InvalidArgumentException::class);
         new Peek('foo-bar');
     }
 
@@ -53,22 +54,18 @@ class PeekTest extends CommandTestCase
         $this->assertEquals($response, (new Peek(10))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testNotFoundThrowsException()
     {
+        $this->expectException(NotFoundException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('NOT_FOUND');
         (new Peek(10))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
+        $this->expectException(CommandException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');

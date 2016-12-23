@@ -3,6 +3,8 @@
 namespace Phlib\Beanstalk\Tests\Command;
 
 use Phlib\Beanstalk\Command\StatsTrait;
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 class StatsTraitTest extends CommandTestCase
 {
@@ -23,11 +25,9 @@ class StatsTraitTest extends CommandTestCase
         $this->assertEquals($expectedData, $stat->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testWhenStatusNotFound()
     {
+        $this->expectException(NotFoundException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn("NOT_FOUND");
@@ -35,11 +35,9 @@ class StatsTraitTest extends CommandTestCase
             ->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testWhenStatusUnknown()
     {
+        $this->expectException(CommandException::class);
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn("UNKNOWN_STATUS data");
