@@ -59,7 +59,7 @@ class StatsTest extends TestCase
             'key1' => $value1,
             'key2' => $value2,
         ]);
-        $stats = $stats->aggregate([
+        $stats->aggregate([
             'key3' => $value3,
             'key4' => $value4,
         ]);
@@ -75,35 +75,6 @@ class StatsTest extends TestCase
         );
     }
 
-    public function testAggregateIsImmutable(): void
-    {
-        $value1 = uniqid('val1');
-        $value2 = uniqid('val2');
-
-        $stats = new Stats([
-            'key1' => $value1,
-        ]);
-
-        $statsNew = $stats->aggregate([
-            'key2' => $value2,
-        ]);
-
-        static::assertSame(
-            [
-                'key1' => $value1,
-            ],
-            $stats->toArray()
-        );
-
-        static::assertSame(
-            [
-                'key1' => $value1,
-                'key2' => $value2,
-            ],
-            $statsNew->toArray()
-        );
-    }
-
     /**
      * @dataProvider dataAggregateListData
      */
@@ -115,7 +86,7 @@ class StatsTest extends TestCase
         $stats = new Stats([
             $name => $value1,
         ]);
-        $stats = $stats->aggregate([
+        $stats->aggregate([
             $name => $value2,
         ]);
 
@@ -144,7 +115,7 @@ class StatsTest extends TestCase
         $stats = new Stats([
             $name => $value1,
         ]);
-        $stats = $stats->aggregate([
+        $stats->aggregate([
             $name => $value2,
         ]);
 
@@ -170,10 +141,10 @@ class StatsTest extends TestCase
         $stats = new Stats([
             $name => $value1,
         ]);
-        $stats = $stats->aggregate([
+        $stats->aggregate([
             $name => $value2,
         ]);
-        $stats = $stats->aggregate([
+        $stats->aggregate([
             $name => $value3,
         ]);
 

@@ -295,7 +295,7 @@ class Pool implements ConnectionInterface
         foreach ($this->getAvailableConnections() as $connection) {
             try {
                 $result = $connection->statsTube($tube);
-                $stats = $stats->aggregate($result);
+                $stats->aggregate($result);
             } catch (NotFoundException | RuntimeException $e) {
                 // ignore connections not responding or without the given tube
             }
@@ -310,7 +310,7 @@ class Pool implements ConnectionInterface
         foreach ($this->getAvailableConnections() as $connection) {
             try {
                 $result = $connection->stats();
-                $stats = $stats->aggregate($result);
+                $stats->aggregate($result);
             } catch (RuntimeException $e) {
                 // ignore connections not responding
             }

@@ -7,7 +7,7 @@ namespace Phlib\Beanstalk\Model;
 /**
  * @package Phlib\Beanstalk
  */
-class Stats
+class Stats extends \ArrayObject
 {
     private const LIST_STATS = [
         'pid',
@@ -24,45 +24,41 @@ class Stats
         'binlog-oldest-index',
     ];
 
-    private array $data;
-
     public function __construct(array $data = [])
     {
-        $this->data = $data;
+        // Hide additional parent constructor parameters
+        parent::__construct($data);
     }
 
-    public function aggregate(array $newData): self
+    public function aggregate(array $newData): void
     {
-        $data = $this->data;
         foreach ($newData as $name => $value) {
-            if (!array_key_exists($name, $data)) {
-                $data[$name] = $value;
+            if (!isset($this[$name])) {
+                $this[$name] = $value;
                 continue;
             }
 
             if (in_array($name, self::LIST_STATS, true)) {
-                if ($data[$name] !== $value) {
-                    $data[$name] .= ',' . $value;
+                if ($this[$name] !== $value) {
+                    $this[$name] .= ',' . $value;
                 }
             } elseif (in_array($name, self::MAX_STATS, true)) {
-                if ($value > $data[$name]) {
-                    $data[$name] = $value;
+                if ($value > $this[$name]) {
+                    $this[$name] = $value;
                 }
             } else {
-                $data[$name] += $value;
+                $this[$name] += $value;
             }
         }
-
-        return new self($data);
     }
 
     public function toArray(): array
     {
-        return $this->data;
+        return $this->getArrayCopy();
     }
 
     public function isEmpty(): bool
     {
-        return empty($this->data);
+        return $this->count() === 0;
     }
 }
