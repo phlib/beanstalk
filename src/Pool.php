@@ -7,6 +7,7 @@ use Phlib\Beanstalk\Pool\ManagedConnection;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\Stats\Collection;
 
 class Pool implements ConnectionInterface
 {
@@ -355,48 +356,18 @@ class Pool implements ConnectionInterface
      */
     protected function doStats(string $command, ...$arguments): array
     {
-        $stats = [];
+        $stats = new Collection();
         foreach ($this->getAvailableConnections() as $connection) {
             try {
                 $result = $connection->send($command, ...$arguments);
-                $stats = $this->statsCombine($stats, $result['response']);
+                $stats = $stats->merge($result['response']);
             } catch (NotFoundException $e) {
                 // ignore
             } catch (RuntimeException $e) {
                 // ignore
             }
         }
-        return $stats;
-    }
-
-    /**
-     * @param array $cumulative
-     * @param array $stats
-     * @return array
-     */
-    protected function statsCombine(array $cumulative, array $stats)
-    {
-        $list    = ['pid', 'version', 'hostname', 'name', 'uptime', 'binlog-current-index'];
-        $maximum = ['timeouts', 'binlog-max-size', 'binlog-oldest-index'];
-        foreach ($stats as $name => $value) {
-            if (!array_key_exists($name, $cumulative)) {
-                $cumulative[$name] = $value;
-                continue;
-            }
-
-            if (in_array($name, $list)) {
-                if ($cumulative[$name] != $value) {
-                    $cumulative[$name] .= ',' . $value;
-                }
-            } elseif (in_array($name, $maximum)) {
-                if ($value > $cumulative[$name]) {
-                    $cumulative[$name] = $value;
-                }
-            } else {
-                $cumulative[$name] += $value;
-            }
-        }
-        return $cumulative;
+        return $stats->toArray();
     }
 
     /**
