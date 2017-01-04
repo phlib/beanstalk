@@ -29,7 +29,7 @@ use Phlib\Beanstalk\Console\TubeKickCommand;
 use Phlib\Beanstalk\Console\TubePeekCommand;
 use Phlib\Beanstalk\Console\TubeStatsCommand;
 use Phlib\Beanstalk\Factory;
-use Phlib\Beanstalk\StatsService;
+use Phlib\Beanstalk\Stats\Service as StatsService;
 use Phlib\ConsoleConfiguration\Helper\ConfigurationHelper;
 use Symfony\Component\Console\Application;
 
