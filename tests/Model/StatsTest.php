@@ -8,21 +8,26 @@ use PHPUnit\Framework\TestCase;
 
 class StatsTest extends TestCase
 {
-    public function testCreateStatsWithData(): void
-    {
-        $data = [
-            'timeouts' => 5,
-            'binlog-max-size' => 10,
-        ];
-        $stats = new Stats($data);
-        static::assertInstanceOf(Stats::class, $stats);
-    }
+    private const LIST_STATS = [
+        'pid',
+        'version',
+        'hostname',
+        'name',
+        'uptime',
+        'binlog-current-index',
+    ];
+
+    private const MAX_STATS = [
+        'timeouts',
+        'binlog-max-size',
+        'binlog-oldest-index',
+    ];
 
     public function testToArrayReturnsOriginalData(): void
     {
         $data = [
-            'timeouts' => 5,
-            'binlog-max-size' => 10,
+            'timeouts' => rand(),
+            'binlog-max-size' => rand(),
         ];
         $stats = new Stats($data);
         static::assertSame($data, $stats->toArray());
@@ -32,103 +37,180 @@ class StatsTest extends TestCase
     {
         $stats = new Stats();
         static::assertTrue($stats->isEmpty());
-
-        $stats = new Stats([]);
-        static::assertTrue($stats->isEmpty());
     }
 
     public function testIsEmptyWithData(): void
     {
         $stats = new Stats([
-            'timeouts' => 5,
-            'binlog-max-size' => 10,
+            'timeouts' => rand(),
+            'binlog-max-size' => rand(),
         ]);
         static::assertFalse($stats->isEmpty());
     }
 
-    public function testAddStatsNewData(): void
+    public function testAggregateNewData(): void
     {
-        $stats = new Stats([
-            'key1' => 'value1',
-            'key2' => 'value2',
-        ]);
+        $value1 = uniqid('val1');
+        $value2 = uniqid('val2');
+        $value3 = uniqid('val3');
+        $value4 = uniqid('val4');
 
+        $stats = new Stats([
+            'key1' => $value1,
+            'key2' => $value2,
+        ]);
         $stats = $stats->aggregate([
-            'key3' => 'value3',
-            'key4' => 'value4',
+            'key3' => $value3,
+            'key4' => $value4,
         ]);
 
         static::assertSame(
             [
-                'key1' => 'value1',
-                'key2' => 'value2',
-                'key3' => 'value3',
-                'key4' => 'value4',
+                'key1' => $value1,
+                'key2' => $value2,
+                'key3' => $value3,
+                'key4' => $value4,
             ],
             $stats->toArray()
         );
     }
 
-    public function testAddStatsListData(): void
+    public function testAggregateIsImmutable(): void
     {
+        $value1 = uniqid('val1');
+        $value2 = uniqid('val2');
+
         $stats = new Stats([
-            'version' => '1.0.0',
-            'name' => 'first',
+            'key1' => $value1,
         ]);
 
-        $stats = $stats->aggregate([
-            'version' => '1.0.2',
-            'name' => 'second',
+        $statsNew = $stats->aggregate([
+            'key2' => $value2,
         ]);
 
         static::assertSame(
             [
-                'version' => '1.0.0,1.0.2',
-                'name' => 'first,second',
+                'key1' => $value1,
             ],
             $stats->toArray()
+        );
+
+        static::assertSame(
+            [
+                'key1' => $value1,
+                'key2' => $value2,
+            ],
+            $statsNew->toArray()
         );
     }
 
-    public function testAddStatsMaxData(): void
+    /**
+     * @dataProvider dataAggregateListData
+     */
+    public function testAggregateListData(string $name): void
     {
+        $value1 = uniqid('val1');
+        $value2 = uniqid('val2');
+
         $stats = new Stats([
-            'timeouts' => 5,
-            'binlog-max-size' => 10,
+            $name => $value1,
         ]);
-
         $stats = $stats->aggregate([
-            'timeouts' => 3,
-            'binlog-max-size' => 16,
+            $name => $value2,
         ]);
 
-        static::assertSame(
-            [
-                'timeouts' => 5,
-                'binlog-max-size' => 16,
-            ],
-            $stats->toArray()
-        );
+        $expected = [
+            $name => $value1 . ',' . $value2,
+        ];
+
+        static::assertSame($expected, $stats->toArray());
     }
 
-    public function testAddStatsSum(): void
+    public function dataAggregateListData(): iterable
+    {
+        foreach (self::LIST_STATS as $name) {
+            yield $name => [$name];
+        }
+    }
+
+    /**
+     * @dataProvider dataAggregateMaxData
+     */
+    public function testAggregateMaxData(string $name): void
+    {
+        $value1 = rand();
+        $value2 = rand();
+
+        $stats = new Stats([
+            $name => $value1,
+        ]);
+        $stats = $stats->aggregate([
+            $name => $value2,
+        ]);
+
+        $expected = [
+            $name => max($value1, $value2),
+        ];
+
+        static::assertSame($expected, $stats->toArray());
+    }
+
+    public function dataAggregateMaxData(): iterable
+    {
+        foreach (self::MAX_STATS as $name) {
+            yield $name => [$name];
+        }
+    }
+
+    /**
+     * @dataProvider dataAggregateSum
+     */
+    public function testAggregateSum(string $name, int $value1, int $value2, int $value3): void
     {
         $stats = new Stats([
-            'sumvalue1' => 5,
-            'sumvalue2' => 3,
+            $name => $value1,
         ]);
-
         $stats = $stats->aggregate([
-            'sumvalue1' => 14,
-            'sumvalue2' => 1,
+            $name => $value2,
+        ]);
+        $stats = $stats->aggregate([
+            $name => $value3,
         ]);
 
-        static::assertSame(
-            [
-                'sumvalue1' => 19,
-                'sumvalue2' => 4,
+        $expected = [
+            $name => $value1 + $value2 + $value3,
+        ];
+
+        static::assertSame($expected, $stats->toArray());
+    }
+
+    public function dataAggregateSum(): iterable
+    {
+        return [
+            'basic' => [
+                sha1(uniqid('key')),
+                rand(1, 4096),
+                rand(1, 4096),
+                rand(1, 4096),
             ],
-            $stats->toArray()
-        );
+            'zero-first' => [
+                sha1(uniqid('key')),
+                0,
+                rand(1, 4096),
+                rand(1, 4096),
+            ],
+            'zero-mid' => [
+                sha1(uniqid('key')),
+                rand(1, 4096),
+                0,
+                rand(1, 4096),
+            ],
+            'zero-final' => [
+                sha1(uniqid('key')),
+                rand(1, 4096),
+                rand(1, 4096),
+                0,
+            ],
+        ];
     }
 }
