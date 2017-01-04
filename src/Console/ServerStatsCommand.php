@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Console;
 
-use Phlib\Beanstalk\StatsService;
+use Phlib\Beanstalk\Stats\Service;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -22,7 +22,7 @@ class ServerStatsCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stat    = $input->getOption('stat');
-        $service = new StatsService($this->getBeanstalk());
+        $service = new Service($this->getBeanstalk());
 
         $this->outputDetectedConfig($output);
         if ($stat == '') {
@@ -46,7 +46,7 @@ class ServerStatsCommand extends AbstractCommand
         $output->writeln('Configuration: ' . $configPath);
     }
 
-    protected function outputInfo(StatsService $stats, OutputInterface $output)
+    protected function outputInfo(Service $stats, OutputInterface $output)
     {
         $info = $stats->getServerInfo();
 
@@ -68,14 +68,14 @@ class ServerStatsCommand extends AbstractCommand
     }
 
     /**
-     * @param StatsService $stats
+     * @param Service $stats
      * @param OutputInterface $output
      */
-    protected function outputStats(StatsService $stats, OutputInterface $output)
+    protected function outputStats(Service $stats, OutputInterface $output)
     {
-        $binlog  = $stats->getServerStats(StatsService::SERVER_BINLOG);
-        $command = $stats->getServerStats(StatsService::SERVER_COMMAND);
-        $current = $stats->getServerStats(StatsService::SERVER_CURRENT);
+        $binlog  = $stats->getServerStats(Service::SERVER_BINLOG);
+        $command = $stats->getServerStats(Service::SERVER_COMMAND);
+        $current = $stats->getServerStats(Service::SERVER_CURRENT);
 
         $table = new Table($output);
         $table->setStyle('borderless');
@@ -106,14 +106,14 @@ class ServerStatsCommand extends AbstractCommand
     }
 
     /**
-     * @param StatsService $service
+     * @param Service $service
      * @param string $stat
      * @param OutputInterface $output
      * @throws InvalidArgumentException
      */
-    protected function outputStat(StatsService $service, $stat, OutputInterface $output)
+    protected function outputStat(Service $service, $stat, OutputInterface $output)
     {
-        $stats = $service->getServerStats(StatsService::SERVER_ALL) + $service->getServerInfo();
+        $stats = $service->getServerStats(Service::SERVER_ALL) + $service->getServerInfo();
         if (!isset($stats[$stat])) {
             throw new InvalidArgumentException("Specified statistic '$stat' is not valid.");
         }

@@ -4,7 +4,7 @@ declare(strict_types = 1);
 namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\StatsService;
+use Phlib\Beanstalk\Stats\Service;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -26,7 +26,7 @@ class TubeStatsCommand extends AbstractCommand
         $tube = $input->getArgument('tube');
         $stat = $input->getOption('stat');
 
-        $service = new StatsService($this->getBeanstalk());
+        $service = new Service($this->getBeanstalk());
         $stats = $service->getTubeStats($tube);
 
         if (empty($stats)) {

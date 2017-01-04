@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Console;
 
-use Phlib\Beanstalk\StatsService;
+use Phlib\Beanstalk\Stats\Service;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -13,7 +13,7 @@ class ServerTubesCommand extends AbstractCommand
     use WatchTrait;
 
     /**
-     * @var StatsService
+     * @var Service
      */
     protected $service;
 
@@ -26,7 +26,7 @@ class ServerTubesCommand extends AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->service = new StatsService($this->getBeanstalk());
+        $this->service = new Service($this->getBeanstalk());
         $this->watch($input, $output, [$this, 'buildTable']);
     }
 
