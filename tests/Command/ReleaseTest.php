@@ -4,6 +4,7 @@ namespace Phlib\Beanstalk\Tests\Command;
 
 use Phlib\Beanstalk\Command\CommandInterface;
 use Phlib\Beanstalk\Command\Release;
+use Phlib\Beanstalk\Exception\BuriedException;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
@@ -41,6 +42,15 @@ class ReleaseTest extends CommandTestCase
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('NOT_FOUND');
+        (new Release(123, 456, 789))->process($this->socket);
+    }
+
+    public function testBuriedThrowsException()
+    {
+        $this->expectException(BuriedException::class);
+        $this->socket->expects($this->any())
+            ->method('read')
+            ->willReturn('BURIED');
         (new Release(123, 456, 789))->process($this->socket);
     }
 
