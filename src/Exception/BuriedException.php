@@ -31,4 +31,12 @@ class BuriedException extends CommandException
         $this->jobId = $jobId;
         parent::__construct($message, $code, $previous);
     }
+
+    /**
+     * @return int
+     */
+    public function getJobId(): int
+    {
+        return $this->jobId;
+    }
 }
