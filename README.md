@@ -1,6 +1,7 @@
 # phlib/beanstalk
 
 [![Build Status](https://img.shields.io/travis/phlib/beanstalk/master.svg)](https://travis-ci.org/phlib/beanstalk)
+[![Codecov](https://img.shields.io/codecov/c/github/phlib/beanstalk.svg)](https://codecov.io/gh/phlib/beanstalk)
 [![Latest Stable Version](https://img.shields.io/packagist/v/phlib/beanstalk.svg)](https://packagist.org/packages/phlib/beanstalk)
 [![Total Downloads](https://img.shields.io/packagist/dt/phlib/beanstalk.svg)](https://packagist.org/packages/phlib/beanstalk)
 
