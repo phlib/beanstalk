@@ -3,7 +3,7 @@
     "description": "Library for handling beanstalk connections.",
     "type": "library",
     "keywords": ["beanstalk", "pool", "job", "queue"],
-    "license": "MIT",
+    "license": "LGPL-3.0",
     "homepage": "https://github.com/phlib/beanstalk",
     "authors": [
         {
