@@ -91,8 +91,41 @@ class AbstractWatchCommandTest extends ConsoleTestCase
             '--watch' => true,
         ]);
 
+        $expectedHeaderLeft = 'Every 1.0s: beanstalk ' . $this->command->getName();
+        $expectedHeaderRight = date('D M d H:i:s Y');
+
         $output = $this->commandTester->getDisplay();
 
+        self::assertStringContainsString($expectedHeaderLeft, $output);
+        self::assertStringContainsString($expectedHeaderRight, $output);
         self::assertStringEndsWith($message . "\n", $output);
+    }
+
+    /**
+     * @medium
+     */
+    public function testWatchInterval(): void
+    {
+        $message = sha1(uniqid('message'));
+
+        // Only way to stop the loop is to return a non-zero exit code
+        $this->command->expects(static::exactly(2))
+            ->method('foreachWatch')
+            ->willReturnOnConsecutiveCalls(0, 1);
+
+        $startTime = time();
+        $this->commandTester->execute([
+            'command' => $this->command->getName(),
+            '--watch' => 2,
+        ]);
+        $totalTime = time() - $startTime;
+
+        static::assertGreaterThanOrEqual(2, $totalTime);
+        static::assertLessThanOrEqual(3, $totalTime);
+
+        $output = $this->commandTester->getDisplay();
+
+        $expectedHeader = 'Every 2.0s: beanstalk';
+        self::assertStringContainsString($expectedHeader, $output);
     }
 }
