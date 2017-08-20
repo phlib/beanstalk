@@ -38,6 +38,8 @@ class SttyOutput implements OutputInterface
             $messages = [$messages];
         }
         foreach ($messages as $message) {
+            // remove non-viewable markup
+            $message = preg_replace('#<(\w+)>([^<]+?)</\1>#', '\2', $message);
             if (preg_match_all('/(?: ([\w-_]+) )+/', $message, $matches)) {
                 $this->wordMapping[] = $this->parseLine($message, $matches[1]);
             }
@@ -49,9 +51,6 @@ class SttyOutput implements OutputInterface
 
     private function parseLine($message, $cellContents)
     {
-        // remove non-viewable characters
-        $message = preg_replace('#<(\w+)>([^<]+?)</\1>#', '\2', $message);
-
         $rowMapping    = [];
         $charPosition  = 0;
         $cellPosition  = 0;
@@ -138,7 +137,7 @@ class SttyOutput implements OutputInterface
 
     public function clearScreen()
     {
-        $this->xPos = $this->yPos = 0;
+        $this->xPos = $this->yPos = 1;
         $this->output->write("\033[2J\033[H");
     }
 

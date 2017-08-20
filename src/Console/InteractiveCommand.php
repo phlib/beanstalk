@@ -94,7 +94,6 @@ class InteractiveCommand extends AbstractCommand
                         break;
                 }
                 if ($pos !== null) {
-                    $pos['y'] += 1;
                     $output->write("\033[{$pos['y']};{$pos['x']}H");
                 }
             }
@@ -107,7 +106,6 @@ class InteractiveCommand extends AbstractCommand
         );
 
         $pos = $mapping->current();
-        $pos['y'] += 1;
         $output->write("\033[{$pos['y']};{$pos['x']}H");
 
         return $input->capture();
