@@ -20,6 +20,7 @@ foreach ($autoloadFiles as $autoloadFile) {
 
 // use
 use Phlib\Beanstalk\ConnectionInterface;
+use Phlib\Beanstalk\Console\InteractiveCommand;
 use Phlib\Beanstalk\Console\JobDeleteCommand;
 use Phlib\Beanstalk\Console\JobPeekCommand;
 use Phlib\Beanstalk\Console\JobStatsCommand;
@@ -43,6 +44,7 @@ $application->addCommands([
     new ServerDistribCommand($factory, $statsServiceFactory),
     new ServerStatsCommand($factory, $statsServiceFactory),
     new ServerTubesCommand($factory, $statsServiceFactory),
+    new InteractiveCommand($factory, $statsServiceFactory),
     new JobStatsCommand($factory),
     new JobPeekCommand($factory),
     new JobDeleteCommand($factory),

@@ -19,6 +19,7 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
+        "ext-json": "*",
         "symfony/console": "^5",
         "phlib/console-configuration": "^2"
     },
