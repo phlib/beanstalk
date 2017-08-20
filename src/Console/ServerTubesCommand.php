@@ -3,8 +3,8 @@ declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Console;
 
+use Phlib\Beanstalk\Console\Output\TubeStatsTable;
 use Phlib\Beanstalk\Stats\Service;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -36,16 +36,7 @@ class ServerTubesCommand extends AbstractCommand
      */
     protected function buildTable(InputInterface $input, OutputInterface $output)
     {
-        $tubes = $this->service->getAllTubeStats();
-        $table = new Table($output);
-        $table->setHeaders($this->service->getTubeHeaderMapping());
-        foreach ($tubes as $stats) {
-            if ($stats['current-jobs-buried'] > 0) {
-                $stats['name'] = "<error>{$stats['name']}</error>";
-                $stats['current-jobs-buried'] = "<error>{$stats['current-jobs-buried']}</error>";
-            }
-            $table->addRow($stats);
-        }
+        $table = TubeStatsTable::create($this->service, $output);
         $table->render();
     }
 }
