@@ -63,17 +63,6 @@ class Mapping
 
     public function current(): array
     {
-        if (!isset($this->mapping[$this->row][$this->column]) ||
-            empty($this->mapping[$this->row][$this->column]['xPos']) ||
-            empty($this->mapping[$this->row][$this->column]['yPos'])
-        ) {
-            var_dump($this->row);
-            var_dump($this->maxRow);
-            var_dump($this->column);
-            var_dump($this->maxColumn);
-            print_r($this->mapping);
-            die;
-        }
         return [
             'x'      => $this->mapping[$this->row][$this->column]['xPos'],
             'y'      => $this->mapping[$this->row][$this->column]['yPos'],
