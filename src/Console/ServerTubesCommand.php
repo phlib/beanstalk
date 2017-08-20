@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Console;
 
-use Phlib\Beanstalk\Console\Service\StatsService;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -14,6 +12,8 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ServerTubesCommand extends AbstractWatchCommand
 {
+    use ServerTubesTrait;
+
     protected function configure(): void
     {
         $this->setName('server:tubes')
@@ -24,22 +24,13 @@ class ServerTubesCommand extends AbstractWatchCommand
 
     protected function foreachWatch(InputInterface $input, OutputInterface $output): int
     {
-        $tubes = $this->getStatsService()->getAllTubeStats();
+        $table = $this->createStatsTable($this->getStatsService(), $output);
 
-        if (empty($tubes)) {
+        if ($this->tubeCount === 0) {
             $output->writeln('No tubes found.');
             return 1;
         }
 
-        $table = new Table($output);
-        $table->setHeaders(StatsService::TUBE_HEADER_MAPPING);
-        foreach ($tubes as $stats) {
-            if ($stats['current-jobs-buried'] > 0) {
-                $stats['name'] = "<error>{$stats['name']}</error>";
-                $stats['current-jobs-buried'] = "<error>{$stats['current-jobs-buried']}</error>";
-            }
-            $table->addRow($stats);
-        }
         $table->render();
 
         return 0;
