@@ -13,6 +13,7 @@ foreach ($autoloadFiles as $autoloadFile) {
 // use
 use Symfony\Component\Console\Application;
 use Phlib\ConsoleConfiguration\Helper\ConfigurationHelper;
+use Phlib\Beanstalk\Console\WatchCommand;
 use Phlib\Beanstalk\Console\ServerStatsCommand;
 use Phlib\Beanstalk\Console\ServerTubesCommand;
 use Phlib\Beanstalk\Console\ServerDistribCommand;
@@ -26,6 +27,7 @@ use Phlib\Beanstalk\Console\TubeStatsCommand;
 // lets go!
 $application = new Application('beanstalk');
 $application->addCommands([
+    new WatchCommand(),
     new ServerStatsCommand(),
     new ServerTubesCommand(),
     new ServerDistribCommand(),

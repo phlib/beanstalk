@@ -27,7 +27,11 @@ class ServerTubesCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->service = new Service($this->getBeanstalk());
-        $this->watch($input, $output, [$this, 'buildTable']);
+        if ($input->getOption('watch')) {
+            $this->watch($input, $output, [$this, 'buildTable']);
+        } else {
+            $this->buildTable($input, $output);
+        }
     }
 
     /**
