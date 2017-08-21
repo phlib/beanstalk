@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk\Console\Console;
 
 use Symfony\Component\Console\Formatter\OutputFormatterInterface;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Output\ConsoleOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -33,6 +34,8 @@ class SttyOutput implements OutputInterface
     private $yPos = 1;
     private $wordMapping = [];
 
+    private $capturingTable = false;
+
     public function __construct(ConsoleOutput $output)
     {
         $this->output = $output;
@@ -49,6 +52,10 @@ class SttyOutput implements OutputInterface
 
     public function writeln($messages, $options = 0)
     {
+        if (!$this->capturingTable) {
+            return $this->output->writeln($messages);
+        }
+
         if (!is_array($messages)) {
             $messages = [$messages];
         }
@@ -95,8 +102,11 @@ class SttyOutput implements OutputInterface
         return $rowMapping;
     }
 
-    public function getMapping()
+    public function captureTableOutput(Table $table)
     {
+        $this->capturingTable = true;
+        $table->render();
+        $this->capturingTable = false;
         return new Mapping($this->wordMapping);
     }
 
