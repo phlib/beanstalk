@@ -61,12 +61,10 @@ class InteractiveCommand extends AbstractStatsCommand
      */
     protected function menuise(SttyOutput $output, Table $table)
     {
-        $output->clearScreen();
-        $table->render();
-        // $output->writeln('[<comment>r</comment>] refresh [<comment>s</comment>] settings [<comment>e</comment>] exit');
-        $output->writeln('[r]efresh [s]ettings [e]xit');
+        $mapping = $output->captureTableOutput($table);
 
-        $mapping = $output->getMapping();
+        $output->writeln('[<comment>r</comment>] refresh [<comment>s</comment>] settings [<comment>e</comment>] exit');
+
         $input = new InteractiveInput();
         $input->map([
             'e' => ['action' => 'exit'],
