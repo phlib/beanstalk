@@ -10,6 +10,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SttyOutput implements OutputInterface
 {
+    const CURSOR_SAVE = 7;
+    const CURSOR_RESTORE = 8;
+
     const ET_BEGINNING_OF_SCREEN = "1J";
     const ET_END_OF_SCREEN = "J";
     const ET_BEGINNING_OF_LINE = "1K";
@@ -211,7 +214,7 @@ class SttyOutput implements OutputInterface
 
     public function highlight(string $word, int $bgColor, int $fgColor)
     {
-        $this->command(["[4{$bgColor};3{$fgColor}m{$word}", '[49;39m']);
+        $this->command([self::CURSOR_SAVE, "[4{$bgColor};3{$fgColor}m{$word}", '[49;39m', self::CURSOR_RESTORE]);
     }
 
     public function getCursor()
