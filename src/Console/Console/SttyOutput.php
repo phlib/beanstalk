@@ -9,6 +9,21 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SttyOutput implements OutputInterface
 {
+    const ET_BEGINNING_OF_SCREEN = "1J";
+    const ET_END_OF_SCREEN = "J";
+    const ET_BEGINNING_OF_LINE = "1K";
+    const ET_END_OF_LINE = "K";
+
+    const COLOR_BLACK = 0;
+    const COLOR_RED = 1;
+    const COLOR_GREEN = 2;
+    const COLOR_YELLOW = 3;
+    const COLOR_BLUE = 4;
+    const COLOR_MAGENTA = 5;
+    const COLOR_CYAN = 6;
+    const COLOR_WHITE = 7;
+    const COLOR_DEFAULT = 9;
+
     /** @var ConsoleOutput */
     private $output;
 
@@ -138,7 +153,55 @@ class SttyOutput implements OutputInterface
     public function clearScreen()
     {
         $this->xPos = $this->yPos = 1;
-        $this->output->write("\033[2J\033[H");
+        $this->command(['[2J', '[H']);
+    }
+
+    public function clearLine()
+    {
+        $this->command(['[2K','[G']);
+    }
+
+    public function eraseTo($point = self::ET_END_OF_LINE)
+    {
+        $this->command("[{$point}");
+    }
+
+    public function issueBell()
+    {
+        $this->output->write(chr(7));
+    }
+
+    public function moveCursorHome()
+    {
+        $this->command('[1;1H');
+    }
+
+    public function moveCursor($x, $y)
+    {
+        $this->command("[{$y};{$x}H");
+    }
+
+    public function makeCursorVisible()
+    {
+        $this->command('[?25h');
+    }
+
+    public function makeCursorInvisible()
+    {
+        $this->command('[?25l');
+    }
+
+    public function command($value)
+    {
+        if (!is_array($value)) {
+            $value = [$value];
+        }
+        $this->output->write("\e" . implode("\e", $value));
+    }
+
+    public function highlight(string $word, int $bgColor, int $fgColor)
+    {
+        $this->command(["[4{$bgColor};3{$fgColor}m{$word}", '[49;39m']);
     }
 
     public function getCursor()
