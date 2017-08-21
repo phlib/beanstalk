@@ -71,9 +71,10 @@ class InteractiveCommand extends AbstractStatsCommand
             'r' => ['action' => 'refresh'],
             's' => ['action' => 'settings'],
         ]);
+        $prev = null;
         $input->intercept(
             [InteractiveInput::CTRL_UP, InteractiveInput::CTRL_DOWN, InteractiveInput::CTRL_LEFT, InteractiveInput::CTRL_RIGHT, InteractiveInput::KEY_TAB],
-            function ($char) use ($mapping, $output) {
+            function ($char) use ($mapping, $output, &$prev) {
                 $pos = null;
                 switch ($char) {
                     case InteractiveInput::CTRL_UP:
@@ -91,7 +92,13 @@ class InteractiveCommand extends AbstractStatsCommand
                         break;
                 }
                 if ($pos !== null) {
-                    $output->write("\033[{$pos['y']};{$pos['x']}H");
+                    if ($prev) {
+                        $output->moveCursor($prev['x'], $prev['y']);
+                        $output->highlight($prev['word'], SttyOutput::COLOR_DEFAULT, SttyOutput::COLOR_DEFAULT);
+                    }
+                    $output->moveCursor($pos['x'], $pos['y']);
+                    $output->highlight($pos['word'], SttyOutput::COLOR_WHITE, SttyOutput::COLOR_BLACK);
+                    $prev = $pos;
                 }
             }
         );
@@ -102,8 +109,9 @@ class InteractiveCommand extends AbstractStatsCommand
             }
         );
 
-        $pos = $mapping->current();
-        $output->write("\033[{$pos['y']};{$pos['x']}H");
+        $pos = $prev = $mapping->current();
+        $output->moveCursor($pos['x'], $pos['y']);
+        $output->highlight($pos['word'], SttyOutput::COLOR_WHITE, SttyOutput::COLOR_BLACK);
 
         return $input->capture();
     }
