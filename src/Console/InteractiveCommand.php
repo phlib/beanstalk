@@ -38,7 +38,6 @@ class InteractiveCommand extends AbstractCommand
                 $sttyOutput = new SttyOutput($output);
                 $ioHelper   = new SymfonyStyle($input, $sttyOutput);
 
-//                $output->write(sprintf("\033\143"));
                 $sttyOutput->clearScreen();
 
                 $table = TubeStatsTable::create($this->service, $sttyOutput);
@@ -119,8 +118,7 @@ class InteractiveCommand extends AbstractCommand
 
     protected function actionSettings(SymfonyStyle $helper)
     {
-//        $helper->write(sprintf("\033\143"));
-        $helper->write("\033[2J\033[H");
+        $helper->write("\e[2J\e[H");
         $this->jobFormat = $helper->choice('Which job format?', ['unserialize', 'json_decode', 'none'], 0);
     }
 
@@ -131,7 +129,6 @@ class InteractiveCommand extends AbstractCommand
 
     protected function actionManageJobs(SymfonyStyle $helper, string $tube, string $status)
     {
-//        $output->write(sprintf("\033\143"));
         $helper->write("\033[2J\033[H");
         $helper->title("$tube ($status)");
 
@@ -152,7 +149,7 @@ class InteractiveCommand extends AbstractCommand
 
 
         $choices = array_merge($this->getJobChoices($status), ['refresh', 'main-menu']);
-        $choice = $helper->choice('Choose what next?', $choices , 2);
+        $choice = $helper->choice('Choose what next?', $choices);
         if ($choice == 'delete-all') {
             $confirmed = $helper->confirm('Are you sure you want to delete all jobs?', false);
         }
