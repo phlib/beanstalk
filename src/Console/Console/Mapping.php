@@ -66,7 +66,8 @@ class Mapping
         return [
             'x'      => $this->mapping[$this->row][$this->column]['xPos'],
             'y'      => $this->mapping[$this->row][$this->column]['yPos'],
-            'length' => $this->mapping[$this->row][$this->column]['length']
+            'length' => $this->mapping[$this->row][$this->column]['length'],
+            'word'   => $this->mapping[$this->row][$this->column]['word']
         ];
     }
 
