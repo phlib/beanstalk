@@ -30,15 +30,14 @@ class ServerTubesCommand extends AbstractCommand
         if ($input->getOption('watch')) {
             $this->watch($input, $output, [$this, 'buildTable']);
         } else {
-            $this->buildTable($input, $output);
+            $this->buildTable($output);
         }
     }
 
     /**
-     * @param InputInterface $input
      * @param OutputInterface $output
      */
-    protected function buildTable(InputInterface $input, OutputInterface $output)
+    private function buildTable(OutputInterface $output): void
     {
         $table = TubeStatsTable::create($this->service, $output);
         $table->render();

@@ -220,9 +220,8 @@ class Connection implements ConnectionInterface
      */
     public function peek($id): array
     {
-        $jobData = (new Command\Peek($id))
+        return (new Command\Peek($id))
             ->process($this->getSocket());
-        return $jobData;
     }
 
     /**

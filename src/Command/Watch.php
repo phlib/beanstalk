@@ -42,12 +42,10 @@ class Watch implements CommandInterface
         $socket->write($this->getCommand());
 
         $status = strtok($socket->read(), ' ');
-        switch ($status) {
-            case 'WATCHING':
-                return (int)strtok(' ');
-
-            default:
-                throw new CommandException("Watch tube '$this->tube' failed '$status'");
+        if ($status !== 'WATCHING') {
+            throw new CommandException("Watch tube '$this->tube' failed '$status'");
         }
+
+        return (int)strtok(' ');
     }
 }
