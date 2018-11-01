@@ -31,13 +31,16 @@ class UseTube implements CommandInterface
     public function process(SocketInterface $socket): string
     {
         $socket->write($this->getCommand());
-
         $status = strtok($socket->read(), ' ');
-        switch ($status) {
-            case 'USING':
-                return strtok(' '); // tube name
-            default:
-                throw new CommandException("Use tube '{$this->tube}' failed '{$status}'");
+
+        if ($status !== 'USING') {
+            throw new CommandException("Use tube '{$this->tube}' failed '{$status}'");
         }
+
+        $tubeName = strtok(' ');
+        if ($tubeName === false) {
+            return '';
+        }
+        return $tubeName;
     }
 }

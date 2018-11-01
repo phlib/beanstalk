@@ -112,7 +112,7 @@ class ServerStatsCommand extends AbstractStatsCommand
 
     private function outputStat(StatsService $service, string $stat, OutputInterface $output): void
     {
-        $stats = $service->getServerStats(StatsService::SERVER_ALL) + $service->getServerInfo();
+        $stats = array_merge($service->getServerStats(StatsService::SERVER_ALL), $service->getServerInfo());
         if (!isset($stats[$stat])) {
             throw new InvalidArgumentException("Specified statistic '{$stat}' is not valid.");
         }

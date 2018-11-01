@@ -159,9 +159,8 @@ class Connection implements ConnectionInterface
     public function peek($id): array
     {
         $id = $this->filterJobId($id);
-        $jobData = (new Command\Peek($id))
+        return (new Command\Peek($id))
             ->process($this->getSocket());
-        return $jobData;
     }
 
     public function peekReady(): ?array
@@ -182,9 +181,8 @@ class Connection implements ConnectionInterface
     private function peekStatus(string $status): ?array
     {
         try {
-            $jobData = (new Command\PeekStatus($status))
+            return (new Command\PeekStatus($status))
                 ->process($this->getSocket());
-            return $jobData;
         } catch (NotFoundException $e) {
             return null;
         }

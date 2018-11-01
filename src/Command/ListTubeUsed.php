@@ -21,12 +21,11 @@ class ListTubeUsed implements CommandInterface
     {
         $socket->write('list-tube-used');
         $status = strtok($socket->read(), ' ');
-        switch ($status) {
-            case 'USING':
-                return strtok(' ');
 
-            default:
-                throw new CommandException("List tube used failed '{$status}'");
+        if ($status !== 'USING') {
+            throw new CommandException("List tube used failed '{$status}'");
         }
+
+        return strtok(' ');
     }
 }
