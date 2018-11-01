@@ -21,10 +21,10 @@ class IntegrationTest extends TestCase
 
     public function setUp()
     {
-        if (!isset($GLOBALS['BSTALK_ENABLED']) || $GLOBALS['BSTALK_ENABLED'] != true) {
+        if (!isset($GLOBALS['BSTALK_ENABLED']) || (bool)$GLOBALS['BSTALK_ENABLED'] !== true) {
             $this->markTestSkipped();
         } else {
-            $this->beanstalk = new Connection($GLOBALS['BSTALK1_HOST'], $GLOBALS['BSTALK1_PORT']);
+            $this->beanstalk = new Connection($GLOBALS['BSTALK1_HOST'], (int)$GLOBALS['BSTALK1_PORT']);
         }
     }
 

@@ -101,7 +101,7 @@ class ConnectionTest extends TestCase
     public function testUseTube(): void
     {
         $tube = 'test-tube';
-        $this->execute("use $tube", 'USING', 'useTube', [$tube]);
+        $this->execute("use $tube", "USING $tube", 'useTube', [$tube]);
     }
 
     public function testBury(): void

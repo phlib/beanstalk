@@ -22,7 +22,7 @@ class IntegrationPoolTest extends TestCase
 
     public function setUp()
     {
-        if (!isset($GLOBALS['BSTALK_ENABLED']) || $GLOBALS['BSTALK_ENABLED'] !== true) {
+        if (!isset($GLOBALS['BSTALK_ENABLED']) || (bool)$GLOBALS['BSTALK_ENABLED'] !== true) {
             $this->markTestSkipped();
         } else {
             $connections = [
