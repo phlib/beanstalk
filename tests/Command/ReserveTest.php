@@ -40,8 +40,8 @@ class ReserveTest extends CommandTestCase
     public function commandDataProvider(): array
     {
         return [
-            [123, 'reserve-with-timeout 123'],
-            [null, 'reserve'],
+            'withTimeout' => [123, 'reserve-with-timeout 123'],
+            'justReserve' => [null, 'reserve'],
         ];
     }
 
@@ -59,8 +59,8 @@ class ReserveTest extends CommandTestCase
     public function failureStatusReturnsFalseDataProvider(): array
     {
         return [
-            ['TIMED_OUT'],
-            ['DEADLINE_SOON'],
+            'timeout' => ['TIMED_OUT'],
+            'deadline' => ['DEADLINE_SOON'],
         ];
     }
 
