@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Tests;
 
@@ -21,18 +22,18 @@ class IntegrationPoolTest extends TestCase
 
     public function setUp()
     {
-        if (!isset($GLOBALS['BSTALK_ENABLED']) || $GLOBALS['BSTALK_ENABLED'] != true) {
+        if (!isset($GLOBALS['BSTALK_ENABLED']) || $GLOBALS['BSTALK_ENABLED'] !== true) {
             $this->markTestSkipped();
         } else {
             $connections = [
-                new Connection($GLOBALS['BSTALK1_HOST'], $GLOBALS['BSTALK1_PORT']),
-                new Connection($GLOBALS['BSTALK2_HOST'], $GLOBALS['BSTALK2_PORT'])
+                new Connection($GLOBALS['BSTALK1_HOST'], (int)$GLOBALS['BSTALK1_PORT']),
+                new Connection($GLOBALS['BSTALK2_HOST'], (int)$GLOBALS['BSTALK2_PORT'])
             ];
             $this->beanstalk = new Pool($connections);
         }
     }
 
-    public function testReconnectingAfterDisconnect()
+    public function testReconnectingAfterDisconnect(): void
     {
         $this->beanstalk->listTubes(); // make sure we connect
         $this->beanstalk->disconnect();
@@ -42,38 +43,38 @@ class IntegrationPoolTest extends TestCase
         $this->assertContains($tube, $this->beanstalk->listTubes());
     }
 
-    public function testStartWithDefaultTube()
+    public function testStartWithDefaultTube(): void
     {
         $this->assertEquals('default', $this->beanstalk->listTubeUsed());
     }
 
-    public function testSwitchingUsedTube()
+    public function testSwitchingUsedTube(): void
     {
         $tube = 'test-tube';
         $this->beanstalk->useTube($tube);
         $this->assertEquals($tube, $this->beanstalk->listTubeUsed());
     }
 
-    public function testStartWithDefaultWatching()
+    public function testStartWithDefaultWatching(): void
     {
         $this->assertEquals(['default'], $this->beanstalk->listTubesWatched());
     }
 
-    public function testWatchingMoreTubes()
+    public function testWatchingMoreTubes(): void
     {
         $tube = 'test-tube';
         $this->beanstalk->watch($tube);
         $this->assertContains($tube, $this->beanstalk->listTubesWatched());
     }
 
-    public function testListTubes()
+    public function testListTubes(): void
     {
         $tube = 'test-tube';
         $this->beanstalk->useTube($tube);
         $this->assertContains($tube, $this->beanstalk->listTubes());
     }
 
-    public function testFullJobProcess()
+    public function testFullJobProcess(): void
     {
         $this->setupTube('integration-test');
         // make sure it's empty
@@ -92,7 +93,7 @@ class IntegrationPoolTest extends TestCase
         $this->assertFalse($this->beanstalk->peekReady());
     }
 
-    public function testBuriedJobProcess()
+    public function testBuriedJobProcess(): void
     {
         $this->setupTube('integration-test');
         try {
@@ -117,7 +118,7 @@ class IntegrationPoolTest extends TestCase
         $this->beanstalk->delete($buriedData['id']);
     }
 
-    public function testLargeJobData()
+    public function testLargeJobData(): void
     {
         $this->setupTube('integration-test');
 
@@ -130,7 +131,7 @@ class IntegrationPoolTest extends TestCase
         $this->assertEquals($length, strlen($jobData['body']));
     }
 
-    public function setupTube($tube)
+    public function setupTube($tube): void
     {
         $this->beanstalk
             ->useTube($tube)

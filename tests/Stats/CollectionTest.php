@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Tests\Stats;
 
@@ -7,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 
 class CollectionTest extends TestCase
 {
-    public function testCreateStatsWithData()
+    public function testCreateStatsWithData(): void
     {
         $data = [
             'timeouts'        => 5,
@@ -17,7 +18,7 @@ class CollectionTest extends TestCase
         $this->assertInstanceOf(Collection::class, $stats);
     }
     
-    public function testToArrayReturnsOriginalData()
+    public function testToArrayReturnsOriginalData(): void
     {
         $data = [
             'timeouts'        => 5,
@@ -27,7 +28,7 @@ class CollectionTest extends TestCase
         $this->assertSame($data, $stats->toArray());
     }
     
-    public function testIsEmptyWithEmptyData()
+    public function testIsEmptyWithEmptyData(): void
     {
         $stats = new Collection();
         $this->assertTrue($stats->isEmpty());
@@ -35,7 +36,7 @@ class CollectionTest extends TestCase
         $this->assertTrue($stats->isEmpty());
     }
     
-    public function testIsEmptyWithData()
+    public function testIsEmptyWithData(): void
     {
         $stats = new Collection([
             'timeouts'        => 5,
@@ -44,7 +45,7 @@ class CollectionTest extends TestCase
         $this->assertFalse($stats->isEmpty());
     }
     
-    public function testAddStatsNewData()
+    public function testAddStatsNewData(): void
     {
         $stats = new Collection([
             'key1' => 'value1',
@@ -62,7 +63,7 @@ class CollectionTest extends TestCase
         ], $stats->toArray());
     }
     
-    public function testAddStatsListData()
+    public function testAddStatsListData(): void
     {
         $stats = new Collection([
             'version' => '1.0.0',
@@ -78,7 +79,7 @@ class CollectionTest extends TestCase
         ], $stats->toArray());
     }
     
-    public function testAddStatsMaxData()
+    public function testAddStatsMaxData(): void
     {
         $stats = new Collection([
             'timeouts'        => 5,
@@ -94,7 +95,7 @@ class CollectionTest extends TestCase
         ], $stats->toArray());
     }
     
-    public function testAddStatsSum()
+    public function testAddStatsSum(): void
     {
         $stats = new Collection([
             'sumvalue1' => 5,

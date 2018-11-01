@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Phlib\Tests\Pool;
 
@@ -30,19 +31,19 @@ class ManagedConnectionTest extends TestCase
         $this->time = $this->getFunctionMock('\Phlib\Beanstalk\Pool', 'time');
     }
 
-    public function testSetGetConnection()
+    public function testSetGetConnection(): void
     {
         $connection = $this->connection->reveal();
         $managed = new ManagedConnection($connection);
         $this->assertSame($connection, $managed->getConnection());
     }
 
-    public function testByDefaultConnectionIsAvailable()
+    public function testByDefaultConnectionIsAvailable(): void
     {
         $this->assertTrue((new ManagedConnection($this->connection->reveal()))->isAvailable());
     }
 
-    public function testNotAvailableAfterError()
+    public function testNotAvailableAfterError(): void
     {
         $this->connection->watch(Argument::any())->willThrow(new RuntimeException());
         $managed = new ManagedConnection($this->connection->reveal());
@@ -54,7 +55,7 @@ class ManagedConnectionTest extends TestCase
         $this->assertFalse($managed->isAvailable());
     }
 
-    public function testNotAvailableBecomesAvailable()
+    public function testNotAvailableBecomesAvailable(): void
     {
         $initialTime = 100;
         $retryDelay  = 600;
@@ -72,7 +73,7 @@ class ManagedConnectionTest extends TestCase
         $this->assertTrue($managed->isAvailable());
     }
 
-    public function testConnectionGetsRestored()
+    public function testConnectionGetsRestored(): void
     {
         $watchCalls  = 0;
         $ignoreCalls = 0;

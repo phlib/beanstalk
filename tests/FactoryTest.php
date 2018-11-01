@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Tests;
 
@@ -11,39 +12,41 @@ use PHPUnit\Framework\TestCase;
 
 class FactoryTest extends TestCase
 {
-    public function testCreate()
+    public function testCreate(): void
     {
         $this->assertInstanceOf(ConnectionInterface::class, Factory::create('localhost'));
     }
 
     /**
+     * @param string $expectedClass
+     * @param array $config
      * @dataProvider createFromArrayDataProvider
      */
-    public function testCreateFromArray($expectedClass, $config)
+    public function testCreateFromArray(string $expectedClass, array $config): void
     {
         $this->assertInstanceOf($expectedClass, Factory::createFromArray($config));
     }
 
-    public function createFromArrayDataProvider()
+    public function createFromArrayDataProvider(): array
     {
         $connectionClass = Connection::class;
         $poolClass       = Pool::class;
 
         return [
-            [$connectionClass, ['host' => 'localhost']],
-            [$connectionClass, ['host' => 'localhost', 'port' => 123456]],
-            [$poolClass, [['host' => 'localhost1'], ['host' => 'localhost2']]],
-            [$poolClass, ['conn1' => ['host' => 'localhost1'], 'conn2' => ['host' => 'localhost2']]]
+            'local' => [$connectionClass, ['host' => 'localhost']],
+            'localWithPort' => [$connectionClass, ['host' => 'localhost', 'port' => 123456]],
+            'poolHosts' => [$poolClass, [['host' => 'localhost1'], ['host' => 'localhost2']]],
+            'namedPool' => [$poolClass, ['conn1' => ['host' => 'localhost1'], 'conn2' => ['host' => 'localhost2']]]
         ];
     }
 
-    public function testCreateFromArrayFailsWhenEmpty()
+    public function testCreateFromArrayFailsWhenEmpty(): void
     {
         $this->expectException(InvalidArgumentException::class);
         Factory::createFromArray([]);
     }
 
-    public function testCreateConnections()
+    public function testCreateConnections(): void
     {
         $result = true;
         $config = ['host' => 'locahost'];

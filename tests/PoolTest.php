@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Tests;
 
@@ -52,7 +53,7 @@ class PoolTest extends TestCase
         $this->connection2 = null;
     }
 
-    public function testDisconnectCallsAllConnections()
+    public function testDisconnectCallsAllConnections(): void
     {
         $this->connection1->expects($this->once())
             ->method('disconnect')
@@ -68,7 +69,7 @@ class PoolTest extends TestCase
      * @param array $returnValues
      * @dataProvider disconnectReturnsValueDataProvider
      */
-    public function testDisconnectReturnsValue($expected, array $returnValues)
+    public function testDisconnectReturnsValue($expected, array $returnValues): void
     {
         $this->connection1->expects($this->any())
             ->method('disconnect')
@@ -79,7 +80,7 @@ class PoolTest extends TestCase
         $this->assertEquals($expected, $this->pool->disconnect());
     }
 
-    public function disconnectReturnsValueDataProvider()
+    public function disconnectReturnsValueDataProvider(): array
     {
         return [
             [true, [true, true]],
@@ -89,7 +90,7 @@ class PoolTest extends TestCase
         ];
     }
 
-    public function testUseTubeCallsAllConnections()
+    public function testUseTubeCallsAllConnections(): void
     {
         $tube = 'test-tube';
         $this->connection1->expects($this->once())
@@ -99,19 +100,19 @@ class PoolTest extends TestCase
         $this->pool->useTube($tube);
     }
 
-    public function testIgnoreDoesNotAllowLessThanOneWatching()
+    public function testIgnoreDoesNotAllowLessThanOneWatching(): void
     {
         // 'default' tube is already being watched
         $this->assertFalse($this->pool->ignore('default'));
     }
 
-    public function testIgnore()
+    public function testIgnore(): void
     {
         $this->pool->watch('test-tube');
         $this->assertEquals(1, $this->pool->ignore('default'));
     }
 
-    public function testPutSuccess()
+    public function testPutSuccess(): void
     {
         $this->connection1->expects($this->once())
             ->method('put')
@@ -119,20 +120,20 @@ class PoolTest extends TestCase
         $this->pool->put('myJobData');
     }
 
-    public function testPutReturnsJobIdContainingTheServerIdentifier()
+    public function testPutReturnsJobIdContainingTheServerIdentifier(): void
     {
         $this->connection1->method('put')->willReturn(234);
         $this->assertContains($this->connection1->getName(), $this->pool->put('myJobData'));
     }
 
-    public function testPutReturnsJobIdContainingTheOriginalJobId()
+    public function testPutReturnsJobIdContainingTheOriginalJobId(): void
     {
         $jobId = '432';
         $this->connection1->method('put')->willReturn($jobId);
         $this->assertContains($jobId, $this->pool->put('myJobData'));
     }
 
-    public function testPutTotalFailure()
+    public function testPutTotalFailure(): void
     {
         $this->expectException(RuntimeException::class);
         $this->connection1->method('put')->will($this->throwException(new RuntimeException()));
@@ -143,7 +144,7 @@ class PoolTest extends TestCase
     /**
      * @medium
      */
-    public function testReserveWithNoJobsDoesNotTakeLongerThanTimeout()
+    public function testReserveWithNoJobsDoesNotTakeLongerThanTimeout(): void
     {
         $this->connection1->method('reserve')->willReturn(false);
         $this->connection2->method('reserve')->willReturn(false);
@@ -154,7 +155,7 @@ class PoolTest extends TestCase
         $this->assertLessThanOrEqual(3, $totalTime);
     }
 
-    public function testReserve()
+    public function testReserve(): void
     {
         $jobId    = '123';
         $host     = $this->connection1->getName();
@@ -165,7 +166,7 @@ class PoolTest extends TestCase
         $this->assertEquals($expected, $this->pool->reserve());
     }
 
-    public function testReserveWithNoJobsOnFirstServer()
+    public function testReserveWithNoJobsOnFirstServer(): void
     {
         $jobId    = '123';
         $host     = $this->connection2->getName();
@@ -177,7 +178,7 @@ class PoolTest extends TestCase
         $this->assertEquals($expected, $this->pool->reserve());
     }
 
-    public function testReserveWithFailingServer()
+    public function testReserveWithFailingServer(): void
     {
         $jobId    = '123';
         $host     = $this->connection2->getName();
@@ -189,7 +190,7 @@ class PoolTest extends TestCase
         $this->assertEquals($expected, $this->pool->reserve());
     }
 
-    public function testPoolIdWithInvalidFormat()
+    public function testPoolIdWithInvalidFormat(): void
     {
         $this->expectException(InvalidArgumentException::class);
         $this->pool->release('123');
@@ -199,7 +200,7 @@ class PoolTest extends TestCase
      * @param string $method
      * @dataProvider methodsWithJobIdDataProvider
      */
-    public function testMethodsWithJobId($method)
+    public function testMethodsWithJobId($method): void
     {
         $host  = $this->connection1->getName();
         $jobId = 123;
@@ -210,12 +211,12 @@ class PoolTest extends TestCase
         $this->pool->$method("$host.$jobId");
     }
 
-    public function methodsWithJobIdDataProvider()
+    public function methodsWithJobIdDataProvider(): array
     {
         return [['delete'], ['release'], ['bury'], ['touch']];
     }
 
-    public function testPeek()
+    public function testPeek(): void
     {
         $host     = $this->connection2->getName();
         $jobId    = '123';
@@ -227,7 +228,7 @@ class PoolTest extends TestCase
         $this->assertEquals($expected, $this->pool->peek("$host.$jobId"));
     }
 
-    public function testPeekReady()
+    public function testPeekReady(): void
     {
         $host     = $this->connection2->getName();
         $jobId    = '123';
@@ -240,14 +241,14 @@ class PoolTest extends TestCase
         $this->assertEquals($expected, $this->pool->peekReady());
     }
 
-    public function testPeekReadyWithNoReadyJobs()
+    public function testPeekReadyWithNoReadyJobs(): void
     {
         $this->connection1->method('peekReady')->willReturn(false);
         $this->connection2->method('peekReady')->willReturn(false);
         $this->assertFalse($this->pool->peekReady());
     }
 
-    public function testPeekDelayed()
+    public function testPeekDelayed(): void
     {
         $host     = $this->connection2->getName();
         $jobId    = '123';
@@ -260,14 +261,14 @@ class PoolTest extends TestCase
         $this->assertEquals($expected, $this->pool->peekDelayed());
     }
 
-    public function testPeekDelayedWithNoDelayedJobs()
+    public function testPeekDelayedWithNoDelayedJobs(): void
     {
         $this->connection1->method('peekDelayed')->willReturn(false);
         $this->connection2->method('peekDelayed')->willReturn(false);
         $this->assertFalse($this->pool->peekDelayed());
     }
 
-    public function testPeekBuried()
+    public function testPeekBuried(): void
     {
         $host     = $this->connection2->getName();
         $jobId    = '123';
@@ -280,14 +281,14 @@ class PoolTest extends TestCase
         $this->assertEquals($expected, $this->pool->peekBuried());
     }
 
-    public function testPeekBuriedWithNoBuriedJobs()
+    public function testPeekBuriedWithNoBuriedJobs(): void
     {
         $this->connection1->method('peekBuried')->willReturn(false);
         $this->connection2->method('peekBuried')->willReturn(false);
         $this->assertFalse($this->pool->peekBuried());
     }
 
-    public function testStats()
+    public function testStats(): void
     {
         $noOfServers = 2;
         $ready       = 2;
@@ -301,7 +302,7 @@ class PoolTest extends TestCase
         );
     }
 
-    public function testStatsJob()
+    public function testStatsJob(): void
     {
         $host      = $this->connection2->getName();
         $jobId     = '123';
@@ -314,7 +315,7 @@ class PoolTest extends TestCase
         $this->assertEquals($expected, $this->pool->statsJob($hostJobId));
     }
 
-    public function testStatsTube()
+    public function testStatsTube(): void
     {
         $noOfServers = 2;
         $ready       = 2;
@@ -334,7 +335,7 @@ class PoolTest extends TestCase
      * @param integer $expected
      * @dataProvider kickDataProvider
      */
-    public function testKick(array $kickValues, $kickAmount, $expected)
+    public function testKick(array $kickValues, $kickAmount, $expected): void
     {
         foreach ($kickValues as $index => $kickValue) {
             $connection = 'connection' . ($index + 1);
@@ -347,7 +348,7 @@ class PoolTest extends TestCase
         $this->assertEquals($expected, $this->pool->kick($kickAmount));
     }
 
-    public function kickDataProvider()
+    public function kickDataProvider(): array
     {
         return [
             [[1, 5], 100, 6],
@@ -359,7 +360,7 @@ class PoolTest extends TestCase
         ];
     }
 
-    public function testListTubes()
+    public function testListTubes(): void
     {
         $expected = ['test1', 'test2', 'test3', 'test4'];
 
@@ -371,39 +372,39 @@ class PoolTest extends TestCase
         $this->assertEquals($expected, $actual);
     }
 
-    public function testListTubeUsed()
+    public function testListTubeUsed(): void
     {
         $tube = 'test-tube';
         $this->pool->useTube($tube);
         $this->assertSame($tube, $this->pool->listTubeUsed());
     }
 
-    public function testListTubesWatchDefaultState()
+    public function testListTubesWatchDefaultState(): void
     {
         $this->assertEquals(['default'], $this->pool->listTubesWatched());
     }
 
-    public function testListTubesWatched()
+    public function testListTubesWatched(): void
     {
         $this->pool->watch('test');
         $this->assertEquals(['default', 'test'], $this->pool->listTubesWatched());
     }
 
-    public function testCombineIdIsNotTheJobId()
+    public function testCombineIdIsNotTheJobId(): void
     {
         $jobId = 123;
         $connection = $this->createMockConnection('host');
         $this->assertNotEquals($jobId, $this->pool->combineId($connection, $jobId));
     }
 
-    public function testCombineIdContainsJob()
+    public function testCombineIdContainsJob(): void
     {
         $jobId = 123;
         $connection = $this->createMockConnection('host');
         $this->assertContains((string)$jobId, $this->pool->combineId($connection, $jobId));
     }
 
-    public function testCombineAndSplitReturnCorrectJob()
+    public function testCombineAndSplitReturnCorrectJob(): void
     {
         $jobId = 234;
         $connection = $this->createMockConnection('127.0.0.1');
@@ -413,7 +414,7 @@ class PoolTest extends TestCase
         $this->assertEquals($jobId, $actualJobId);
     }
 
-    public function testCombineAndSplitReturnCorrectHost()
+    public function testCombineAndSplitReturnCorrectHost(): void
     {
         $host = '127.0.0.1';
         $connection = $this->createMockConnection($host);
