@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Tests\Command;
 
@@ -10,23 +11,17 @@ use Phlib\Beanstalk\Exception\NotFoundException;
 
 class ReleaseTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
         $this->assertInstanceOf(CommandInterface::class, new Release(123, 456, 789));
     }
 
-    public function testGetCommand()
+    public function testGetCommand(): void
     {
         $this->assertEquals('release 123 456 789', (new Release(123, 456, 789))->getCommand());
     }
 
-    public function testWithInvalidPriority()
-    {
-        $this->expectException(\TypeError::class);
-        new Release(123, 'foo', 456);
-    }
-
-    public function testSuccessfulCommand()
+    public function testSuccessfulCommand(): void
     {
         $this->socket->expects($this->any())
             ->method('read')
@@ -36,7 +31,7 @@ class ReleaseTest extends CommandTestCase
         $this->assertInstanceOf(Release::class, $release->process($this->socket));
     }
 
-    public function testNotFoundThrowsException()
+    public function testNotFoundThrowsException(): void
     {
         $this->expectException(NotFoundException::class);
         $this->socket->expects($this->any())
@@ -45,7 +40,7 @@ class ReleaseTest extends CommandTestCase
         (new Release(123, 456, 789))->process($this->socket);
     }
 
-    public function testBuriedThrowsException()
+    public function testBuriedThrowsException(): void
     {
         $this->expectException(BuriedException::class);
         $this->socket->expects($this->any())
@@ -54,7 +49,7 @@ class ReleaseTest extends CommandTestCase
         (new Release(123, 456, 789))->process($this->socket);
     }
 
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
         $this->expectException(CommandException::class);
         $this->socket->expects($this->any())

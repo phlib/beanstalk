@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Tests\Command;
 
@@ -8,7 +9,7 @@ use Phlib\Beanstalk\Exception\NotFoundException;
 
 class StatsTraitTest extends CommandTestCase
 {
-    public function testProcessCompletesOnSuccess()
+    public function testProcessCompletesOnSuccess(): void
     {
         $stat         = $this->getMockStat(['process']);
         $testString   = 'my test data';
@@ -25,17 +26,17 @@ class StatsTraitTest extends CommandTestCase
         $this->assertEquals($expectedData, $stat->process($this->socket));
     }
 
-    public function testWhenStatusNotFound()
+    public function testWhenStatusNotFound(): void
     {
         $this->expectException(NotFoundException::class);
         $this->socket->expects($this->any())
             ->method('read')
-            ->willReturn("NOT_FOUND");
+            ->willReturn('NOT_FOUND');
         $this->getMockStat(['process'])
             ->process($this->socket);
     }
 
-    public function testWhenStatusUnknown()
+    public function testWhenStatusUnknown(): void
     {
         $this->expectException(CommandException::class);
         $this->socket->expects($this->any())
@@ -50,7 +51,7 @@ class StatsTraitTest extends CommandTestCase
      * @param array $expectedOutput
      * @dataProvider yamlFormatIsDecodedDataProvider
      */
-    public function testYamlFormatIsDecoded($yaml, array $expectedOutput)
+    public function testYamlFormatIsDecoded($yaml, array $expectedOutput): void
     {
         $this->socket->expects($this->any())
             ->method('read')
@@ -59,16 +60,16 @@ class StatsTraitTest extends CommandTestCase
         $this->assertEquals($expectedOutput, $stat->process($this->socket));
     }
 
-    public function yamlFormatIsDecodedDataProvider()
+    public function yamlFormatIsDecodedDataProvider(): array
     {
         return [
-            ['- value', [0 => 'value']],
-            ["- value1\r\n- value2", [0 => 'value1', 1 => 'value2']],
-            ['- 321', [0 => 321]],
-            ['key1: value1', ['key1' => 'value1']],
-            ["key1: value1\r\nkey2: value2", ['key1' => 'value1', 'key2' => 'value2']],
-            ['key1: 123', ['key1' => 123]],
-            ["key1: value1\r\nkey2: \r\nkey3: value3", ['key1' => 'value1', 'key2' => '', 'key3' => 'value3']],
+            'indexed' => ['- value', [0 => 'value']],
+            'multiIndexed' => ["- value1\r\n- value2", [0 => 'value1', 1 => 'value2']],
+            'indexedInteger' => ['- 321', [0 => 321]],
+            'keyValue' => ['key1: value1', ['key1' => 'value1']],
+            'multiKeyValue' => ["key1: value1\r\nkey2: value2", ['key1' => 'value1', 'key2' => 'value2']],
+            'keyIntValue' => ['key1: 123', ['key1' => 123]],
+            'assocValues' => ["key1: value1\r\nkey2: \r\nkey3: value3", ['key1' => 'value1', 'key2' => '', 'key3' => 'value3']],
         ];
     }
 

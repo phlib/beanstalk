@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Tests\Command;
 
@@ -8,7 +9,7 @@ use Phlib\Beanstalk\Exception\CommandException;
 
 class ReserveTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
         $this->assertInstanceOf(CommandInterface::class, new Reserve(123));
     }
@@ -16,20 +17,20 @@ class ReserveTest extends CommandTestCase
     /**
      * @dataProvider getCommandDataProvider
      */
-    public function testGetCommand($timeout, $command)
+    public function testGetCommand($timeout, $command): void
     {
         $this->assertEquals($command, (new Reserve($timeout))->getCommand());
     }
 
-    public function getCommandDataProvider()
+    public function getCommandDataProvider(): array
     {
         return [
-            [123, 'reserve-with-timeout 123'],
-            [null, 'reserve'],
+            'withTimeout' => [123, 'reserve-with-timeout 123'],
+            'justReserve' => [null, 'reserve'],
         ];
     }
 
-    public function testSuccessfulCommand()
+    public function testSuccessfulCommand(): void
     {
         $id       = 123;
         $data     = 'Foo Bar';
@@ -47,7 +48,7 @@ class ReserveTest extends CommandTestCase
      * @param string $status
      * @dataProvider failureStatusReturnsFalseDataProvider
      */
-    public function testFailureStatusReturnsFalse($status)
+    public function testFailureStatusReturnsFalse($status): void
     {
         $this->socket->expects($this->any())
             ->method('read')
@@ -55,15 +56,15 @@ class ReserveTest extends CommandTestCase
         $this->assertFalse((new Reserve(123))->process($this->socket));
     }
 
-    public function failureStatusReturnsFalseDataProvider()
+    public function failureStatusReturnsFalseDataProvider(): array
     {
         return [
-            ['TIMED_OUT'],
-            ['DEADLINE_SOON'],
+            'timeout' => ['TIMED_OUT'],
+            'deadline' => ['DEADLINE_SOON'],
         ];
     }
 
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
         $this->expectException(CommandException::class);
         $this->socket->expects($this->any())

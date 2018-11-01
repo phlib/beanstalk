@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Tests\Command;
 
@@ -8,17 +9,17 @@ use Phlib\Beanstalk\Exception\CommandException;
 
 class ListTubeUsedTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
         $this->assertInstanceOf(CommandInterface::class, new ListTubeUsed());
     }
 
-    public function testGetCommand()
+    public function testGetCommand(): void
     {
         $this->assertEquals("list-tube-used", (new ListTubeUsed())->getCommand());
     }
 
-    public function testSuccessfulCommand()
+    public function testSuccessfulCommand(): void
     {
         $tube = 'test-tube';
         $this->socket->expects($this->any())
@@ -27,7 +28,7 @@ class ListTubeUsedTest extends CommandTestCase
         $this->assertEquals($tube, (new ListTubeUsed())->process($this->socket));
     }
 
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
         $this->expectException(CommandException::class);
         $this->socket->expects($this->any())
