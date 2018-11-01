@@ -43,12 +43,12 @@ class Factory
     {
         $connections = [];
         foreach ($servers as $index => $config) {
-            if (array_key_exists('enabled', $config) && $config['enabled'] == false) {
+            if (array_key_exists('enabled', $config) && $config['enabled'] === false) {
                 continue;
             }
             $config     = static::normalizeArgs($config);
             $connection = static::create($config['host'], $config['port'], $config['options']);
-            if (!is_int($index)) {
+            if (!\is_int($index)) {
                 $connection->setName($index);
             }
             $connections[] = $connection;

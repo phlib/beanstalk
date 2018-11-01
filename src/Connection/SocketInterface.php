@@ -17,7 +17,7 @@ interface SocketInterface
     public function write(string $data): self;
 
     /**
-     * @param integer $length
+     * @param int $length
      * @return string
      */
     public function read(int $length = null): string;

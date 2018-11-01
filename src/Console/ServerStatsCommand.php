@@ -25,7 +25,7 @@ class ServerStatsCommand extends AbstractCommand
         $service = new Service($this->getBeanstalk());
 
         $this->outputDetectedConfig($output);
-        if ($stat == '') {
+        if ($stat === '') {
             $this->outputInfo($service, $output);
             $this->outputStats($service, $output);
         } else {
@@ -39,7 +39,7 @@ class ServerStatsCommand extends AbstractCommand
             return;
         }
         $configPath = $this->getHelper('configuration')->getConfigPath();
-        if ($configPath == '[default]') {
+        if ($configPath === '[default]') {
             $configPath = '[default fallback localhost]';
         }
 
@@ -88,15 +88,15 @@ class ServerStatsCommand extends AbstractCommand
         $currentKeys   = array_keys($current);
         $currentValues = array_values($current);
 
-        $maxRows = max(count($binlog), count($command), count($current));
+        $maxRows = max(\count($binlog), \count($command), \count($current));
         for ($i=0; $i < $maxRows; $i++) {
             $row = [
-                (isset($currentKeys[$i])) ? $currentKeys[$i] : '',
-                (isset($currentValues[$i])) ? $currentValues[$i] : '',
-                (isset($commandKeys[$i])) ? $commandKeys[$i] : '',
-                (isset($commandValues[$i])) ? $commandValues[$i] : '',
-                (isset($binlogKeys[$i])) ? $binlogKeys[$i] : '',
-                (isset($binlogValues[$i])) ? $binlogValues[$i] : '',
+                $currentKeys[$i] ?? '',
+                $currentValues[$i] ?? '',
+                $commandKeys[$i] ?? '',
+                $commandValues[$i] ?? '',
+                $binlogKeys[$i] ?? '',
+                $binlogValues[$i] ?? '',
             ];
             $table->addRow($row);
         }

@@ -15,19 +15,19 @@ class Mapping
     private $row = 0;
 
     /** @var int */
-    private $maxColumn = 1;
+    private $maxColumn;
 
     /** @var int */
-    private $maxRow = 1;
+    private $maxRow;
 
     public function __construct(array $mapping)
     {
         $this->mapping   = $this->filter($mapping);
-        $this->maxRow    = count($this->mapping) - 1;
-        $this->maxColumn = count($this->mapping[0]) - 1;
+        $this->maxRow    = \count($this->mapping) - 1;
+        $this->maxColumn = \count($this->mapping[0]) - 1;
     }
 
-    private function filter(array $mapping)
+    private function filter(array $mapping): array
     {
         $filtered = [];
         unset($mapping[0]);
@@ -73,7 +73,7 @@ class Mapping
 
     public function moveUp(): ?array
     {
-        if ($this->row == 0) {
+        if ($this->row === 0) {
             return null;
         }
         $this->row--;
@@ -82,7 +82,7 @@ class Mapping
 
     public function moveDown(): ?array
     {
-        if ($this->row == $this->maxRow) {
+        if ($this->row === $this->maxRow) {
             return null;
         }
         $this->row++;
@@ -91,7 +91,7 @@ class Mapping
 
     public function moveLeft(): ?array
     {
-        if ($this->column == 0) {
+        if ($this->column === 0) {
             return null;
         }
         $this->column--;
@@ -100,7 +100,7 @@ class Mapping
 
     public function moveRight(): ?array
     {
-        if ($this->column == $this->maxColumn) {
+        if ($this->column === $this->maxColumn) {
             return null;
         }
         $this->column++;

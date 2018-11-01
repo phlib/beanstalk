@@ -16,7 +16,7 @@ class BuriedException extends CommandException
      */
     public static function create(int $jobId): BuriedException
     {
-        return new static($jobId, "Server ran out of memory trying to grow the priority queue data structure.");
+        return new static($jobId, 'Server ran out of memory trying to grow the priority queue data structure.');
     }
 
     /**

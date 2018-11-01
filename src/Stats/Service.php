@@ -7,15 +7,15 @@ use Phlib\Beanstalk\ConnectionInterface;
 
 class Service
 {
-    const SERVER_BINLOG  = 1;
-    const SERVER_COMMAND = 2;
-    const SERVER_CURRENT = 4;
-    const SERVER_ALL     = 7;
+    public const SERVER_BINLOG  = 1;
+    public const SERVER_COMMAND = 2;
+    public const SERVER_CURRENT = 4;
+    public const SERVER_ALL     = 7;
 
     /**
      * @var array
      */
-    protected $infoKeys = [
+    protected static $infoKeys = [
         'pid',
         'hostname',
         'id',
@@ -32,7 +32,7 @@ class Service
     /**
      * @var array
      */
-    protected $serverKeys = [
+    protected static $serverKeys = [
         'current-jobs-urgent',
         'current-jobs-ready',
         'current-jobs-reserved',
@@ -95,7 +95,7 @@ class Service
      */
     public function getServerInfo(): array
     {
-        return $this->filterTheseKeys($this->infoKeys, $this->getStats());
+        return $this->filterTheseKeys(self::$infoKeys, $this->getStats());
     }
 
     /**
@@ -116,8 +116,8 @@ class Service
      */
     protected function filterServerKeys(int $filter): array
     {
-        $serverKeys = $this->serverKeys;
-        if ($filter != self::SERVER_ALL) {
+        $serverKeys = self::$serverKeys;
+        if ($filter !== self::SERVER_ALL) {
             $include = [];
             if ($filter & self::SERVER_BINLOG) {
                 $include[] = 'binlog-';
@@ -131,7 +131,7 @@ class Service
             $filtered = [];
             foreach ($include as $beginsWith) {
                 foreach ($serverKeys as $serverKey) {
-                    if (substr($serverKey, 0, strlen($beginsWith)) != $beginsWith) {
+                    if (\substr($serverKey, 0, \strlen($beginsWith)) !== $beginsWith) {
                         continue;
                     }
                     $filtered[] = $serverKey;
@@ -162,7 +162,7 @@ class Service
         $tubeStats = [];
         foreach ($tubes as $tube) {
             $stats = $this->beanstalk->statsTube($tube);
-            $tubeStats[] = array_slice($stats, 0, -3); // @see getTubeHeaderMapping
+            $tubeStats[] = \array_slice($stats, 0, -3); // @see getTubeHeaderMapping
         }
 
         usort($tubeStats, function ($a, $b) {

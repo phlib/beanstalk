@@ -9,7 +9,7 @@ use Phlib\Beanstalk\Exception\NotFoundException;
 
 class Connection implements ConnectionInterface
 {
-    const DEFAULT_TUBE = 'default';
+    public const DEFAULT_TUBE = 'default';
 
     /**
      * @var string
@@ -110,8 +110,7 @@ class Connection implements ConnectionInterface
         int $priority = ConnectionInterface::DEFAULT_PRIORITY,
         int $delay = ConnectionInterface::DEFAULT_DELAY,
         int $ttr = ConnectionInterface::DEFAULT_TTR
-    ) {
-        $data = (string)$data;
+    ): int {
         return (new Command\Put($data, $priority, $delay, $ttr))
             ->process($this->getSocket());
     }
@@ -127,8 +126,9 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param int $id
+     * @param int|string $id
      * @return ConnectionInterface
+     * @throws NotFoundException
      */
     public function delete($id): ConnectionInterface
     {
@@ -138,10 +138,11 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param int $id
+     * @param int|string $id
      * @param int $priority
      * @param int $delay
      * @return ConnectionInterface
+     * @throws NotFoundException
      */
     public function release(
         $id,
@@ -154,9 +155,10 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param int $id
+     * @param int|string $id
      * @param int $priority
      * @return ConnectionInterface
+     * @throws NotFoundException
      */
     public function bury($id, int $priority = ConnectionInterface::DEFAULT_PRIORITY): ConnectionInterface
     {
@@ -168,6 +170,7 @@ class Connection implements ConnectionInterface
     /**
      * @param int $id
      * @return ConnectionInterface
+     * @throws NotFoundException
      */
     public function touch($id): ConnectionInterface
     {
@@ -198,7 +201,7 @@ class Connection implements ConnectionInterface
     public function ignore(string $tube)
     {
         if (isset($this->watching[$tube])) {
-            if (count($this->watching) == 1) {
+            if (\count($this->watching) === 1) {
                 return false;
             }
 
@@ -207,12 +210,13 @@ class Connection implements ConnectionInterface
             unset($this->watching[$tube]);
         }
 
-        return count($this->watching);
+        return \count($this->watching);
     }
 
     /**
      * @param int $id
      * @return array
+     * @throws NotFoundException
      */
     public function peek($id): array
     {
@@ -262,6 +266,7 @@ class Connection implements ConnectionInterface
 
     /**
      * @inheritdoc
+     * @throws NotFoundException
      */
     public function stats(): array
     {
@@ -272,6 +277,7 @@ class Connection implements ConnectionInterface
     /**
      * @param int $id
      * @return array
+     * @throws NotFoundException
      */
     public function statsJob($id): array
     {
@@ -281,6 +287,7 @@ class Connection implements ConnectionInterface
 
     /**
      * @inheritdoc
+     * @throws NotFoundException
      */
     public function statsTube(string $tube): array
     {
@@ -299,6 +306,7 @@ class Connection implements ConnectionInterface
 
     /**
      * @inheritdoc
+     * @throws NotFoundException
      */
     public function listTubes(): array
     {

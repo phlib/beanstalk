@@ -17,7 +17,7 @@ class Socket implements SocketInterface
     protected $host;
 
     /**
-     * @var integer
+     * @var int
      */
     protected $port;
 
@@ -33,7 +33,7 @@ class Socket implements SocketInterface
 
     /**
      * @param string  $host
-     * @param integer $port
+     * @param int     $port
      * @param array   $options
      */
     public function __construct(string $host, int $port = self::DEFAULT_PORT, array $options = [])
@@ -43,9 +43,6 @@ class Socket implements SocketInterface
         $this->options = $options + ['timeout' => 60];
     }
 
-    /**
-     * Destructor
-     */
     public function __destruct()
     {
         $this->disconnect();
@@ -71,7 +68,7 @@ class Socket implements SocketInterface
             $errNum = $errStr = null;
             $this->connection = @fsockopen($this->host, $this->port, $errNum, $errStr, $this->options['timeout']);
 
-            if (!$this->connection or $errNum > 0) {
+            if (!$this->connection || $errNum > 0) {
                 $message = sprintf(
                     'Could not connect to beanstalkd "%s:%d": %s (%d)',
                     $this->host,
@@ -101,7 +98,7 @@ class Socket implements SocketInterface
         $this->connect();
 
         $data .= self::EOL;
-        $bytesWritten = strlen($data);
+        $bytesWritten = \strlen($data);
         $bytesSent    = fwrite($this->connection, $data, $bytesWritten);
 
         if ($bytesSent !== $bytesWritten) {
@@ -129,7 +126,7 @@ class Socket implements SocketInterface
                 if ($chunk === false) {
                     throw new SocketException('Failed to read data.');
                 }
-                $read += strlen($chunk);
+                $read += \strlen($chunk);
                 $data .= $chunk;
             }
         } else {
@@ -148,7 +145,7 @@ class Socket implements SocketInterface
      */
     public function disconnect(): bool
     {
-        if (is_resource($this->connection)) {
+        if (\is_resource($this->connection)) {
             fclose($this->connection);
             $this->connection = null;
         }

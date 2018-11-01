@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Console;
 
@@ -25,7 +26,7 @@ trait WatchTrait
         do {
             $buffered->writeln($infoText. $infoLinePadding . date('D M d H:i:s Y'));
             $buffered->writeln('');
-            call_user_func_array($build, [$input, $buffered]);
+            $build($input, $buffered);
 
             $clearScreen = "\e[H\e[2J";
             $output->write($clearScreen . $buffered->fetch());

@@ -6,7 +6,6 @@ namespace Phlib\Beanstalk\Console;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class TubePeekCommand extends AbstractCommand
@@ -24,14 +23,14 @@ class TubePeekCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $status = $input->getArgument('status');
-        if (!in_array($status, ['ready', 'delayed', 'buried'], true)) {
+        if (!\in_array($status, ['ready', 'delayed', 'buried'], true)) {
             throw new InvalidArgumentException("Specified status '$status' is not valid.");
         }
 
         $this->getBeanstalk()
             ->useTube($input->getArgument('tube'));
         $method = 'peek' . ucfirst($status);
-        $job = call_user_func([$this->getBeanstalk(), $method]);
+        $job = \call_user_func([$this->getBeanstalk(), $method]);
 
         if ($job === false) {
             $output->writeln("No jobs found in '$status' status.");

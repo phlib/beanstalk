@@ -17,6 +17,9 @@ class InteractiveInput
     /** @var array */
     private $intercept = [];
 
+    /**
+     * @return mixed
+     */
     public function capture()
     {
         while (!feof(STDIN)) {
@@ -27,7 +30,7 @@ class InteractiveInput
 
             if (isset($this->intercept[$char])) {
                 foreach ($this->intercept[$char] as $callable) {
-                    $result = call_user_func($callable, $char);
+                    $result = \call_user_func($callable, $char);
                     if ($result) {
                         return $result;
                     }
@@ -38,7 +41,7 @@ class InteractiveInput
 
     public function intercept($characters, callable $callback)
     {
-        if (!is_array($characters)) {
+        if (!\is_array($characters)) {
             $characters = [$characters];
         }
 

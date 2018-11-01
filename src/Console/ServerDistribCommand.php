@@ -67,7 +67,7 @@ class ServerDistribCommand extends AbstractCommand
             $rows[5][] = $stats['current-jobs-delayed'];
 
             $waiting = $stats['current-waiting'];
-            if ($waiting == 0) {
+            if ($waiting === 0) {
                 $waiting = "<comment>$waiting</comment>";
             }
             $rows[1][] = $waiting;

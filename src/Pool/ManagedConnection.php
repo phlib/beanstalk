@@ -106,13 +106,13 @@ class ManagedConnection
     {
         switch ($command) {
             case 'useTube':
-                $this->useTube($arguments[0]);
+                $this->useTube((string)$arguments[0]);
                 break;
             case 'watch':
-                $this->watch($arguments[0]);
+                $this->watch((string)$arguments[0]);
                 break;
             case 'ignore':
-                $this->ignore($arguments[0]);
+                $this->ignore((string)$arguments[0]);
                 break;
         }
     }

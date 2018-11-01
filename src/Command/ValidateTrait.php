@@ -6,10 +6,6 @@ namespace Phlib\Beanstalk\Command;
 use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
-/**
- * Class ValidateTrait
- * @package Phlib\Beanstalk
- */
 trait ValidateTrait
 {
     /**
@@ -33,7 +29,7 @@ trait ValidateTrait
      */
     public function validateTubeName(string $name): bool
     {
-        $bytes   = strlen($name);
+        $bytes   = \strlen($name);
         $options = ['options' => ['min_range' => 1, 'max_range' => ConnectionInterface::MAX_TUBE_LENGTH]];
         if (filter_var($bytes, FILTER_VALIDATE_INT, $options) === false) {
             throw new InvalidArgumentException("Specified tube '$name' is not a valid name.");
@@ -48,9 +44,9 @@ trait ValidateTrait
      */
     public function validateJobData($data): bool
     {
-        if (is_array($data)) {
+        if (\is_array($data)) {
             $data = 'Array';
-        } elseif (is_object($data)) {
+        } elseif (\is_object($data)) {
             if (method_exists($data, '__toString')) {
                 $data = (string)$data;
             } else {
@@ -58,8 +54,8 @@ trait ValidateTrait
             }
         }
         $options = ['options' => ['min_range' => 1, 'max_range' => ConnectionInterface::MAX_JOB_LENGTH]];
-        if (filter_var(strlen((string)$data), FILTER_VALIDATE_INT, $options) === false) {
-            throw new InvalidArgumentException("The job data is too large. Maximum allowed size is 65,536.");
+        if (filter_var(\strlen((string)$data), FILTER_VALIDATE_INT, $options) === false) {
+            throw new InvalidArgumentException('The job data is too large. Maximum allowed size is 65,536.');
         }
         return true;
     }

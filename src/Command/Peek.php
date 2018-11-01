@@ -17,12 +17,12 @@ class Peek implements CommandInterface
     /**
      * @var string|int
      */
-    protected $jobId = null;
+    protected $jobId;
 
     /**
      * @var string
      */
-    protected $subCommand = null;
+    protected $subCommand;
 
     /**
      * @var array
@@ -39,9 +39,9 @@ class Peek implements CommandInterface
      */
     public function __construct($subject)
     {
-        if (is_int($subject) || ctype_digit($subject)) {
+        if (\is_int($subject) || ctype_digit($subject)) {
             $this->jobId = $subject;
-        } elseif (in_array($subject, $this->subCommands)) {
+        } elseif (\in_array($subject, $this->subCommands, true)) {
             $this->subCommand = $subject;
         } else {
             throw new InvalidArgumentException(sprintf('Invalid peek subject: %s', $subject));
@@ -53,7 +53,7 @@ class Peek implements CommandInterface
      */
     public function getCommand(): string
     {
-        return isset($this->jobId) ?
+        return $this->jobId !== null ?
             sprintf('peek %u', $this->jobId) :
             sprintf('peek-%s', $this->subCommand);
     }

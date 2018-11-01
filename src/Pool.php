@@ -108,9 +108,6 @@ class Pool implements ConnectionInterface
     public function useTube(string $tube): ConnectionInterface
     {
         $this->sendToAll('useTube', $tube);
-//        foreach ($this->getAvailableConnections() as $connection) {
-//            $connection->send('useTube', $tube);
-//        }
         $this->using = $tube;
         return $this;
     }
@@ -161,6 +158,7 @@ class Pool implements ConnectionInterface
     /**
      * @param string $id
      * @return ConnectionInterface
+     * @throws NotFoundException
      */
     public function touch($id): ConnectionInterface
     {
@@ -173,6 +171,7 @@ class Pool implements ConnectionInterface
      * @param int $priority
      * @param int $delay
      * @return ConnectionInterface
+     * @throws NotFoundException
      */
     public function release(
         $id,
@@ -187,6 +186,7 @@ class Pool implements ConnectionInterface
      * @param string $id
      * @param int $priority
      * @return ConnectionInterface
+     * @throws NotFoundException
      */
     public function bury($id, int $priority = self::DEFAULT_PRIORITY): ConnectionInterface
     {
@@ -197,6 +197,7 @@ class Pool implements ConnectionInterface
     /**
      * @param string $id
      * @return ConnectionInterface
+     * @throws NotFoundException
      */
     public function delete($id): ConnectionInterface
     {
@@ -221,20 +222,21 @@ class Pool implements ConnectionInterface
      */
     public function ignore(string $tube)
     {
-        $index = array_search($tube, $this->watching);
+        $index = \array_search($tube, $this->watching, true);
         if ($index !== false) {
-            if (count($this->watching) == 1) {
+            if (\count($this->watching) === 1) {
                 return false;
             }
             $this->sendToAll('ignore', $tube);
             unset($this->watching[$index]);
         }
-        return count($this->watching);
+        return \count($this->watching);
     }
 
     /**
      * @param string $id
      * @return array
+     * @throws NotFoundException
      */
     public function peek($id): array
     {
@@ -299,10 +301,8 @@ class Pool implements ConnectionInterface
                 $result = $connection->send('statsTube', $this->using);
                 $stats  = $result['response'];
 
-                $buriedJobs = isset($stats['current-jobs-buried'])
-                    ? $stats['current-jobs-buried'] : 0;
-
-                if ($buriedJobs == 0) {
+                $buriedJobs = $stats['current-jobs-buried'] ?? 0;
+                if ($buriedJobs === 0) {
                     continue;
                 }
 
@@ -332,6 +332,7 @@ class Pool implements ConnectionInterface
     /**
      * @param string $id
      * @return array
+     * @throws NotFoundException
      */
     public function statsJob($id): array
     {
@@ -361,8 +362,6 @@ class Pool implements ConnectionInterface
             try {
                 $result = $connection->send($command, ...$arguments);
                 $stats = $stats->merge($result['response']);
-            } catch (NotFoundException $e) {
-                // ignore
             } catch (RuntimeException $e) {
                 // ignore
             }
@@ -443,7 +442,7 @@ class Pool implements ConnectionInterface
      */
     protected function sendToExact(string $command, string $id, ...$arguments): array
     {
-        list($key, $id) = $this->splitId($id);
+        [$key, $id] = $this->splitId($id);
         if (!array_key_exists($key, $this->connections)) {
             throw new NotFoundException("Specified key '{$key}' is not in the pool.");
         }
@@ -466,7 +465,7 @@ class Pool implements ConnectionInterface
         foreach ($this->getAvailableConnections() as $connection) {
             try {
                 $result = $connection->send($command, ...$arguments);
-                if (is_array($result)) {
+                if (\is_array($result)) {
                     return $result;
                 }
             } catch (RuntimeException $e) {

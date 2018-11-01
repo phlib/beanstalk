@@ -25,7 +25,7 @@ trait StatsTrait
                 return $this->decode($data);
 
             case 'NOT_FOUND':
-                throw new NotFoundException("Stats read could not find specified job");
+                throw new NotFoundException('Stats read could not find specified job');
 
             default:
                 throw new CommandException("Stats read failed '$status'");
@@ -40,11 +40,11 @@ trait StatsTrait
      */
     protected function decode(string $response): array
     {
-        $lines = array_slice(explode("\n", trim($response)), 1);
+        $lines = \array_slice(explode("\n", trim($response)), 1);
 
         $result = [];
         foreach ($lines as $line) {
-            if ($line[0] == '-') {
+            if ($line[0] === '-') {
                 $result[] = trim(ltrim($line, '- '));
             } else {
                 $key = strtok($line, ': ');
@@ -52,7 +52,7 @@ trait StatsTrait
                     $value = ltrim(trim(strtok('')), ' ');
 
                     if (is_numeric($value)) {
-                        $value = $value + 0;
+                        $value += 0;
                     }
 
                     $result[$key] = $value;

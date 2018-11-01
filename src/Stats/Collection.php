@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Stats;
 
@@ -39,11 +40,11 @@ class Collection extends \ArrayObject
                 $data[$name] = $value;
                 continue;
             }
-            if (in_array($name, self::$listStats)) {
-                if ($data[$name] != $value) {
+            if (\in_array($name, self::$listStats, true)) {
+                if ($data[$name] !== $value) {
                     $data[$name] .= ',' . $value;
                 }
-            } elseif (in_array($name, self::$maxStats)) {
+            } elseif (\in_array($name, self::$maxStats, true)) {
                 if ($value > $data[$name]) {
                     $data[$name] = $value;
                 }
@@ -67,6 +68,6 @@ class Collection extends \ArrayObject
      */
     public function isEmpty(): bool
     {
-        return $this->count() == 0;
+        return $this->count() === 0;
     }
 }

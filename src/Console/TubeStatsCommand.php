@@ -34,7 +34,7 @@ class TubeStatsCommand extends AbstractCommand
             return;
         }
 
-        if ($stat == '') {
+        if ($stat === '') {
             $this->displayTable($stats, $output);
         } else {
             $this->displayStat($stats, $stat, $output);
@@ -50,7 +50,7 @@ class TubeStatsCommand extends AbstractCommand
         $table = new Table($output);
         $table->setHeaders(['Statistic', 'Total']);
         foreach ($stats as $stat => $total) {
-            if ($stat == 'current-jobs-buried' && $total > 0) {
+            if ($stat === 'current-jobs-buried' && $total > 0) {
                 $stat  = "<error>$stat</error>";
                 $total = "<error>{$total}</error>";
             }
