@@ -36,7 +36,7 @@ class Delete implements CommandInterface
      * @throws NotFoundException
      * @throws CommandException
      */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): Delete
     {
         $socket->write($this->getCommand());
 

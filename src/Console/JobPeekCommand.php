@@ -13,7 +13,7 @@ class JobPeekCommand extends AbstractCommand
 {
     use DisplayJobTrait;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('job:peek')
             ->setDescription('View information about a specific job.')

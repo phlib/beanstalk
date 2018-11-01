@@ -127,7 +127,7 @@ class Pool implements ConnectionInterface
         int $priority = self::DEFAULT_PRIORITY,
         int $delay = self::DEFAULT_DELAY,
         int $ttr = self::DEFAULT_TTR
-    ) {
+    ): string {
         $result = $this->sendToOne('put', $data, $priority, $delay, $ttr);
         return $this->combineId($result['connection'], $result['response']);
     }
@@ -408,7 +408,7 @@ class Pool implements ConnectionInterface
      * @param int $id
      * @return string
      */
-    public function combineId(ConnectionInterface $connection, $id)
+    public function combineId(ConnectionInterface $connection, $id): string
     {
         if (!is_numeric($id)) {
             throw new InvalidArgumentException('Specified job id must be a number.');
@@ -421,7 +421,7 @@ class Pool implements ConnectionInterface
      * @return array Indexed array of key and id.
      * @throws InvalidArgumentException
      */
-    public function splitId($id)
+    public function splitId($id): array
     {
         if (strpos($id, '.') === false) {
             throw new InvalidArgumentException('Job ID is not in expected pool format.');
@@ -434,7 +434,14 @@ class Pool implements ConnectionInterface
         return [$key, $jobId];
     }
 
-    protected function sendToExact(string $command, string $id, ...$arguments)
+    /**
+     * @param string $command
+     * @param string $id
+     * @param mixed ...$arguments
+     * @return array
+     * @throws NotFoundException
+     */
+    protected function sendToExact(string $command, string $id, ...$arguments): array
     {
         list($key, $id) = $this->splitId($id);
         if (!array_key_exists($key, $this->connections)) {
@@ -473,7 +480,7 @@ class Pool implements ConnectionInterface
      * @param string $command
      * @param array ...$arguments
      */
-    protected function sendToAll(string $command, ...$arguments)
+    protected function sendToAll(string $command, ...$arguments): void
     {
         foreach ($this->getAvailableConnections() as $connection) {
             try {

@@ -55,7 +55,7 @@ class Release implements CommandInterface
      * @throws NotFoundException
      * @throws CommandException
      */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): Release
     {
         $socket->write($this->getCommand());
 

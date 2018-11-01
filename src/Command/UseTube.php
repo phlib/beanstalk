@@ -37,7 +37,7 @@ class UseTube implements CommandInterface
      * @return string
      * @throws CommandException
      */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): string
     {
         $socket->write($this->getCommand());
 

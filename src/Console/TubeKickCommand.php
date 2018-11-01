@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class TubeKickCommand extends AbstractCommand
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('tube:kick')
             ->setDescription('Kick a number of delayed or buried jobs in the tube.')

@@ -63,7 +63,7 @@ class Put implements CommandInterface
      * @return int
      * @throws CommandException
      */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): int
     {
         $socket->write($this->getCommand());
         $socket->write($this->data);

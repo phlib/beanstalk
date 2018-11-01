@@ -64,7 +64,7 @@ class Peek implements CommandInterface
      * @throws NotFoundException
      * @throws CommandException
      */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): array
     {
         $socket->write($this->getCommand());
 

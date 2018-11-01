@@ -70,7 +70,7 @@ class ManagedConnection
      * @param array $arguments
      * @return array
      */
-    public function send(string $command, ...$arguments)
+    public function send(string $command, ...$arguments): array
     {
         $this->intercept($command, ...$arguments);
         return $this->doSend($command, ...$arguments);
@@ -81,7 +81,7 @@ class ManagedConnection
      * @param array ...$arguments
      * @return array
      */
-    protected function doSend(string $command, ...$arguments)
+    protected function doSend(string $command, ...$arguments): array
     {
         try {
             if ($this->retryAt !== false) {
@@ -102,7 +102,7 @@ class ManagedConnection
      * @param string $command
      * @param array ...$arguments
      */
-    protected function intercept(string $command, ...$arguments)
+    protected function intercept(string $command, ...$arguments): void
     {
         switch ($command) {
             case 'useTube':
@@ -117,10 +117,7 @@ class ManagedConnection
         }
     }
 
-    /**
-     *
-     */
-    protected function delay()
+    protected function delay(): void
     {
         $this->retryAt = time() + $this->retryDelay;
     }
@@ -129,7 +126,7 @@ class ManagedConnection
      * When a connection has been lost, it could have missed important commands like use, watch and ignore.
      * These are recorded and replayed when the connection comes back.
      */
-    protected function reset()
+    protected function reset(): void
     {
         $this->retryAt = false;
         $this->doSend('useTube', $this->using);
@@ -144,7 +141,7 @@ class ManagedConnection
     /**
      * @param string $tube
      */
-    protected function useTube(string $tube)
+    protected function useTube(string $tube): void
     {
         $this->using = $tube;
     }
@@ -152,7 +149,7 @@ class ManagedConnection
     /**
      * @param string $tube
      */
-    protected function watch(string $tube)
+    protected function watch(string $tube): void
     {
         if (array_key_exists($tube, $this->ignoring)) {
             unset($this->ignoring[$tube]);
@@ -163,7 +160,7 @@ class ManagedConnection
     /**
      * @param string $tube
      */
-    protected function ignore(string $tube)
+    protected function ignore(string $tube): void
     {
         if (array_key_exists($tube, $this->watching)) {
             unset($this->watching[$tube]);

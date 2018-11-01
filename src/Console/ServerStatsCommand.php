@@ -12,7 +12,7 @@ use Symfony\Component\Console\Helper\Table;
 
 class ServerStatsCommand extends AbstractCommand
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('server:stats')
             ->setDescription('Get a list of details about the beanstalk server(s).')
@@ -33,7 +33,7 @@ class ServerStatsCommand extends AbstractCommand
         }
     }
 
-    protected function outputDetectedConfig(OutputInterface $output)
+    protected function outputDetectedConfig(OutputInterface $output): void
     {
         if (!$output->isVerbose()) {
             return;
@@ -46,7 +46,7 @@ class ServerStatsCommand extends AbstractCommand
         $output->writeln('Configuration: ' . $configPath);
     }
 
-    protected function outputInfo(Service $stats, OutputInterface $output)
+    protected function outputInfo(Service $stats, OutputInterface $output): void
     {
         $info = $stats->getServerInfo();
 
@@ -71,7 +71,7 @@ class ServerStatsCommand extends AbstractCommand
      * @param Service $stats
      * @param OutputInterface $output
      */
-    protected function outputStats(Service $stats, OutputInterface $output)
+    protected function outputStats(Service $stats, OutputInterface $output): void
     {
         $binlog  = $stats->getServerStats(Service::SERVER_BINLOG);
         $command = $stats->getServerStats(Service::SERVER_COMMAND);
@@ -111,7 +111,7 @@ class ServerStatsCommand extends AbstractCommand
      * @param OutputInterface $output
      * @throws InvalidArgumentException
      */
-    protected function outputStat(Service $service, $stat, OutputInterface $output)
+    protected function outputStat(Service $service, $stat, OutputInterface $output): void
     {
         $stats = $service->getServerStats(Service::SERVER_ALL) + $service->getServerInfo();
         if (!isset($stats[$stat])) {

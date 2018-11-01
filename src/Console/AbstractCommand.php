@@ -3,20 +3,21 @@ declare(strict_types = 1);
 
 namespace Phlib\Beanstalk\Console;
 
+use Phlib\Beanstalk\ConnectionInterface;
 use Symfony\Component\Console\Command\Command;
 use Phlib\Beanstalk\Factory;
 
 abstract class AbstractCommand extends Command
 {
     /**
-     * @var \Phlib\Beanstalk\ConnectionInterface
+     * @var ConnectionInterface
      */
     protected $beanstalk;
 
     /**
-     * @return \Phlib\Beanstalk\ConnectionInterface
+     * @return ConnectionInterface
      */
-    public function getBeanstalk()
+    public function getBeanstalk(): ConnectionInterface
     {
         if (!$this->beanstalk) {
             $config = $this->getHelper('configuration')->fetch();

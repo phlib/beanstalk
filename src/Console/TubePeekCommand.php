@@ -13,7 +13,7 @@ class TubePeekCommand extends AbstractCommand
 {
     use DisplayJobTrait;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('tube:peek')
             ->setDescription('Look at a job in the job based on status.')

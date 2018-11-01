@@ -36,7 +36,7 @@ class Touch implements CommandInterface
      * @throws NotFoundException
      * @throws CommandException
      */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): Touch
     {
         $socket->write($this->getCommand());
 

@@ -21,7 +21,7 @@ class ListTubeUsed implements CommandInterface
      * @return string
      * @throws CommandException
      */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): string
     {
         $socket->write('list-tube-used');
         $status = strtok($socket->read(), ' ');

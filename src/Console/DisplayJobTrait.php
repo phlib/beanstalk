@@ -11,7 +11,7 @@ trait DisplayJobTrait
      * @param array $job
      * @param OutputInterface $output
      */
-    protected function displayJob(array $job, OutputInterface $output)
+    protected function displayJob(array $job, OutputInterface $output): void
     {
         /* @var $formatter \Symfony\Component\Console\Helper\FormatterHelper */
         $formatter = $this->getHelper('formatter');

@@ -55,7 +55,7 @@ class Connection implements ConnectionInterface
      * @param SocketInterface $socket
      * @return $this
      */
-    public function setSocket(SocketInterface $socket)
+    public function setSocket(SocketInterface $socket): Connection
     {
         $this->socket = $socket;
         return $this;

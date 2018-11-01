@@ -13,7 +13,7 @@ class WatchCommand extends AbstractCommand
 {
     use WatchTrait;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('watch')
             ->setDescription('Continually updates a table of all tubes and their associated stats')

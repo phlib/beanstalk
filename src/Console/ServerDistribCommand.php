@@ -19,7 +19,7 @@ class ServerDistribCommand extends AbstractCommand
      */
     protected $connections;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('server:distrib')
             ->setDescription('View distribution of jobs across the servers (for Pools only).')
@@ -37,7 +37,7 @@ class ServerDistribCommand extends AbstractCommand
      * @param InputInterface $input
      * @param OutputInterface $output
      */
-    protected function buildTable(InputInterface $input, OutputInterface $output)
+    protected function buildTable(InputInterface $input, OutputInterface $output): void
     {
         $headers = ['Stat'];
         $rows = [
@@ -86,10 +86,7 @@ class ServerDistribCommand extends AbstractCommand
         $table->render();
     }
 
-    /**
-     * @return Pool
-     */
-    public function getBeanstalk()
+    public function getBeanstalk(): ConnectionInterface
     {
         $beanstalk = parent::getBeanstalk();
         if (!$beanstalk instanceof Pool) {

@@ -47,7 +47,7 @@ class Bury implements CommandInterface
      * @throws NotFoundException
      * @throws CommandException
      */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): Bury
     {
         $socket->write($this->getCommand());
 

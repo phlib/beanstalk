@@ -31,7 +31,7 @@ class Collection extends \ArrayObject
      * @param array $additional
      * @return Collection
      */
-    public function merge(array $additional)
+    public function merge(array $additional): Collection
     {
         $data = $this->toArray();
         foreach ($additional as $name => $value) {
@@ -57,7 +57,7 @@ class Collection extends \ArrayObject
     /**
      * @return array
      */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->getArrayCopy();
     }
@@ -65,7 +65,7 @@ class Collection extends \ArrayObject
     /**
      * @return bool
      */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         return $this->count() == 0;
     }

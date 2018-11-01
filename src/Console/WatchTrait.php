@@ -15,7 +15,7 @@ trait WatchTrait
      * @param callable $build
      * @param float $interval
      */
-    protected function watch(InputInterface $input, OutputInterface $output, callable $build, float $interval = 1.0)
+    protected function watch(InputInterface $input, OutputInterface $output, callable $build, float $interval = 1.0): void
     {
         $infoText = "Every {$interval}s: beanstalk server:tubes";
         // 34 for info, 25 for datetime == 58

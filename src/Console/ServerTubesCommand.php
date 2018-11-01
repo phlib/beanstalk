@@ -17,7 +17,7 @@ class ServerTubesCommand extends AbstractCommand
      */
     protected $service;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('server:tubes')
             ->setDescription('List all tubes known to the server(s).')

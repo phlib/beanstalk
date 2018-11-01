@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class JobDeleteCommand extends AbstractCommand
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('job:delete')
             ->setDescription('Delete specific job.')

@@ -34,10 +34,10 @@ class Ignore implements CommandInterface
 
     /**
      * @param SocketInterface $socket
-     * @return integer
+     * @return int
      * @throws CommandException
      */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): int
     {
         $socket->write($this->getCommand());
 

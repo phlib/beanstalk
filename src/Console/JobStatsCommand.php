@@ -12,7 +12,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class JobStatsCommand extends AbstractCommand
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('job:stats')
             ->setDescription('List statistics related to a specific job.')

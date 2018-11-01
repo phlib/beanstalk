@@ -37,7 +37,7 @@ class Watch implements CommandInterface
      * @return integer
      * @throws CommandException
      */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): int
     {
         $socket->write($this->getCommand());
 
