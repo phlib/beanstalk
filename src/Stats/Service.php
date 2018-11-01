@@ -82,26 +82,16 @@ class Service
      */
     protected $stats;
 
-    /**
-     * @param ConnectionInterface $beanstalk
-     */
     public function __construct(ConnectionInterface $beanstalk)
     {
         $this->beanstalk = $beanstalk;
     }
 
-    /**
-     * @return array
-     */
     public function getServerInfo(): array
     {
         return $this->filterTheseKeys(self::$infoKeys, $this->getStats());
     }
 
-    /**
-     * @param int $filter
-     * @return array
-     */
     public function getServerStats(int $filter = self::SERVER_ALL): array
     {
         $serverKeys = $this->filterServerKeys($filter);
@@ -110,11 +100,7 @@ class Service
         return $stats;
     }
 
-    /**
-     * @param int $filter
-     * @return array
-     */
-    protected function filterServerKeys(int $filter): array
+    private function filterServerKeys(int $filter): array
     {
         $serverKeys = self::$serverKeys;
         if ($filter !== self::SERVER_ALL) {
@@ -142,10 +128,6 @@ class Service
         return $serverKeys;
     }
 
-    /**
-     * @param string $tube
-     * @return array
-     */
     public function getTubeStats(string $tube): array
     {
         $stats = $this->beanstalk->statsTube($tube);
@@ -153,9 +135,6 @@ class Service
         return $stats;
     }
 
-    /**
-     * @return array
-     */
     public function getAllTubeStats(): array
     {
         $tubes     = $this->beanstalk->listTubes();
@@ -172,20 +151,12 @@ class Service
         return $tubeStats;
     }
 
-    /**
-     * @param array $keys
-     * @param array $data
-     * @return array
-     */
-    protected function filterTheseKeys(array $keys, array $data): array
+    private function filterTheseKeys(array $keys, array $data): array
     {
         return array_intersect_key($data, array_flip($keys));
     }
 
-    /**
-     * @return array
-     */
-    protected function getStats(): array
+    private function getStats(): array
     {
         if (!$this->stats) {
             $this->stats = $this->beanstalk->stats();
@@ -193,9 +164,6 @@ class Service
         return $this->stats;
     }
 
-    /**
-     * @return array
-     */
     public function getTubeHeaderMapping(): array
     {
         return [
