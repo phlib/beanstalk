@@ -1,6 +1,7 @@
 .idea
 vendor
 report
+beanstalk-config.php
 config*.php
 composer.lock
 phpunit.xml
