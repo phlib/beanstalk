@@ -32,7 +32,7 @@ class Put implements CommandInterface
         $this->validateDelay($delay);
         $this->validateTtr($ttr);
 
-        $this->data = (string)$data;
+        $this->data = $data;
         $this->priority = $priority;
         $this->delay = $delay;
         $this->ttr = $ttr;

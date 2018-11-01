@@ -67,7 +67,6 @@ class Connection implements ConnectionInterface
         int $delay = ConnectionInterface::DEFAULT_DELAY,
         int $ttr = ConnectionInterface::DEFAULT_TTR
     ): int {
-        $data = (string)$data;
         return (new Command\Put($data, $priority, $delay, $ttr))
             ->process($this->getSocket());
     }
@@ -207,7 +206,7 @@ class Connection implements ConnectionInterface
             ->process($this->getSocket());
     }
 
-    public function statsTube(string $tube): ?array
+    public function statsTube(string $tube): array
     {
         return (new Command\StatsTube($tube))
             ->process($this->getSocket());

@@ -53,7 +53,7 @@ class Socket implements SocketInterface
             $errNum = $errStr = null;
             $this->connection = @fsockopen($this->host, $this->port, $errNum, $errStr, $this->options['timeout']);
 
-            if (!$this->connection or $errNum > 0) {
+            if (!$this->connection || $errNum > 0) {
                 $message = sprintf(
                     'Could not connect to beanstalkd "%s:%d": %s (%d)',
                     $this->host,

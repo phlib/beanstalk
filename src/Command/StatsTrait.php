@@ -53,7 +53,7 @@ trait StatsTrait
                     $value = ltrim(trim(strtok('')), ' ');
 
                     if (is_numeric($value)) {
-                        $value = $value + 0;
+                        $value += 0;
                     }
 
                     $result[$key] = $value;
