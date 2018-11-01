@@ -3,8 +3,9 @@
 namespace Phlib\Beanstalk\Tests\Stats;
 
 use Phlib\Beanstalk\Stats\Collection;
+use PHPUnit\Framework\TestCase;
 
-class CollectionTest extends \PHPUnit_Framework_TestCase
+class CollectionTest extends TestCase
 {
     public function testCreateStatsWithData()
     {

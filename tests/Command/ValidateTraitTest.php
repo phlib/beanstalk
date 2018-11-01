@@ -5,8 +5,9 @@ namespace Phlib\Beanstalk\Tests\Command;
 use Phlib\Beanstalk\Command\ValidateTrait;
 use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 
-class ValidateTraitTest extends \PHPUnit_Framework_TestCase
+class ValidateTraitTest extends TestCase
 {
     /**
      * @var \Phlib\Beanstalk\Command\ValidateTrait

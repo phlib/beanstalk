@@ -6,12 +6,13 @@ use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Pool;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @runTestsInSeparateProcesses
  * @group integration
  */
-class IntegrationPoolTest extends \PHPUnit_Framework_TestCase
+class IntegrationPoolTest extends TestCase
 {
     /**
      * @var Connection

@@ -7,8 +7,9 @@ use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Factory;
 use Phlib\Beanstalk\Pool;
+use PHPUnit\Framework\TestCase;
 
-class FactoryTest extends \PHPUnit_Framework_TestCase
+class FactoryTest extends TestCase
 {
     public function testCreate()
     {

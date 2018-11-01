@@ -6,8 +6,9 @@ use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\SocketException;
 use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\TestCase;
 
-class SocketTest extends \PHPUnit_Framework_TestCase
+class SocketTest extends TestCase
 {
     use PHPMock;
 

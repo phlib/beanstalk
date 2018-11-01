@@ -6,9 +6,10 @@ use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool\ManagedConnection;
 use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
 
-class ManagedConnectionTest extends \PHPUnit_Framework_TestCase
+class ManagedConnectionTest extends TestCase
 {
     use PHPMock;
 

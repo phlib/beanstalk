@@ -5,12 +5,13 @@ namespace Phlib\Beanstalk\Tests;
 use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Connection\Socket;
+use PHPUnit\Framework\TestCase;
 
 /**
  * @runTestsInSeparateProcesses
  * @group integration
  */
-class IntegrationTest extends \PHPUnit_Framework_TestCase
+class IntegrationTest extends TestCase
 {
     /**
      * @var Connection

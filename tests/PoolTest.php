@@ -7,8 +7,9 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool;
 use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\TestCase;
 
-class PoolTest extends \PHPUnit_Framework_TestCase
+class PoolTest extends TestCase
 {
     use PHPMock;
 

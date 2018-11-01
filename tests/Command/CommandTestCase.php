@@ -3,8 +3,9 @@
 namespace Phlib\Beanstalk\Tests\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
+use PHPUnit\Framework\TestCase;
 
-class CommandTestCase extends \PHPUnit_Framework_TestCase
+class CommandTestCase extends TestCase
 {
     /**
      * @var \Phlib\Beanstalk\Connection\SocketInterface|\PHPUnit_Framework_MockObject_MockObject
