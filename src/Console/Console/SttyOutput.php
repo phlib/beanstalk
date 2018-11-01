@@ -10,23 +10,23 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class SttyOutput implements OutputInterface
 {
-    const CURSOR_SAVE = 7;
-    const CURSOR_RESTORE = 8;
+    public const CURSOR_SAVE = 7;
+    public const CURSOR_RESTORE = 8;
 
-    const ET_BEGINNING_OF_SCREEN = "1J";
-    const ET_END_OF_SCREEN = "J";
-    const ET_BEGINNING_OF_LINE = "1K";
-    const ET_END_OF_LINE = "K";
+    public const ET_BEGINNING_OF_SCREEN = '1J';
+    public const ET_END_OF_SCREEN = 'J';
+    public const ET_BEGINNING_OF_LINE = '1K';
+    public const ET_END_OF_LINE = 'K';
 
-    const COLOR_BLACK = 0;
-    const COLOR_RED = 1;
-    const COLOR_GREEN = 2;
-    const COLOR_YELLOW = 3;
-    const COLOR_BLUE = 4;
-    const COLOR_MAGENTA = 5;
-    const COLOR_CYAN = 6;
-    const COLOR_WHITE = 7;
-    const COLOR_DEFAULT = 9;
+    public const COLOR_BLACK = 0;
+    public const COLOR_RED = 1;
+    public const COLOR_GREEN = 2;
+    public const COLOR_YELLOW = 3;
+    public const COLOR_BLUE = 4;
+    public const COLOR_MAGENTA = 5;
+    public const COLOR_CYAN = 6;
+    public const COLOR_WHITE = 7;
+    public const COLOR_DEFAULT = 9;
 
     /** @var ConsoleOutput */
     private $output;
@@ -48,18 +48,19 @@ class SttyOutput implements OutputInterface
         shell_exec('stty -icanon -echo');
     }
 
-    public function write($messages, $newline = false, $options = 0)
+    public function write($messages, $newline = false, $options = 0): void
     {
         $this->output->write($messages, $newline, $options);
     }
 
-    public function writeln($messages, $options = 0)
+    public function writeln($messages, $options = 0): void
     {
         if (!$this->capturingTable) {
-            return $this->output->writeln($messages);
+            $this->output->writeln($messages);
+            return;
         }
 
-        if (!is_array($messages)) {
+        if (!\is_array($messages)) {
             $messages = [$messages];
         }
         foreach ($messages as $message) {
@@ -74,17 +75,17 @@ class SttyOutput implements OutputInterface
         $this->output->writeln($messages, $options);
     }
 
-    private function parseLine($message, $cellContents)
+    private function parseLine($message, $cellContents): array
     {
         $rowMapping    = [];
         $charPosition  = 0;
         $cellPosition  = 0;
-        $messageLength = strlen($message);
+        $messageLength = \strlen($message);
         do {
             $cellWord       = $cellContents[$cellPosition];
-            $cellWordLength = strlen((string)$cellWord);
+            $cellWordLength = \strlen((string)$cellWord);
             $lineWord       = substr($message, $charPosition, $cellWordLength);
-            if ($lineWord == $cellWord) {
+            if ($lineWord === $cellWord) {
                 $rowMapping[$cellPosition] = [
                     'word'   => $cellWord,
                     'xPos'   => $charPosition + 1,
@@ -105,7 +106,7 @@ class SttyOutput implements OutputInterface
         return $rowMapping;
     }
 
-    public function captureTableOutput(Table $table)
+    public function captureTableOutput(Table $table): Mapping
     {
         $this->capturingTable = true;
         $table->render();
@@ -113,111 +114,111 @@ class SttyOutput implements OutputInterface
         return new Mapping($this->wordMapping);
     }
 
-    public function setVerbosity($level)
+    public function setVerbosity($level): void
     {
         $this->output->setVerbosity($level);
     }
 
-    public function getVerbosity()
+    public function getVerbosity(): int
     {
         return $this->output->getVerbosity();
     }
 
-    public function isQuiet()
+    public function isQuiet(): bool
     {
         return $this->output->isQuiet();
     }
 
-    public function isVerbose()
+    public function isVerbose(): bool
     {
         return $this->output->isVerbose();
     }
 
-    public function isVeryVerbose()
+    public function isVeryVerbose(): bool
     {
         return $this->output->isVerbose();
     }
 
-    public function isDebug()
+    public function isDebug(): bool
     {
         return $this->output->isDebug();
     }
 
-    public function setDecorated($decorated)
+    public function setDecorated($decorated): void
     {
         $this->output->setDecorated($decorated);
     }
 
-    public function isDecorated()
+    public function isDecorated(): bool
     {
         return $this->output->isDecorated();
     }
 
-    public function setFormatter(OutputFormatterInterface $formatter)
+    public function setFormatter(OutputFormatterInterface $formatter): void
     {
         $this->output->setFormatter($formatter);
     }
 
-    public function getFormatter()
+    public function getFormatter(): OutputFormatterInterface
     {
         return $this->output->getFormatter();
     }
 
-    public function clearScreen()
+    public function clearScreen(): void
     {
         $this->xPos = $this->yPos = 1;
         $this->command(['[2J', '[H']);
     }
 
-    public function clearLine()
+    public function clearLine(): void
     {
         $this->command(['[2K','[G']);
     }
 
-    public function eraseTo($point = self::ET_END_OF_LINE)
+    public function eraseTo($point = self::ET_END_OF_LINE): void
     {
         $this->command("[{$point}");
     }
 
-    public function issueBell()
+    public function issueBell(): void
     {
-        $this->output->write(chr(7));
+        $this->output->write(\chr(7));
     }
 
-    public function moveCursorHome()
+    public function moveCursorHome(): void
     {
         $this->command('[1;1H');
     }
 
-    public function moveCursor($x, $y)
+    public function moveCursor($x, $y): void
     {
         $this->command("[{$y};{$x}H");
     }
 
-    public function makeCursorVisible()
+    public function makeCursorVisible(): void
     {
         $this->command('[?25h');
     }
 
-    public function makeCursorInvisible()
+    public function makeCursorInvisible(): void
     {
         $this->command('[?25l');
     }
 
-    public function command($value)
+    public function command($value): void
     {
-        if (!is_array($value)) {
+        if (!\is_array($value)) {
             $value = [$value];
         }
         $this->output->write("\e" . implode("\e", $value));
     }
 
-    public function highlight(string $word, int $bgColor, int $fgColor)
+    public function highlight(string $word, int $bgColor, int $fgColor): void
     {
         $this->command([self::CURSOR_SAVE, "[4{$bgColor};3{$fgColor}m{$word}", '[49;39m', self::CURSOR_RESTORE]);
     }
 
-    public function getCursor()
+    public function getCursor(): array
     {
         return [$this->xPos, $this->yPos];
     }

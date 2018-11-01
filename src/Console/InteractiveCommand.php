@@ -129,7 +129,7 @@ class InteractiveCommand extends AbstractCommand
 
     protected function actionManageJobs(SymfonyStyle $helper, string $tube, string $status)
     {
-        $helper->write("\033[2J\033[H");
+        $helper->write("\e[2J\e[H");
         $helper->title("$tube ($status)");
 
         $beanstalk = $this->getBeanstalk();
