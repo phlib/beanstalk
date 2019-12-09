@@ -7,14 +7,14 @@
     "homepage": "https://github.com/phlib/beanstalk",
     "authors": [
         {
-            "name": "James Dempster",
-            "email": "james.dempster@emailcenteruk.com",
-            "role": "developer"
+            "name": "James Dempster"
         },
         {
-            "name": "Luke Richards",
-            "email": "luke.richards@emailcenteruk.com",
-            "role": "developer"
+            "name": "Luke Richards"
+        },
+        {
+            "name": "Phlib Team & Contributors",
+            "homepage": "https://github.com/phlib/beanstalk/contributors"
         }
     ],
     "require": {
