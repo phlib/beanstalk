@@ -27,7 +27,7 @@ class ServerTubesCommand extends AbstractCommand
 
             if (empty($tubes)) {
                 $output->writeln('No tubes found.');
-                return;
+                return 0;
             }
 
             $table = new Table($buffered);
@@ -47,5 +47,7 @@ class ServerTubesCommand extends AbstractCommand
             $watch && sleep(1);
 
         } while ($watch);
+
+        return 0;
     }
 }

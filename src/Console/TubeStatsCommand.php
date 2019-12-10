@@ -30,7 +30,7 @@ class TubeStatsCommand extends AbstractCommand
 
         if (empty($stats)) {
             $output->writeln("No statistics found for tube '$tube'.");
-            return;
+            return 0;
         }
 
         if ($stat == '') {
@@ -38,6 +38,8 @@ class TubeStatsCommand extends AbstractCommand
         } else {
             $this->displayStat($stats, $stat, $output);
         }
+
+        return 0;
     }
 
     /**

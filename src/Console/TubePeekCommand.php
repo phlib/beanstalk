@@ -37,5 +37,7 @@ class TubePeekCommand extends AbstractCommand
         } else {
             $this->displayJob($job, $output);
         }
+
+        return 0;
     }
 }

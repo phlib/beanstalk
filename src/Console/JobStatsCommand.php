@@ -51,5 +51,7 @@ class JobStatsCommand extends AbstractCommand
             $table->addRow([$stat, $value]);
         }
         $table->render();
+
+        return 0;
     }
 }

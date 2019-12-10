@@ -24,5 +24,7 @@ class TubeKickCommand extends AbstractCommand
             ->useTube($input->getArgument('tube'))
             ->kick($input->getArgument('quantity'));
         $output->writeln("Successfully kicked $quantity jobs.");
+
+        return 0;
     }
 }
