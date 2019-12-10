@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [1.0.15] - 2019-12-10
 ### Added
 - Add support for *Symfony/Console* v5
 - Add a Change Log. Previous releases are shown as date only. See descriptions
