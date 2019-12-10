@@ -22,5 +22,7 @@ class JobDeleteCommand extends AbstractCommand
         $jobId = $input->getArgument('job-id');
         $this->getBeanstalk()->delete($jobId);
         $output->writeln("Job '$jobId' successfully deleted.");
+
+        return 0;
     }
 }

@@ -30,6 +30,8 @@ class ServerStatsCommand extends AbstractCommand
         } else {
             $this->outputStat($service, $stat, $output);
         }
+
+        return 0;
     }
 
     protected function outputDetectedConfig(OutputInterface $output)

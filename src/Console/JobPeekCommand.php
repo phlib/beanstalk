@@ -24,5 +24,7 @@ class JobPeekCommand extends AbstractCommand
         $jobId = $input->getArgument('job-id');
         $job = $this->getBeanstalk()->peek($jobId);
         $this->displayJob($job, $output);
+
+        return 0;
     }
 }

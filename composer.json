@@ -19,7 +19,7 @@
     ],
     "require": {
         "php": "^5.4|^7.0",
-        "symfony/console": "^2.7|^3|^4",
+        "symfony/console": "^2.7|^3|^4|^5",
         "phlib/console-configuration": "^1.0.3"
     },
     "require-dev": {
