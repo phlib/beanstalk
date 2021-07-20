@@ -2,6 +2,7 @@
 
 namespace Phlib\Beanstalk;
 
+use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\Socket;
 
 class ConnectionTest extends \PHPUnit_Framework_TestCase
@@ -18,7 +19,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->socket = $this->getMockBuilder('\Phlib\Beanstalk\Connection\Socket')
+        $this->socket = $this->getMockBuilder(Socket::class)
             ->disableOriginalConstructor()
             ->getMock();
         $this->beanstalk = new Connection($this->socket);
@@ -27,7 +28,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
     public function testImplementsInterface()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\ConnectionInterface', $this->beanstalk);
+        $this->assertInstanceOf(ConnectionInterface::class, $this->beanstalk);
     }
 
     public function testSocketIsSetCorrectly()
@@ -37,7 +38,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
     public function testDefaultSocketImplementation()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\Socket', $this->beanstalk->getSocket());
+        $this->assertInstanceOf(Socket::class, $this->beanstalk->getSocket());
     }
 
     public function testDisconnectCallsSocket()

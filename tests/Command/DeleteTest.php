@@ -6,7 +6,7 @@ class DeleteTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Delete(123));
+        $this->assertInstanceOf(CommandInterface::class, new Delete(123));
     }
 
     public function testGetCommand()
@@ -20,7 +20,7 @@ class DeleteTest extends CommandTestCase
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('DELETED');
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\Delete', (new Delete(123))->process($this->socket));
+        $this->assertInstanceOf(Delete::class, (new Delete(123))->process($this->socket));
     }
 
     /**

@@ -6,7 +6,7 @@ class PeekTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Peek('ready'));
+        $this->assertInstanceOf(CommandInterface::class, new Peek('ready'));
     }
 
     /**

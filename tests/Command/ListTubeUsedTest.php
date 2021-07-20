@@ -6,7 +6,7 @@ class ListTubeUsedTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new ListTubeUsed());
+        $this->assertInstanceOf(CommandInterface::class, new ListTubeUsed());
     }
 
     public function testGetCommand()

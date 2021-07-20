@@ -4,6 +4,7 @@ namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\StatsService;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -51,7 +52,7 @@ class ServerStatsCommand extends AbstractCommand
     {
         $info = $stats->getServerInfo();
 
-        /* @var $formatter \Symfony\Component\Console\Helper\FormatterHelper */
+        /** @var FormatterHelper $formatter */
         $formatter = $this->getHelper('formatter');
         $block = $formatter->formatBlock(
             [
@@ -92,12 +93,12 @@ class ServerStatsCommand extends AbstractCommand
         $maxRows = max(count($binlog), count($command), count($current));
         for ($i=0; $i < $maxRows; $i++) {
             $row = [
-                (isset($currentKeys[$i])) ? $currentKeys[$i] : '',
-                (isset($currentValues[$i])) ? $currentValues[$i] : '',
-                (isset($commandKeys[$i])) ? $commandKeys[$i] : '',
-                (isset($commandValues[$i])) ? $commandValues[$i] : '',
-                (isset($binlogKeys[$i])) ? $binlogKeys[$i] : '',
-                (isset($binlogValues[$i])) ? $binlogValues[$i] : '',
+                $currentKeys[$i] ?? '',
+                $currentValues[$i] ?? '',
+                $commandKeys[$i] ?? '',
+                $commandValues[$i] ?? '',
+                $binlogKeys[$i] ?? '',
+                $binlogValues[$i] ?? '',
             ];
             $table->addRow($row);
         }

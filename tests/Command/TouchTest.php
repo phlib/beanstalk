@@ -6,7 +6,7 @@ class TouchTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Touch(123));
+        $this->assertInstanceOf(CommandInterface::class, new Touch(123));
     }
 
     public function testGetCommand()
@@ -23,7 +23,7 @@ class TouchTest extends CommandTestCase
             ->willReturn("TOUCHED");
 
         $touch = new Touch($id);
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\Touch', $touch->process($this->socket));
+        $this->assertInstanceOf(Touch::class, $touch->process($this->socket));
     }
 
     /**

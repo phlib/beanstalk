@@ -6,7 +6,7 @@ class BuryTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Bury(123, 123));
+        $this->assertInstanceOf(CommandInterface::class, new Bury(123, 123));
     }
 
     public function testGetCommand()
@@ -21,7 +21,7 @@ class BuryTest extends CommandTestCase
         $this->socket->expects($this->any())
             ->method('read')
             ->willReturn('BURIED');
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\Bury', (new Bury(123, 123))->process($this->socket));
+        $this->assertInstanceOf(Bury::class, (new Bury(123, 123))->process($this->socket));
     }
 
     /**

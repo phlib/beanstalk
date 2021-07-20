@@ -6,6 +6,7 @@ use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Pool\Collection;
+use Phlib\Beanstalk\Pool\RoundRobinStrategy;
 use Phlib\Beanstalk\Pool\SelectionStrategyInterface;
 
 /**
@@ -40,7 +41,7 @@ class Factory
             $connection = static::create($server['host'], $server['port'], $server['options']);
         } elseif (array_key_exists('servers', $config)) {
             if (!isset($config['strategyClass'])) {
-                $config['strategyClass'] = '\Phlib\Beanstalk\Pool\RoundRobinStrategy';
+                $config['strategyClass'] = RoundRobinStrategy::class;
             }
             $servers    = static::createConnections($config['servers']);
             $strategy   = static::createStrategy($config['strategyClass']);

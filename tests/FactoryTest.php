@@ -4,6 +4,8 @@ namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\Pool\RandomStrategy;
+use Phlib\Beanstalk\Pool\RoundRobinStrategy;
 
 class FactoryTest extends \PHPUnit_Framework_TestCase
 {
@@ -19,7 +21,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
 
     public function testCreate()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\ConnectionInterface', Factory::create('localhost'));
+        $this->assertInstanceOf(ConnectionInterface::class, Factory::create('localhost'));
     }
 
     /**
@@ -27,13 +29,13 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
      */
     public function testCreateFromArray($expectedClass, $config)
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\ConnectionInterface', Factory::create('localhost'));
+        $this->assertInstanceOf(ConnectionInterface::class, Factory::create('localhost'));
     }
 
     public function createFromArrayDataProvider()
     {
-        $connectionClass = '\Phlib\Beanstalk\Connection';
-        $poolClass       = '\Phlib\Beanstalk\Pool';
+        $connectionClass = Connection::class;
+        $poolClass       = Pool::class;
         $defaultHost     = ['host' => 'localhost'];
 
         return [
@@ -67,8 +69,8 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
     public function creatingPoolUsesStrategyDataProvider()
     {
         return [
-            ['\Phlib\Beanstalk\Pool\RoundRobinStrategy'],
-            ['\Phlib\Beanstalk\Pool\RandomStrategy']
+            [RoundRobinStrategy::class],
+            [RandomStrategy::class]
         ];
     }
 

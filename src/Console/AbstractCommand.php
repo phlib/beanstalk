@@ -2,6 +2,7 @@
 
 namespace Phlib\Beanstalk\Console;
 
+use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Symfony\Component\Console\Command\Command;
 use Phlib\Beanstalk\Factory;
 
@@ -12,12 +13,12 @@ use Phlib\Beanstalk\Factory;
 abstract class AbstractCommand extends Command
 {
     /**
-     * @var \Phlib\Beanstalk\Connection\ConnectionInterface
+     * @var ConnectionInterface
      */
     protected $beanstalk;
 
     /**
-     * @return \Phlib\Beanstalk\Connection\ConnectionInterface
+     * @return ConnectionInterface
      */
     public function getBeanstalk()
     {

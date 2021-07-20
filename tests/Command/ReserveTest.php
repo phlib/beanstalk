@@ -6,7 +6,7 @@ class ReserveTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Reserve(123));
+        $this->assertInstanceOf(CommandInterface::class, new Reserve(123));
     }
 
     /**

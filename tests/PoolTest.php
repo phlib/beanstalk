@@ -22,7 +22,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     {
         parent::setUp();
 
-        $this->collection = $this->getMockBuilder('\Phlib\Beanstalk\Pool\Collection')
+        $this->collection = $this->getMockBuilder(Collection::class)
             ->disableOriginalConstructor()
             ->getMock();
         $this->pool = new Pool($this->collection);
@@ -37,7 +37,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
 
     public function testDisconnectCallsAllConnections()
     {
-        $connection = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
+        $connection = $this->getMockBuilder(Connection::class)
             ->disableOriginalConstructor()
             ->getMock();
         $connection->expects($this->exactly(2))
@@ -57,7 +57,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
      */
     public function testDisconnectReturnsValue($expected, array $returnValues)
     {
-        $connection = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
+        $connection = $this->getMockBuilder(Connection::class)
             ->disableOriginalConstructor()
             ->getMock();
         $connection->expects($this->any())
@@ -102,7 +102,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
 
     public function testPutSuccess()
     {
-        $connection = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
+        $connection = $this->getMockBuilder(Connection::class)
             ->disableOriginalConstructor()
             ->getMock();
         $this->collection->expects($this->once())
@@ -491,7 +491,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $connection = $this->createMockConnection('127.0.0.1');
 
         $poolId = $this->pool->combineId($connection, $jobId);
-        list($actualHost, $actualJobId) = $this->pool->splitId($poolId);
+        [$actualHost, $actualJobId] = $this->pool->splitId($poolId);
         $this->assertEquals($jobId, $actualJobId);
     }
 
@@ -501,7 +501,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $connection = $this->createMockConnection($host);
 
         $poolId = $this->pool->combineId($connection, 123);
-        list($actualHost, ) = $this->pool->splitId($poolId);
+        [$actualHost, ] = $this->pool->splitId($poolId);
         $this->assertEquals($host, $actualHost);
     }
 
@@ -511,7 +511,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
      */
     protected function createMockConnection($host)
     {
-        $connection = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
+        $connection = $this->getMockBuilder(Connection::class)
             ->disableOriginalConstructor()
             ->getMock();
         $connection->expects($this->any())

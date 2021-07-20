@@ -6,7 +6,7 @@ class RandomStrategyTest extends \PHPUnit_Framework_TestCase
 {
     public function testImplementsSelectionStrategyInterface()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Pool\SelectionStrategyInterface', new RandomStrategy());
+        $this->assertInstanceOf(SelectionStrategyInterface::class, new RandomStrategy());
     }
 
     /**

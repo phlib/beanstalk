@@ -6,7 +6,7 @@ class StatsTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Stats());
+        $this->assertInstanceOf(CommandInterface::class, new Stats());
     }
 
     public function testGetCommand()

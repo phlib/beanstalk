@@ -6,7 +6,7 @@ class ReleaseTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Release(123, 456, 789));
+        $this->assertInstanceOf(CommandInterface::class, new Release(123, 456, 789));
     }
 
     public function testGetCommand()
@@ -29,7 +29,7 @@ class ReleaseTest extends CommandTestCase
             ->willReturn("RELEASED");
 
         $release = new Release(123, 456, 789);
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\Release', $release->process($this->socket));
+        $this->assertInstanceOf(Release::class, $release->process($this->socket));
     }
 
     /**

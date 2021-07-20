@@ -15,7 +15,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $this->strategy = $this->getMock('\Phlib\Beanstalk\Pool\SelectionStrategyInterface');
+        $this->strategy = $this->getMock(SelectionStrategyInterface::class);
     }
 
     public function tearDown()
@@ -25,12 +25,12 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
 
     public function testImplementsCollectionInterface()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Pool\CollectionInterface', new Collection([], $this->strategy));
+        $this->assertInstanceOf(CollectionInterface::class, new Collection([], $this->strategy));
     }
 
     public function testImplementsArrayAggregateInterface()
     {
-        $this->assertInstanceOf('\IteratorAggregate', new Collection([], $this->strategy));
+        $this->assertInstanceOf(\IteratorAggregate::class, new Collection([], $this->strategy));
     }
 
     public function testArrayAggregateReturnsConnections()
@@ -56,7 +56,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
     public function testDefaultStrategyIsRoundRobin()
     {
         $collection = new Collection([]);
-        $this->assertInstanceOf('\Phlib\Beanstalk\Pool\RoundRobinStrategy', $collection->getSelectionStrategy());
+        $this->assertInstanceOf(RoundRobinStrategy::class, $collection->getSelectionStrategy());
     }
 
     public function testConstructorCanSetTheStrategy()
@@ -356,7 +356,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
      */
     public function getMockConnection($identifier, array $methods = null)
     {
-        $builder = $this->getMockBuilder('\Phlib\Beanstalk\Connection')
+        $builder = $this->getMockBuilder(Connection::class)
             ->disableOriginalConstructor();
         if ($methods) {
             $builder->setMethods($methods);

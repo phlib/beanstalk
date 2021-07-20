@@ -6,7 +6,7 @@ class WatchTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Watch('test-tube'));
+        $this->assertInstanceOf(CommandInterface::class, new Watch('test-tube'));
     }
 
     public function testGetCommand()

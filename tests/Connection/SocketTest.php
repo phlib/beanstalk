@@ -10,7 +10,7 @@ class SocketTest extends \PHPUnit_Framework_TestCase
 
     public function testImplementsInterface()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\SocketInterface', new Socket('localhost'));
+        $this->assertInstanceOf(SocketInterface::class, new Socket('localhost'));
     }
 
     public function testGetUniqueIdentifier()
@@ -22,12 +22,12 @@ class SocketTest extends \PHPUnit_Framework_TestCase
 
     public function testConnectOnSuccessReturnsSelf()
     {
-        $fsockopen = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'fsockopen');
+        $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
         $fsockopen->expects($this->any())->willReturn(true);
-        $stream_set_timeout = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'stream_set_timeout');
+        $stream_set_timeout = $this->getFunctionMock(__NAMESPACE__, 'stream_set_timeout');
         $stream_set_timeout->expects($this->any())->willReturn(true);
 
-        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\Socket', (new Socket('host'))->connect());
+        $this->assertInstanceOf(Socket::class, (new Socket('host'))->connect());
     }
 
     /**
@@ -35,13 +35,13 @@ class SocketTest extends \PHPUnit_Framework_TestCase
      */
     public function testConnectOnFailureThrowsError()
     {
-        $fsockopen = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'fsockopen');
+        $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
         $fsockopen->expects($this->any())->willReturnCallback(function ($host, $port, &$errNum, &$errStr, $timeout) {
             $errNum = 123;
             $errStr = 'Testing All The Things';
             return false;
         });
-        $stream_set_timeout = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'stream_set_timeout');
+        $stream_set_timeout = $this->getFunctionMock(__NAMESPACE__, 'stream_set_timeout');
         $stream_set_timeout->expects($this->any())->willReturn(true);
 
         (new Socket('host'))->connect();
@@ -53,7 +53,7 @@ class SocketTest extends \PHPUnit_Framework_TestCase
         $port    = 145234;
         $timeout = 432;
 
-        $fsockopen = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'fsockopen');
+        $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
         $fsockopen->expects($this->any())
             ->with(
                 $this->equalTo($host),
@@ -63,7 +63,7 @@ class SocketTest extends \PHPUnit_Framework_TestCase
                 $this->equalTo($timeout)
             )
             ->willReturn('(socket)');
-        $stream_set_timeout = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'stream_set_timeout');
+        $stream_set_timeout = $this->getFunctionMock(__NAMESPACE__, 'stream_set_timeout');
         $stream_set_timeout->expects($this->any())->willReturn(true);
 
         (new Socket($host, $port, ['timeout' => $timeout]))->connect();
@@ -71,11 +71,11 @@ class SocketTest extends \PHPUnit_Framework_TestCase
 
     public function testDisconnectWithValidConnection()
     {
-        $fsockopen = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'fsockopen');
+        $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
         $fsockopen->expects($this->any())->willReturn(fopen('php://memory', 'r+'));
-        $stream_set_timeout = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'stream_set_timeout');
+        $stream_set_timeout = $this->getFunctionMock(__NAMESPACE__, 'stream_set_timeout');
         $stream_set_timeout->expects($this->any())->willReturn(true);
-        $fsockopen = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'fclose');
+        $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fclose');
         $fsockopen->expects($this->once())->willReturn(true); // <- test here
 
         $socket = new Socket('host');
@@ -85,11 +85,11 @@ class SocketTest extends \PHPUnit_Framework_TestCase
 
     public function testDisconnectWithNoConnection()
     {
-        $fsockopen = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'fsockopen');
+        $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
         $fsockopen->expects($this->any())->willReturn(true);
-        $stream_set_timeout = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'stream_set_timeout');
+        $stream_set_timeout = $this->getFunctionMock(__NAMESPACE__, 'stream_set_timeout');
         $stream_set_timeout->expects($this->any())->willReturn(true);
-        $fsockopen = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'fclose');
+        $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fclose');
         $fsockopen->expects($this->never()); // <- test here
 
         $socket = new Socket('host');
@@ -102,7 +102,7 @@ class SocketTest extends \PHPUnit_Framework_TestCase
         $data = 'Some Data';
         $dataLength = 9 + strlen(Socket::EOL);
 
-        $fwrite = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'fwrite');
+        $fwrite = $this->getFunctionMock(__NAMESPACE__, 'fwrite');
         $fwrite->expects($this->any())
             ->with(
                 $this->anything(),
@@ -120,7 +120,7 @@ class SocketTest extends \PHPUnit_Framework_TestCase
      */
     public function testWriteThrowsExceptionOnError()
     {
-        $fwrite = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'fwrite');
+        $fwrite = $this->getFunctionMock(__NAMESPACE__, 'fwrite');
         $fwrite->expects($this->any())
             ->willReturn(0);
 
@@ -131,7 +131,7 @@ class SocketTest extends \PHPUnit_Framework_TestCase
     public function testReadSuccessfullyFromTheConnection()
     {
         $expectedData = 'Some Data';
-        $stream_get_line = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'stream_get_line');
+        $stream_get_line = $this->getFunctionMock(__NAMESPACE__, 'stream_get_line');
         $stream_get_line->expects($this->any())->willReturn($expectedData);
         $this->assertEquals($expectedData, $this->getMockSocket(['read'])->read());
     }
@@ -140,9 +140,9 @@ class SocketTest extends \PHPUnit_Framework_TestCase
     {
         $expectedData = 'Some Data';
 
-        $feof = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'feof');
+        $feof = $this->getFunctionMock(__NAMESPACE__, 'feof');
         $feof->expects($this->any())->willReturn(false);
-        $fread = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'fread');
+        $fread = $this->getFunctionMock(__NAMESPACE__, 'fread');
         $fread->expects($this->any())->willReturn($expectedData);
 
         $this->assertEquals($expectedData, $this->getMockSocket(['read'])->read(9));
@@ -153,7 +153,7 @@ class SocketTest extends \PHPUnit_Framework_TestCase
      */
     public function testReadFailsWithBadData()
     {
-        $stream_get_line = $this->getFunctionMock('\Phlib\Beanstalk\Connection', 'stream_get_line');
+        $stream_get_line = $this->getFunctionMock(__NAMESPACE__, 'stream_get_line');
         $stream_get_line->expects($this->any())->willReturn(false);
         $this->getMockSocket(['read'])->read();
     }
@@ -166,7 +166,7 @@ class SocketTest extends \PHPUnit_Framework_TestCase
     {
         $availableFns = ['connect', 'disconnect', 'read', 'write', 'getUniqueIdentifier'];
 
-        return $this->getMockBuilder('\Phlib\Beanstalk\Connection\Socket')
+        return $this->getMockBuilder(Socket::class)
             ->disableOriginalConstructor()
             ->setMethods(array_diff($availableFns, $mockFns))
             ->getMock();

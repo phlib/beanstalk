@@ -6,7 +6,7 @@ class RoundRobinStrategyTest extends \PHPUnit_Framework_TestCase
 {
     public function testImplementsSelectionStrategyInterface()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Pool\SelectionStrategyInterface', new RoundRobinStrategy());
+        $this->assertInstanceOf(SelectionStrategyInterface::class, new RoundRobinStrategy());
     }
 
     public function testAllowsContinuousSelection()
