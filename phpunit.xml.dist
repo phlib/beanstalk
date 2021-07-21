@@ -3,11 +3,11 @@
 <phpunit bootstrap="vendor/autoload.php" colors="true">
 
     <php>
-        <var name="BSTALK_ENABLED" value="0" />
-        <!--<var name="BSTALK1_HOST" value="host_1" />-->
-        <!--<var name="BSTALK1_PORT" value="11300" />-->
-        <!--<var name="BSTALK2_HOST" value="host_2" />-->
-        <!--<var name="BSTALK2_PORT" value="11300" />-->
+        <env name="BSTALK_ENABLED" value="0" />
+        <env name="BSTALK1_HOST" value="127.0.0.1" />
+        <env name="BSTALK1_PORT" value="11300" />
+        <env name="BSTALK2_HOST" value="127.0.0.1" />
+        <env name="BSTALK2_PORT" value="11300" />
     </php>
 
     <testsuites>

@@ -19,11 +19,12 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        if (!isset($GLOBALS['BSTALK_ENABLED']) || $GLOBALS['BSTALK_ENABLED'] != true) {
+        if (getenv('BSTALK_ENABLED') != true) {
             $this->markTestSkipped();
-        } else {
-            $this->beanstalk = new Connection(new Socket($GLOBALS['BSTALK1_HOST'], $GLOBALS['BSTALK1_PORT']));
+            return;
         }
+
+        $this->beanstalk = new Connection(new Socket(getenv('BSTALK1_HOST'), getenv('BSTALK1_PORT')));
     }
 
     public function testReconnectingAfterDisconnect()
