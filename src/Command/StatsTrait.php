@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
@@ -12,12 +14,7 @@ use Phlib\Beanstalk\Exception\NotFoundException;
  */
 trait StatsTrait
 {
-    /**
-     * @return array
-     * @throws NotFoundException
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): array
     {
         $socket->write($this->getCommand());
         $status = strtok($socket->read(), ' ');
@@ -36,11 +33,8 @@ trait StatsTrait
 
     /**
      * Decodes the YAML string into an array of data.
-     *
-     * @param  string $response
-     * @return array
      */
-    protected function decode($response)
+    protected function decode(string $response): array
     {
         $lines = array_slice(explode("\n", trim($response)), 1);
 

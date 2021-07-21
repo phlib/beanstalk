@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
@@ -14,33 +16,19 @@ class Touch implements CommandInterface
 {
     use ToStringTrait;
 
-    /**
-     * @var string|integer
-     */
-    protected $id;
+    protected int $id;
 
-    /**
-     * @param string $id
-     */
-    public function __construct($id)
+    public function __construct(int $id)
     {
         $this->id = $id;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('touch %d', $this->id);
     }
 
-    /**
-     * @return $this
-     * @throws NotFoundException
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): self
     {
         $socket->write($this->getCommand());
 

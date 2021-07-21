@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
@@ -10,7 +12,7 @@ use PHPUnit\Framework\TestCase;
 
 class FactoryTest extends TestCase
 {
-    public function testCreate()
+    public function testCreate(): void
     {
         static::assertInstanceOf(ConnectionInterface::class, Factory::create('localhost'));
     }
@@ -18,12 +20,12 @@ class FactoryTest extends TestCase
     /**
      * @dataProvider createFromArrayDataProvider
      */
-    public function testCreateFromArray($expectedClass, $config)
+    public function testCreateFromArray($expectedClass, $config): void
     {
         static::assertInstanceOf(ConnectionInterface::class, Factory::create('localhost'));
     }
 
-    public function createFromArrayDataProvider()
+    public function createFromArrayDataProvider(): array
     {
         $connectionClass = Connection::class;
         $poolClass = Pool::class;
@@ -59,10 +61,9 @@ class FactoryTest extends TestCase
     }
 
     /**
-     * @param string $strategyClass
      * @dataProvider creatingPoolUsesStrategyDataProvider
      */
-    public function testCreatingPoolUsesStrategy($strategyClass)
+    public function testCreatingPoolUsesStrategy(string $strategyClass): void
     {
         $hostConfig = [
             'host' => 'localhost',
@@ -80,7 +81,7 @@ class FactoryTest extends TestCase
         static::assertInstanceOf($strategyClass, $collection->getSelectionStrategy());
     }
 
-    public function creatingPoolUsesStrategyDataProvider()
+    public function creatingPoolUsesStrategyDataProvider(): array
     {
         return [
             [RoundRobinStrategy::class],
@@ -88,7 +89,7 @@ class FactoryTest extends TestCase
         ];
     }
 
-    public function testCreatingPoolFailsWithInvalidStrategyClass()
+    public function testCreatingPoolFailsWithInvalidStrategyClass(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
@@ -102,14 +103,14 @@ class FactoryTest extends TestCase
         Factory::createFromArray($poolConfig);
     }
 
-    public function testCreateFromArrayFailsWhenEmpty()
+    public function testCreateFromArrayFailsWhenEmpty(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         Factory::createFromArray([]);
     }
 
-    public function testCreateConnections()
+    public function testCreateConnections(): void
     {
         $result = true;
         $config = [

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Connection;
 
 use Phlib\Beanstalk\Exception;
@@ -16,33 +18,18 @@ class Socket implements SocketInterface
 
     private const READ_LENGTH = 4096;
 
-    /**
-     * @var string
-     */
-    protected $host;
+    protected string $host;
 
-    /**
-     * @var integer
-     */
-    protected $port;
+    protected int $port;
 
-    /**
-     * @var array
-     */
-    protected $options;
+    protected array $options;
 
     /**
      * @var resource
      */
     protected $connection;
 
-    /**
-     * Constructor
-     *
-     * @param string  $host
-     * @param integer $port
-     */
-    public function __construct($host, $port = self::DEFAULT_PORT, array $options = [])
+    public function __construct(string $host, int $port = self::DEFAULT_PORT, array $options = [])
     {
         $this->host = $host;
         $this->port = $port;
@@ -51,29 +38,17 @@ class Socket implements SocketInterface
         ];
     }
 
-    /**
-     * Destructor
-     */
     public function __destruct()
     {
         $this->disconnect();
     }
 
-    /**
-     * @return string
-     */
-    public function getUniqueIdentifier()
+    public function getUniqueIdentifier(): string
     {
         return "{$this->host}:{$this->port}";
     }
 
-    /**
-     * Connect the socket to the beanstalk server.
-     *
-     * @return $this
-     * @throws Exception\SocketException
-     */
-    public function connect()
+    public function connect(): self
     {
         if (!$this->connection) {
             $errNum = $errStr = null;
@@ -97,14 +72,7 @@ class Socket implements SocketInterface
         return $this;
     }
 
-    /**
-     * Write to the socket.
-     *
-     * @param  string $data
-     * @return $this
-     * @throws Exception\SocketException
-     */
-    public function write($data)
+    public function write(string $data): self
     {
         $this->connect();
 
@@ -120,12 +88,7 @@ class Socket implements SocketInterface
         return $this;
     }
 
-    /**
-     * @param integer|null $length
-     * @return string
-     * @throws Exception\SocketException
-     */
-    public function read($length = null)
+    public function read(int $length = null): string
     {
         $this->connect();
 
@@ -151,10 +114,7 @@ class Socket implements SocketInterface
         return $data;
     }
 
-    /**
-     * @return $this
-     */
-    public function disconnect()
+    public function disconnect(): bool
     {
         if (is_resource($this->connection)) {
             fclose($this->connection);

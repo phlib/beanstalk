@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
@@ -82,10 +84,7 @@ class StatsService
         'binlog-max-size',
     ];
 
-    /**
-     * @var ConnectionInterface
-     */
-    private $beanstalk;
+    private ConnectionInterface $beanstalk;
 
     /**
      * @var array
@@ -97,19 +96,12 @@ class StatsService
         $this->beanstalk = $beanstalk;
     }
 
-    /**
-     * @return array
-     */
-    public function getServerInfo()
+    public function getServerInfo(): array
     {
         return $this->filterTheseKeys(self::INFO_KEYS, $this->getStats());
     }
 
-    /**
-     * @param int $filter
-     * @return array
-     */
-    public function getServerStats($filter = self::SERVER_ALL)
+    public function getServerStats(int $filter = self::SERVER_ALL): array
     {
         $serverKeys = $this->filterServerKeys($filter);
         $stats = $this->filterTheseKeys($serverKeys, $this->getStats());
@@ -118,9 +110,8 @@ class StatsService
 
     /**
      * @param $filter
-     * @return array
      */
-    protected function filterServerKeys($filter)
+    protected function filterServerKeys($filter): array
     {
         $serverKeys = self::SERVER_KEYS;
         if ($filter != self::SERVER_ALL) {
@@ -148,21 +139,14 @@ class StatsService
         return $serverKeys;
     }
 
-    /**
-     * @param string $tube
-     * @return array
-     */
-    public function getTubeStats($tube)
+    public function getTubeStats(string $tube): array
     {
         $stats = $this->beanstalk->statsTube($tube);
         unset($stats['name']);
         return $stats;
     }
 
-    /**
-     * @return array
-     */
-    public function getAllTubeStats()
+    public function getAllTubeStats(): array
     {
         $tubes = $this->beanstalk->listTubes();
         $tubeStats = [];
@@ -184,17 +168,13 @@ class StatsService
 
     /**
      * @param $data
-     * @return array
      */
-    protected function filterTheseKeys(array $keys, $data)
+    protected function filterTheseKeys(array $keys, $data): array
     {
         return array_intersect_key($data, array_flip($keys));
     }
 
-    /**
-     * @return array
-     */
-    protected function getStats()
+    protected function getStats(): array
     {
         if (!$this->stats) {
             $this->stats = $this->beanstalk->stats();

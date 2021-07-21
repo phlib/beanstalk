@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
@@ -17,20 +19,16 @@ class Bury implements CommandInterface
     use ToStringTrait;
 
     /**
-     * @var string|integer
+     * @var string|int
      */
     protected $id;
 
-    /**
-     * @var integer
-     */
-    protected $priority;
+    protected int $priority;
 
     /**
-     * @param string|integer $id
-     * @param integer        $priority
+     * @param string|int $id
      */
-    public function __construct($id, $priority)
+    public function __construct($id, int $priority)
     {
         $this->validatePriority($priority);
 
@@ -38,20 +36,12 @@ class Bury implements CommandInterface
         $this->priority = $priority;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('bury %d %d', $this->id, $this->priority);
     }
 
-    /**
-     * @return $this
-     * @throws NotFoundException
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): self
     {
         $socket->write($this->getCommand());
 

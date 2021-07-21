@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
@@ -13,23 +15,14 @@ class Reserve implements CommandInterface
 {
     use ToStringTrait;
 
-    /**
-     * @var integer|null
-     */
-    protected $timeout;
+    protected ?int $timeout;
 
-    /**
-     * @param integer|null $timeout
-     */
-    public function __construct($timeout = null)
+    public function __construct(?int $timeout = null)
     {
         $this->timeout = $timeout;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
         if ($this->timeout === null) {
             return 'reserve';
@@ -40,7 +33,6 @@ class Reserve implements CommandInterface
 
     /**
      * @return array|false
-     * @throws CommandException
      */
     public function process(SocketInterface $socket)
     {

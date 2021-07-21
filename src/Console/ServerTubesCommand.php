@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\StatsService;
@@ -10,14 +12,14 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class ServerTubesCommand extends AbstractCommand
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('server:tubes')
             ->setDescription('List all tubes known to the server(s).')
             ->addOption('watch', null, null, 'Watch server values by refreshing stats every second');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $watch = $input->getOption('watch');
         $buffered = new BufferedOutput($output->getVerbosity(), $output->isDecorated());

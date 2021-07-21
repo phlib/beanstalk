@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
@@ -15,20 +17,12 @@ use Phlib\Beanstalk\Pool\SelectionStrategyInterface;
  */
 class Factory
 {
-    /**
-     * @param string $host
-     * @param integer $port
-     * @return Connection
-     */
-    public static function create($host, $port = Socket::DEFAULT_PORT, array $options = [])
+    public static function create(string $host, int $port = Socket::DEFAULT_PORT, array $options = []): Connection
     {
         return new Connection(new Socket($host, $port, $options));
     }
 
-    /**
-     * @return ConnectionInterface
-     */
-    public static function createFromArray(array $config)
+    public static function createFromArray(array $config): ConnectionInterface
     {
         if (array_key_exists('host', $config)) {
             $config = [
@@ -56,7 +50,7 @@ class Factory
     /**
      * @return Connection[]
      */
-    public static function createConnections(array $servers)
+    public static function createConnections(array $servers): array
     {
         $connections = [];
         foreach ($servers as $server) {
@@ -70,11 +64,7 @@ class Factory
         return $connections;
     }
 
-    /**
-     * @param string $class
-     * @return SelectionStrategyInterface
-     */
-    public static function createStrategy($class)
+    public static function createStrategy(string $class): SelectionStrategyInterface
     {
         if (!class_exists($class)) {
             throw new InvalidArgumentException("Specified Pool strategy class '{$class}' does not exist.");
@@ -82,10 +72,7 @@ class Factory
         return new $class();
     }
 
-    /**
-     * @return array
-     */
-    protected static function normalizeArgs(array $serverArgs)
+    protected static function normalizeArgs(array $serverArgs): array
     {
         return $serverArgs + [
             'host' => null,

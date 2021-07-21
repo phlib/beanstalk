@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
@@ -15,32 +17,24 @@ class Delete implements CommandInterface
     use ToStringTrait;
 
     /**
-     * @var string|integer
+     * @var string|int
      */
     protected $id;
 
     /**
-     * @param string|integer $id
+     * @param string|int $id
      */
     public function __construct($id)
     {
         $this->id = $id;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('delete %d', $this->id);
     }
 
-    /**
-     * @return $this
-     * @throws NotFoundException
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): self
     {
         $socket->write($this->getCommand());
 

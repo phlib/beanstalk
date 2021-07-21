@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
@@ -15,33 +17,15 @@ class Put implements CommandInterface
     use ValidateTrait;
     use ToStringTrait;
 
-    /**
-     * @var string
-     */
-    protected $data;
+    protected string $data;
 
-    /**
-     * @var integer
-     */
-    protected $priority;
+    protected int $priority;
 
-    /**
-     * @var integer
-     */
-    protected $delay;
+    protected int $delay;
 
-    /**
-     * @var integer
-     */
-    protected $ttr;
+    protected int $ttr;
 
-    /**
-     * @param string  $data
-     * @param integer $priority
-     * @param integer $delay
-     * @param integer $ttr
-     */
-    public function __construct($data, $priority, $delay, $ttr)
+    public function __construct(string $data, int $priority, int $delay, int $ttr)
     {
         $this->validateJobData($data);
         $this->validatePriority($priority);
@@ -52,20 +36,13 @@ class Put implements CommandInterface
         $this->ttr = $ttr;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
         $bytesSent = strlen($this->data);
         return sprintf('put %d %d %d %d', $this->priority, $this->delay, $this->ttr, $bytesSent);
     }
 
-    /**
-     * @return integer
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): int
     {
         $socket->write($this->getCommand());
         $socket->write($this->data);

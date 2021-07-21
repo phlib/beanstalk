@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
@@ -12,7 +14,7 @@ class TubePeekCommand extends AbstractCommand
 {
     use DisplayJobTrait;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('tube:peek')
             ->setDescription('Look at a job in the job based on status.')
@@ -20,7 +22,7 @@ class TubePeekCommand extends AbstractCommand
             ->addOption('status', 's', InputOption::VALUE_OPTIONAL, 'The tube status. Value can be ready, delayed or buried.', 'buried');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $status = $input->getOption('status');
 

@@ -6,7 +6,6 @@ namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\CommandException;
-use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
@@ -29,12 +28,7 @@ class Peek implements CommandInterface
         return sprintf('peek %u', $this->jobId);
     }
 
-    /**
-     * @return array
-     * @throws NotFoundException
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): array
     {
         $socket->write($this->getCommand());
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
@@ -15,33 +17,20 @@ class Ignore implements CommandInterface
     use ValidateTrait;
     use ToStringTrait;
 
-    /**
-     * @var string
-     */
-    protected $tube;
+    protected string $tube;
 
-    /**
-     * @param string $tube
-     */
-    public function __construct($tube)
+    public function __construct(string $tube)
     {
         $this->validateTubeName($tube);
         $this->tube = $tube;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('ignore %s', $this->tube);
     }
 
-    /**
-     * @return integer
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): int
     {
         $socket->write($this->getCommand());
 

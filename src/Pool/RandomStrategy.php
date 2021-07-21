@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
@@ -11,9 +13,9 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
 class RandomStrategy implements SelectionStrategyInterface
 {
     /**
-     * @inheritdoc
+     * @param string[] $collection
      */
-    public function pickOne(array $collection)
+    public function pickOne(array $collection): string
     {
         if (empty($collection)) {
             throw new InvalidArgumentException('Can not select from an empty collection.');

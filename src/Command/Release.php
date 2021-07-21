@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
@@ -16,27 +18,13 @@ class Release implements CommandInterface
     use ValidateTrait;
     use ToStringTrait;
 
-    /**
-     * @var string|integer
-     */
-    protected $id;
+    protected int $id;
 
-    /**
-     * @var integer
-     */
-    protected $priority;
+    protected int $priority;
 
-    /**
-     * @var integer
-     */
-    protected $delay;
+    protected int $delay;
 
-    /**
-     * @param string  $id
-     * @param integer $priority
-     * @param integer $delay
-     */
-    public function __construct($id, $priority, $delay)
+    public function __construct(int $id, int $priority, int $delay)
     {
         $this->validatePriority($priority);
 
@@ -45,20 +33,12 @@ class Release implements CommandInterface
         $this->delay = $delay;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('release %d %d %d', $this->id, $this->priority, $this->delay);
     }
 
-    /**
-     * @return $this
-     * @throws NotFoundException
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): self
     {
         $socket->write($this->getCommand());
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Connection;
 
 /**
@@ -8,25 +10,11 @@ namespace Phlib\Beanstalk\Connection;
  */
 interface SocketInterface
 {
-    /**
-     * @return string
-     */
-    public function getUniqueIdentifier();
+    public function getUniqueIdentifier(): string;
 
-    /**
-     * @param string $data
-     * @return $this
-     */
-    public function write($data);
+    public function write(string $data): self;
 
-    /**
-     * @param integer|null $length
-     * @return string
-     */
-    public function read($length = null);
+    public function read(int $length = null): string;
 
-    /**
-     * @return bool
-     */
-    public function disconnect();
+    public function disconnect(): bool;
 }

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
@@ -10,15 +12,12 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
  */
 class RoundRobinStrategy implements SelectionStrategyInterface
 {
-    /**
-     * @var integer
-     */
-    protected $index = -1;
+    protected int $index = -1;
 
     /**
-     * @inheritdoc
+     * @param string[] $collection
      */
-    public function pickOne(array $collection)
+    public function pickOne(array $collection): string
     {
         if (empty($collection)) {
             throw new InvalidArgumentException('Can not select from an empty collection.');

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Exception\CommandException;
@@ -8,7 +10,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 class StatsTraitTest extends CommandTestCase
 {
-    public function testProcessCompletesOnSuccess()
+    public function testProcessCompletesOnSuccess(): void
     {
         $stat = $this->getMockStat(['process']);
         $testString = 'my test data';
@@ -25,7 +27,7 @@ class StatsTraitTest extends CommandTestCase
         static::assertEquals($expectedData, $stat->process($this->socket));
     }
 
-    public function testWhenStatusNotFound()
+    public function testWhenStatusNotFound(): void
     {
         $this->expectException(NotFoundException::class);
 
@@ -36,7 +38,7 @@ class StatsTraitTest extends CommandTestCase
             ->process($this->socket);
     }
 
-    public function testWhenStatusUnknown()
+    public function testWhenStatusUnknown(): void
     {
         $this->expectException(CommandException::class);
 
@@ -48,10 +50,9 @@ class StatsTraitTest extends CommandTestCase
     }
 
     /**
-     * @param string $yaml
      * @dataProvider yamlFormatIsDecodedDataProvider
      */
-    public function testYamlFormatIsDecoded($yaml, array $expectedOutput)
+    public function testYamlFormatIsDecoded(string $yaml, array $expectedOutput): void
     {
         $this->socket->expects(static::any())
             ->method('read')
@@ -60,7 +61,7 @@ class StatsTraitTest extends CommandTestCase
         static::assertEquals($expectedOutput, $stat->process($this->socket));
     }
 
-    public function yamlFormatIsDecodedDataProvider()
+    public function yamlFormatIsDecodedDataProvider(): array
     {
         return [
             [
@@ -115,11 +116,15 @@ class StatsTraitTest extends CommandTestCase
     /**
      * @return StatsTrait|MockObject
      */
-    public function getMockStat(array $mockFns)
+    public function getMockStat(array $mockFns): MockObject
     {
         $availableFns = ['process', 'decode', 'getCommand'];
-        return $this->getMockBuilder(StatsTrait::class)
+        $mock = $this->getMockBuilder(StatsTrait::class)
             ->setMethods(array_diff($availableFns, $mockFns))
             ->getMockForTrait();
+        $mock->method('getCommand')
+            ->willReturn('stats');
+
+        return $mock;
     }
 }

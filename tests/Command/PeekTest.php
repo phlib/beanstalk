@@ -9,17 +9,17 @@ use Phlib\Beanstalk\Exception\NotFoundException;
 
 class PeekTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
         static::assertInstanceOf(CommandInterface::class, new Peek(10));
     }
 
-    public function testGetCommand()
+    public function testGetCommand(): void
     {
         static::assertEquals('peek 123', (new Peek(123))->getCommand());
     }
 
-    public function testSuccessfulCommand()
+    public function testSuccessfulCommand(): void
     {
         $id = 123;
         $body = 'Foo Bar';
@@ -35,7 +35,7 @@ class PeekTest extends CommandTestCase
         static::assertEquals($response, (new Peek(10))->process($this->socket));
     }
 
-    public function testNotFoundThrowsException()
+    public function testNotFoundThrowsException(): void
     {
         $this->expectException(NotFoundException::class);
 
@@ -45,7 +45,7 @@ class PeekTest extends CommandTestCase
         (new Peek(10))->process($this->socket);
     }
 
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
         $this->expectException(CommandException::class);
 

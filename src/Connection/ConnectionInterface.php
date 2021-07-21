@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Connection;
 
 /**
@@ -20,92 +22,63 @@ interface ConnectionInterface
 
     public const MAX_PRIORITY = 4294967295; // 2^32
 
-    /**
-     * @return string
-     */
-    public function getName();
+    public function getName(): string;
+
+    public function disconnect(): bool;
+
+    public function useTube(string $tube): self;
 
     /**
-     * @return bool
-     */
-    public function disconnect();
-
-    /**
-     * @param string $tube
-     * @return $this
-     */
-    public function useTube($tube);
-
-    /**
-     * @param string  $data
-     * @param integer $priority
-     * @param integer $delay
-     * @param integer $ttr
-     * @return string|integer
+     * @return string|int
      */
     public function put(
-        $data,
-        $priority = self::DEFAULT_PRIORITY,
-        $delay = self::DEFAULT_DELAY,
-        $ttr = self::DEFAULT_TTR
+        string $data,
+        int $priority = self::DEFAULT_PRIORITY,
+        int $delay = self::DEFAULT_DELAY,
+        int $ttr = self::DEFAULT_TTR
     );
 
     /**
-     * @param integer $timeout
-     * @return array
+     * @return array|false
      */
-    public function reserve($timeout = null);
+    public function reserve(?int $timeout = null);
 
     /**
-     * @param string|integer $id
-     * @return $this
+     * @param string|int $id
      */
-    public function touch($id);
+    public function touch($id): self;
 
     /**
-     * @param integer $id
-     * @param integer $priority
-     * @param integer $delay
-     * @return $this
+     * @param string|int $id
      */
-    public function release($id, $priority = self::DEFAULT_PRIORITY, $delay = self::DEFAULT_DELAY);
+    public function release($id, int $priority = self::DEFAULT_PRIORITY, int $delay = self::DEFAULT_DELAY): self;
 
     /**
-     * @param integer $id
-     * @param integer $priority
-     * @return $this
+     * @param string|int $id
      */
-    public function bury($id, $priority = self::DEFAULT_PRIORITY);
+    public function bury($id, int $priority = self::DEFAULT_PRIORITY): self;
 
     /**
-     * @param integer $id
-     * @return $this
+     * @param string|int $id
      */
-    public function delete($id);
+    public function delete($id): self;
+
+    public function watch(string $tube): self;
 
     /**
-     * @param string $tube
-     * @return $this
-     */
-    public function watch($tube);
-
-    /**
-     * @param string $tube
      * @return int|false Number of tubes being watched or false
      */
-    public function ignore($tube);
+    public function ignore(string $tube);
 
     /**
-     * @param integer $id
-     * @return array
+     * @param string|int $id
      */
-    public function peek($id);
+    public function peek($id): array;
 
     /**
-     * @param integer $id
-     * @return array
+     * @param string|int $id
      */
-    public function statsJob($id);
+    public function statsJob($id): array;
 
     /**
      * @return array|false
@@ -122,35 +95,21 @@ interface ConnectionInterface
      */
     public function peekBuried();
 
-    /**
-     * @param integer $quantity
-     * @return integer
-     */
-    public function kick($quantity);
+    public function kick(int $quantity): int;
 
     /**
-     * @param string $tube
-     * @return array
+     * @return array|false
      */
-    public function statsTube($tube);
+    public function statsTube(string $tube);
 
     /**
-     * @return array
+     * @return array|false
      */
     public function stats();
 
-    /**
-     * @return array
-     */
-    public function listTubes();
+    public function listTubes(): array;
 
-    /**
-     * @return string
-     */
-    public function listTubeUsed();
+    public function listTubeUsed(): string;
 
-    /**
-     * @return array
-     */
-    public function listTubesWatched();
+    public function listTubesWatched(): array;
 }

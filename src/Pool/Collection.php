@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
@@ -14,24 +16,14 @@ use Phlib\Beanstalk\Exception\RuntimeException;
  */
 class Collection implements CollectionInterface
 {
-    /**
-     * @var array
-     */
-    protected $connections;
+    protected array $connections;
 
-    /**
-     * @var SelectionStrategyInterface
-     */
-    protected $strategy;
+    protected SelectionStrategyInterface $strategy;
 
-    /**
-     * @var array
-     */
-    protected $options;
+    protected array $options;
 
     /**
      * @param ConnectionInterface[] $connections
-     * @throws InvalidArgumentException
      */
     public function __construct(array $connections, SelectionStrategyInterface $strategy = null, array $options = [])
     {
@@ -57,18 +49,12 @@ class Collection implements CollectionInterface
         ];
     }
 
-    /**
-     * @return SelectionStrategyInterface
-     */
-    public function getSelectionStrategy()
+    public function getSelectionStrategy(): SelectionStrategyInterface
     {
         return $this->strategy;
     }
 
-    /**
-     * @return \Traversable
-     */
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         $connections = [];
         foreach (array_keys($this->connections) as $key) {
@@ -81,10 +67,7 @@ class Collection implements CollectionInterface
         return new \ArrayIterator($connections);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getConnection($key)
+    public function getConnection(string $key): ConnectionInterface
     {
         if (!array_key_exists($key, $this->connections)) {
             throw new NotFoundException("Specified key '{$key}' is not in the pool.");
@@ -98,10 +81,7 @@ class Collection implements CollectionInterface
         return $this->connections[$key]['connection'];
     }
 
-    /**
-     * @return array
-     */
-    public function getAvailableKeys()
+    public function getAvailableKeys(): array
     {
         $keys = [];
         foreach (array_keys($this->connections) as $key) {
@@ -116,9 +96,9 @@ class Collection implements CollectionInterface
     }
 
     /**
-     * @inheritdoc
+     * @return mixed
      */
-    public function sendToOne($command, array $arguments = [])
+    public function sendToOne(string $command, array $arguments = [])
     {
         $e = null;
 
@@ -151,9 +131,9 @@ class Collection implements CollectionInterface
     }
 
     /**
-     * @inheritdoc
+     * @return mixed
      */
-    public function sendToExact($key, $command, array $arguments = [])
+    public function sendToExact(string $key, string $command, array $arguments = [])
     {
         try {
             $connection = $this->getConnection($key);
@@ -239,10 +219,21 @@ class Collection implements CollectionInterface
     }
 
     /**
-     * @inheritdoc
+     * @param callable|null $success {
+     *     @param array $result
+     *     @return bool continue iteration to other connections
+     * }
+     * @param callable|null $failure {
+     *     @return bool continue iteration to other connections
+     * }
+     * @return mixed
      */
-    public function sendToAll($command, array $arguments = [], callable $success = null, callable $failure = null)
-    {
+    public function sendToAll(
+        string $command,
+        array $arguments = [],
+        callable $success = null,
+        callable $failure = null
+    ) {
         foreach (array_keys($this->connections) as $key) {
             try {
                 $result = $this->sendToExact($key, $command, $arguments);

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Console;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -10,14 +12,14 @@ class JobPeekCommand extends AbstractCommand
 {
     use DisplayJobTrait;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('job:peek')
             ->setDescription('View information about a specific job.')
             ->addArgument('job-id', InputArgument::REQUIRED, 'The ID of the job.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $jobId = $input->getArgument('job-id');
         $job = $this->getBeanstalk()->peek($jobId);
