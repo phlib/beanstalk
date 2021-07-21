@@ -3,8 +3,8 @@
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
-use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\ValidateTrait;
 
 /**
@@ -34,7 +34,7 @@ class Bury implements CommandInterface
     {
         $this->validatePriority($priority);
 
-        $this->id       = $id;
+        $this->id = $id;
         $this->priority = $priority;
     }
 
@@ -47,7 +47,6 @@ class Bury implements CommandInterface
     }
 
     /**
-     * @param SocketInterface $socket
      * @return $this
      * @throws NotFoundException
      * @throws CommandException
@@ -62,10 +61,10 @@ class Bury implements CommandInterface
                 return $this;
 
             case 'NOT_FOUND':
-                throw new NotFoundException("Job id '$this->id' could not be found.");
+                throw new NotFoundException("Job id '{$this->id}' could not be found.");
 
             default:
-                throw new CommandException("Bury id '$this->id' failed '$response'");
+                throw new CommandException("Bury id '{$this->id}' failed '{$response}'");
         }
     }
 }

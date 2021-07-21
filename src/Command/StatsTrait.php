@@ -3,8 +3,8 @@
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
-use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
  * Class AbstractStats
@@ -12,9 +12,7 @@ use Phlib\Beanstalk\Exception\CommandException;
  */
 trait StatsTrait
 {
-
     /**
-     * @param SocketInterface $socket
      * @return array
      * @throws NotFoundException
      * @throws CommandException
@@ -29,10 +27,10 @@ trait StatsTrait
                 return $this->decode($data);
 
             case 'NOT_FOUND':
-                throw new NotFoundException("Stats read could not find specified job");
+                throw new NotFoundException('Stats read could not find specified job');
 
             default:
-                throw new CommandException("Stats read failed '$status'");
+                throw new CommandException("Stats read failed '{$status}'");
         }
     }
 

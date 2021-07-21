@@ -15,7 +15,7 @@ class WatchTest extends CommandTestCase
     public function testGetCommand()
     {
         $tube = 'test-tube';
-        static::assertEquals("watch $tube", (new Watch($tube))->getCommand());
+        static::assertEquals("watch {$tube}", (new Watch($tube))->getCommand());
     }
 
     public function testTubeIsValidated()
@@ -31,7 +31,7 @@ class WatchTest extends CommandTestCase
         $watchingCount = 12;
         $this->socket->expects(static::any())
             ->method('read')
-            ->willReturn("WATCHING $watchingCount");
+            ->willReturn("WATCHING {$watchingCount}");
 
         static::assertEquals($watchingCount, (new Watch($tube))->process($this->socket));
     }

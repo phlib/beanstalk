@@ -3,8 +3,8 @@
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
-use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
  * Class Touch
@@ -36,7 +36,6 @@ class Touch implements CommandInterface
     }
 
     /**
-     * @param SocketInterface $socket
      * @return $this
      * @throws NotFoundException
      * @throws CommandException
@@ -51,10 +50,10 @@ class Touch implements CommandInterface
                 return $this;
 
             case 'NOT_TOUCHED':
-                throw new NotFoundException("Job id '$this->id' could not be found.");
+                throw new NotFoundException("Job id '{$this->id}' could not be found.");
 
             default:
-                throw new CommandException("Touch id '$this->id' failed '$status'");
+                throw new CommandException("Touch id '{$this->id}' failed '{$status}'");
         }
     }
 }

@@ -12,7 +12,7 @@ use Phlib\Beanstalk\Exception\NotFoundException;
  */
 class Connection implements ConnectionInterface
 {
-    const DEFAULT_TUBE = 'default';
+    public const DEFAULT_TUBE = 'default';
 
     /**
      * @var string
@@ -32,13 +32,10 @@ class Connection implements ConnectionInterface
     /**
      * @var array
      */
-    protected $watching = [self::DEFAULT_TUBE => true];
+    protected $watching = [
+        self::DEFAULT_TUBE => true,
+    ];
 
-    /**
-     * Constructor
-     *
-     * @param SocketInterface $socket
-     */
     public function __construct(SocketInterface $socket)
     {
         $this->setSocket($socket);
@@ -54,7 +51,6 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param SocketInterface $socket
      * @return $this
      */
     public function setSocket(SocketInterface $socket)

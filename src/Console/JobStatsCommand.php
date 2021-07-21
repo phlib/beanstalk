@@ -2,11 +2,9 @@
 
 namespace Phlib\Beanstalk\Console;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class JobStatsCommand extends AbstractCommand
@@ -22,7 +20,7 @@ class JobStatsCommand extends AbstractCommand
     {
         $jobId = $input->getArgument('job-id');
         $stats = $this->getBeanstalk()->statsJob($jobId);
-        $output->writeln("<info>[Job ID: $jobId]</info>");
+        $output->writeln("<info>[Job ID: {$jobId}]</info>");
 
         $table = new Table($output);
         $table->setStyle('compact');
@@ -36,8 +34,8 @@ class JobStatsCommand extends AbstractCommand
         $table->render();
 
         $created = time();
-        $table   = new Table($output);
-        $stats   = array_diff_key($stats, array_flip(['id', 'tube', 'state']));
+        $table = new Table($output);
+        $stats = array_diff_key($stats, array_flip(['id', 'tube', 'state']));
         $table->setHeaders(['Stat', 'Value']);
         foreach ($stats as $stat => $value) {
             if ($stat == 'age') {

@@ -3,9 +3,9 @@
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
-use Phlib\Beanstalk\Exception\CommandException;
 
 /**
  * Class Peek
@@ -15,9 +15,11 @@ class Peek implements CommandInterface
 {
     use ToStringTrait;
 
-    const READY   = 'ready';
-    const DELAYED = 'delayed';
-    const BURIED  = 'buried';
+    public const READY = 'ready';
+
+    public const DELAYED = 'delayed';
+
+    public const BURIED = 'buried';
 
     /**
      * @var string|integer
@@ -35,7 +37,7 @@ class Peek implements CommandInterface
     protected $subCommands = [
         self::READY,
         self::DELAYED,
-        self::BURIED
+        self::BURIED,
     ];
 
     /**
@@ -64,7 +66,6 @@ class Peek implements CommandInterface
     }
 
     /**
-     * @param SocketInterface $socket
      * @return array
      * @throws NotFoundException
      * @throws CommandException
@@ -76,17 +77,20 @@ class Peek implements CommandInterface
         $response = strtok($socket->read(), ' ');
         switch ($response) {
             case 'FOUND':
-                $id     = (int)strtok(' ');
-                $bytes  = (int)strtok(' ');
-                $body   = substr($socket->read($bytes + 2), 0, -2);
+                $id = (int)strtok(' ');
+                $bytes = (int)strtok(' ');
+                $body = substr($socket->read($bytes + 2), 0, -2);
 
-                return ['id' => $id, 'body' => $body];
+                return [
+                    'id' => $id,
+                    'body' => $body,
+                ];
 
             case 'NOT_FOUND':
-                throw new NotFoundException("Peek failed to find any jobs");
+                throw new NotFoundException('Peek failed to find any jobs');
 
             default:
-                throw new CommandException("Unknown peek response '$response'");
+                throw new CommandException("Unknown peek response '{$response}'");
         }
     }
 }

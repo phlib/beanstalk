@@ -46,10 +46,10 @@ class Put implements CommandInterface
         $this->validateJobData($data);
         $this->validatePriority($priority);
 
-        $this->data     = (string)$data;
+        $this->data = (string)$data;
         $this->priority = $priority;
-        $this->delay    = $delay;
-        $this->ttr      = $ttr;
+        $this->delay = $delay;
+        $this->ttr = $ttr;
     }
 
     /**
@@ -62,7 +62,6 @@ class Put implements CommandInterface
     }
 
     /**
-     * @param SocketInterface $socket
      * @return integer
      * @throws CommandException
      */
@@ -81,7 +80,7 @@ class Put implements CommandInterface
             case 'JOB_TOO_BIG':
             case 'DRAINING':
             default:
-                throw new CommandException("Put failed '$status'");
+                throw new CommandException("Put failed '{$status}'");
         }
     }
 }

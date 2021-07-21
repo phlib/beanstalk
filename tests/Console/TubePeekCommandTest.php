@@ -65,7 +65,7 @@ class TubePeekCommandTest extends ConsoleTestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             'tube' => $tube,
-            '--status' => 'buried'
+            '--status' => 'buried',
         ]);
 
         $output = $this->commandTester->getDisplay();
@@ -94,7 +94,7 @@ class TubePeekCommandTest extends ConsoleTestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             'tube' => $tube,
-            '--status' => 'delayed'
+            '--status' => 'delayed',
         ]);
 
         $output = $this->commandTester->getDisplay();
@@ -123,7 +123,7 @@ class TubePeekCommandTest extends ConsoleTestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             'tube' => $tube,
-            '--status' => 'ready'
+            '--status' => 'ready',
         ]);
 
         $output = $this->commandTester->getDisplay();

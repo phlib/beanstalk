@@ -42,13 +42,16 @@ class PeekTest extends CommandTestCase
 
     public function testSuccessfulCommand()
     {
-        $id       = 123;
-        $body     = 'Foo Bar';
-        $response = ['id' => $id, 'body' => $body];
+        $id = 123;
+        $body = 'Foo Bar';
+        $response = [
+            'id' => $id,
+            'body' => $body,
+        ];
 
         $this->socket->expects(static::any())
             ->method('read')
-            ->willReturnOnConsecutiveCalls("FOUND $id 123\r\n", $body . "\r\n");
+            ->willReturnOnConsecutiveCalls("FOUND {$id} 123\r\n", $body . "\r\n");
 
         static::assertEquals($response, (new Peek(10))->process($this->socket));
     }

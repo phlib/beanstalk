@@ -24,21 +24,18 @@ interface CollectionInterface extends \IteratorAggregate
     /**
      * @param $key
      * @param $command
-     * @param array $arguments
      * @return mixed
      */
     public function sendToExact($key, $command, array $arguments = []);
 
     /**
      * @param $command
-     * @param array $arguments
      * @return mixed
      */
     public function sendToOne($command, array $arguments = []);
 
     /**
      * @param $command
-     * @param array $arguments
      * @param callable $success
      * @param callable $failure
      * @return mixed

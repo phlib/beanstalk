@@ -29,14 +29,17 @@ class ReserveTest extends CommandTestCase
 
     public function testSuccessfulCommand()
     {
-        $id       = 123;
-        $data     = 'Foo Bar';
-        $bytes    = strlen($data);
-        $response = ['id' => $id, 'body' => $data];
+        $id = 123;
+        $data = 'Foo Bar';
+        $bytes = strlen($data);
+        $response = [
+            'id' => $id,
+            'body' => $data,
+        ];
 
         $this->socket->expects(static::any())
             ->method('read')
-            ->willReturnOnConsecutiveCalls("RESERVED $id $bytes\r\n", $data . "\r\n");
+            ->willReturnOnConsecutiveCalls("RESERVED {$id} {$bytes}\r\n", $data . "\r\n");
 
         static::assertEquals($response, (new Reserve())->process($this->socket));
     }

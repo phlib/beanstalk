@@ -35,7 +35,6 @@ class Kick implements CommandInterface
     }
 
     /**
-     * @param SocketInterface $socket
      * @return integer
      * @throws CommandException
      */
@@ -48,7 +47,7 @@ class Kick implements CommandInterface
                 return (int)strtok(' ');
 
             default:
-                throw new CommandException("Kick with bound '$this->bound' failed '$status'");
+                throw new CommandException("Kick with bound '{$this->bound}' failed '{$status}'");
         }
     }
 }

@@ -3,8 +3,8 @@
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
-use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\ValidateTrait;
 
 /**
@@ -40,9 +40,9 @@ class Release implements CommandInterface
     {
         $this->validatePriority($priority);
 
-        $this->id       = $id;
+        $this->id = $id;
         $this->priority = $priority;
-        $this->delay    = $delay;
+        $this->delay = $delay;
     }
 
     /**
@@ -54,7 +54,6 @@ class Release implements CommandInterface
     }
 
     /**
-     * @param SocketInterface $socket
      * @return $this
      * @throws NotFoundException
      * @throws CommandException
@@ -70,10 +69,10 @@ class Release implements CommandInterface
                 return $this;
 
             case 'NOT_FOUND':
-                throw new NotFoundException("Job id '$this->id' could not be found.");
+                throw new NotFoundException("Job id '{$this->id}' could not be found.");
 
             default:
-                throw new CommandException("Release '$this->id' failed '$response'");
+                throw new CommandException("Release '{$this->id}' failed '{$response}'");
         }
     }
 }

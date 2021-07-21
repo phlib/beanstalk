@@ -54,8 +54,8 @@ class SocketTest extends TestCase
      */
     public function testConnectsWithTheCorrectDetails()
     {
-        $host    = 'someHost';
-        $port    = 145234;
+        $host = 'someHost';
+        $port = 145234;
         $timeout = 432;
 
         $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
@@ -71,7 +71,9 @@ class SocketTest extends TestCase
         $stream_set_timeout = $this->getFunctionMock(__NAMESPACE__, 'stream_set_timeout');
         $stream_set_timeout->expects(static::any())->willReturn(true);
 
-        (new Socket($host, $port, ['timeout' => $timeout]))->connect();
+        (new Socket($host, $port, [
+            'timeout' => $timeout,
+        ]))->connect();
     }
 
     public function testDisconnectWithValidConnection()
@@ -165,7 +167,6 @@ class SocketTest extends TestCase
     }
 
     /**
-     * @param array $mockFns
      * @return Socket|MockObject
      */
     protected function getMockSocket(array $mockFns)

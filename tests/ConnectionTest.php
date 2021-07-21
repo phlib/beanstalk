@@ -76,7 +76,10 @@ class ConnectionTest extends TestCase
 
     public function testReserveDecodesData()
     {
-        $expectedData = ['foo' => 'bar' , 'bar' => 'baz'];
+        $expectedData = [
+            'foo' => 'bar',
+            'bar' => 'baz',
+        ];
         $expectedData = @(string)$expectedData;
         $this->socket->expects(static::atLeastOnce())
             ->method('read')
@@ -88,43 +91,43 @@ class ConnectionTest extends TestCase
     public function testDelete()
     {
         $id = 234;
-        $this->execute("delete $id", 'DELETED', 'delete', [$id]);
+        $this->execute("delete {$id}", 'DELETED', 'delete', [$id]);
     }
 
     public function testRelease()
     {
         $id = 234;
-        $this->execute("release $id", 'RELEASED', 'release', [$id]);
+        $this->execute("release {$id}", 'RELEASED', 'release', [$id]);
     }
 
     public function testUseTube()
     {
         $tube = 'test-tube';
-        $this->execute("use $tube", 'USING', 'useTube', [$tube]);
+        $this->execute("use {$tube}", 'USING', 'useTube', [$tube]);
     }
 
     public function testBury()
     {
         $id = 534;
-        $this->execute("bury $id", 'BURIED', 'bury', [$id]);
+        $this->execute("bury {$id}", 'BURIED', 'bury', [$id]);
     }
 
     public function testTouch()
     {
         $id = 567;
-        $this->execute("touch $id", 'TOUCHED', 'touch', [$id]);
+        $this->execute("touch {$id}", 'TOUCHED', 'touch', [$id]);
     }
 
     public function testWatch()
     {
         $tube = 'test-tube';
-        $this->execute("watch $tube", "WATCHING $tube", 'watch', [$tube]);
+        $this->execute("watch {$tube}", "WATCHING {$tube}", 'watch', [$tube]);
     }
 
     public function testWatchForExistingWatchedTube()
     {
         $tube = 'test-tube';
-        $this->execute("watch $tube", "WATCHING 123", 'watch', [$tube]);
+        $this->execute("watch {$tube}", 'WATCHING 123', 'watch', [$tube]);
         $this->beanstalk->watch($tube);
     }
 
@@ -135,7 +138,7 @@ class ConnectionTest extends TestCase
             ->method('read')
             ->willReturn('WATCHING 123');
         $this->beanstalk->watch($tube);
-        $this->execute("ignore $tube", 'WATCHING 123', 'ignore', [$tube]);
+        $this->execute("ignore {$tube}", 'WATCHING 123', 'ignore', [$tube]);
     }
 
     public function testIgnoreDoesNothingWhenNotWatching()
@@ -154,22 +157,22 @@ class ConnectionTest extends TestCase
     public function testPeek()
     {
         $id = 245;
-        $this->execute("peek $id", ["FOUND $id 678", '{"foo":"bar","bar":"baz"}'], 'peek', [$id]);
+        $this->execute("peek {$id}", ["FOUND {$id} 678", '{"foo":"bar","bar":"baz"}'], 'peek', [$id]);
     }
 
     public function testPeekReady()
     {
-        $this->execute("peek-ready", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekReady');
+        $this->execute('peek-ready', ['FOUND 234 678', '{"foo":"bar","bar":"baz"}'], 'peekReady');
     }
 
     public function testPeekDelayed()
     {
-        $this->execute("peek-delayed", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekDelayed');
+        $this->execute('peek-delayed', ['FOUND 234 678', '{"foo":"bar","bar":"baz"}'], 'peekDelayed');
     }
 
     public function testPeekBuried()
     {
-        $this->execute("peek-buried", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekBuried');
+        $this->execute('peek-buried', ['FOUND 234 678', '{"foo":"bar","bar":"baz"}'], 'peekBuried');
     }
 
     public function testPeekNotFound()
@@ -177,34 +180,34 @@ class ConnectionTest extends TestCase
         $this->expectException(NotFoundException::class);
 
         $id = 245;
-        static::assertFalse($this->execute("peek $id", 'NOT_FOUND', 'peek', [$id]));
+        static::assertFalse($this->execute("peek {$id}", 'NOT_FOUND', 'peek', [$id]));
     }
 
     public function testPeekReadyNotFound()
     {
-        static::assertFalse($this->execute("peek-ready", 'NOT_FOUND', 'peekReady'));
+        static::assertFalse($this->execute('peek-ready', 'NOT_FOUND', 'peekReady'));
     }
 
     public function testPeekDelayedNotFound()
     {
-        static::assertFalse($this->execute("peek-delayed", 'NOT_FOUND', 'peekDelayed'));
+        static::assertFalse($this->execute('peek-delayed', 'NOT_FOUND', 'peekDelayed'));
     }
 
     public function testPeekBuriedNotFound()
     {
-        static::assertFalse($this->execute("peek-buried", 'NOT_FOUND', 'peekBuried'));
+        static::assertFalse($this->execute('peek-buried', 'NOT_FOUND', 'peekBuried'));
     }
 
     public function testKick()
     {
         $bound = 123;
-        $this->execute("kick $bound", "KICKED $bound", 'kick', [$bound]);
+        $this->execute("kick {$bound}", "KICKED {$bound}", 'kick', [$bound]);
     }
 
     public function testKickEmpty()
     {
         $bound = 1;
-        $quantity = $this->execute("kick $bound", "KICKED 0", 'kick', [$bound]);
+        $quantity = $this->execute("kick {$bound}", 'KICKED 0', 'kick', [$bound]);
         static::assertEquals(0, $quantity);
     }
 
@@ -221,28 +224,34 @@ class ConnectionTest extends TestCase
 
     public function testStats()
     {
-        $yaml  = 'key1: value1';
-        $stats = ['key1' => 'value1'];
+        $yaml = 'key1: value1';
+        $stats = [
+            'key1' => 'value1',
+        ];
 
-        $actual = $this->execute('stats', ["OK 1234\r\n", "---\n$yaml\r\n"], 'stats');
+        $actual = $this->execute('stats', ["OK 1234\r\n", "---\n{$yaml}\r\n"], 'stats');
         static::assertEquals($stats, $actual);
     }
 
     public function testStatsJob()
     {
-        $yaml  = 'key1: value1';
-        $stats = ['key1' => 'value1'];
+        $yaml = 'key1: value1';
+        $stats = [
+            'key1' => 'value1',
+        ];
 
-        $actual = $this->execute('stats-job', ["OK 1234\r\n", "---\n$yaml\r\n"], 'statsJob', [123]);
+        $actual = $this->execute('stats-job', ["OK 1234\r\n", "---\n{$yaml}\r\n"], 'statsJob', [123]);
         static::assertEquals($stats, $actual);
     }
 
     public function testStatsTube()
     {
-        $yaml  = 'key1: value1';
-        $stats = ['key1' => 'value1'];
+        $yaml = 'key1: value1';
+        $stats = [
+            'key1' => 'value1',
+        ];
 
-        $actual = $this->execute('stats-tube', ["OK 1234\r\n", "---\n$yaml\r\n"], 'statsTube', ['test-tube']);
+        $actual = $this->execute('stats-tube', ["OK 1234\r\n", "---\n{$yaml}\r\n"], 'statsTube', ['test-tube']);
         static::assertEquals($stats, $actual);
     }
 

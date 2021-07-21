@@ -38,7 +38,6 @@ class UseTube implements CommandInterface
     }
 
     /**
-     * @param SocketInterface $socket
      * @return string
      * @throws CommandException
      */
@@ -51,7 +50,7 @@ class UseTube implements CommandInterface
             case 'USING':
                 return strtok(' '); // tube name
             default:
-                throw new CommandException("Use tube '$this->tube' failed '$status'");
+                throw new CommandException("Use tube '{$this->tube}' failed '{$status}'");
         }
     }
 }

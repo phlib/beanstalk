@@ -6,10 +6,13 @@ use Phlib\Beanstalk\Connection\ConnectionInterface;
 
 class StatsService
 {
-    public const SERVER_BINLOG  = 1;
+    public const SERVER_BINLOG = 1;
+
     public const SERVER_COMMAND = 2;
+
     public const SERVER_CURRENT = 4;
-    public const SERVER_ALL     = 7;
+
+    public const SERVER_ALL = 7;
 
     public const TUBE_HEADER_MAPPING = [
         'name' => 'Tube',
@@ -89,9 +92,6 @@ class StatsService
      */
     protected $stats;
 
-    /**
-     * @param ConnectionInterface $beanstalk
-     */
     public function __construct(ConnectionInterface $beanstalk)
     {
         $this->beanstalk = $beanstalk;
@@ -164,7 +164,7 @@ class StatsService
      */
     public function getAllTubeStats()
     {
-        $tubes     = $this->beanstalk->listTubes();
+        $tubes = $this->beanstalk->listTubes();
         $tubeStats = [];
         foreach ($tubes as $tube) {
             $stats = $this->beanstalk->statsTube($tube);
@@ -183,7 +183,6 @@ class StatsService
     }
 
     /**
-     * @param array $keys
      * @param $data
      * @return array
      */

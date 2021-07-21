@@ -24,7 +24,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^7",
-        "php-mock/php-mock-phpunit": "^2"
+        "php-mock/php-mock-phpunit": "^2",
+        "symplify/easy-coding-standard": "^9"
     },
     "autoload": {
         "psr-4": {
@@ -36,5 +37,9 @@
             "Phlib\\Beanstalk\\": "tests/"
         }
     },
-    "bin": ["bin/beanstalk"]
+    "bin": ["bin/beanstalk"],
+    "scripts": {
+        "cs-check": "vendor/bin/ecs",
+        "cs-fix": "vendor/bin/ecs --fix"
+    }
 }

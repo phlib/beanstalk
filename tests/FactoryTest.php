@@ -26,14 +26,35 @@ class FactoryTest extends TestCase
     public function createFromArrayDataProvider()
     {
         $connectionClass = Connection::class;
-        $poolClass       = Pool::class;
-        $defaultHost     = ['host' => 'localhost'];
+        $poolClass = Pool::class;
+        $defaultHost = [
+            'host' => 'localhost',
+        ];
 
         return [
-            [$connectionClass, $defaultHost],
-            [$connectionClass, ['host' => 'localhost', 'port' => 123456]],
-            [$connectionClass, ['server' => $defaultHost]],
-            [$poolClass, ['servers' => [$defaultHost, $defaultHost]]]
+            [
+                $connectionClass,
+                $defaultHost,
+            ],
+            [
+                $connectionClass,
+                [
+                    'host' => 'localhost',
+                    'port' => 123456,
+                ],
+            ],
+            [
+                $connectionClass,
+                [
+                    'server' => $defaultHost,
+                ],
+            ],
+            [
+                $poolClass,
+                [
+                    'servers' => [$defaultHost, $defaultHost],
+                ],
+            ],
         ];
     }
 
@@ -43,10 +64,12 @@ class FactoryTest extends TestCase
      */
     public function testCreatingPoolUsesStrategy($strategyClass)
     {
-        $hostConfig = ['host' => 'localhost'];
+        $hostConfig = [
+            'host' => 'localhost',
+        ];
         $poolConfig = [
             'servers' => [$hostConfig, $hostConfig],
-            'strategyClass' => $strategyClass
+            'strategyClass' => $strategyClass,
         ];
         $pool = Factory::createFromArray($poolConfig);
         /* @var $pool Pool */
@@ -61,7 +84,7 @@ class FactoryTest extends TestCase
     {
         return [
             [RoundRobinStrategy::class],
-            [RandomStrategy::class]
+            [RandomStrategy::class],
         ];
     }
 
@@ -69,10 +92,12 @@ class FactoryTest extends TestCase
     {
         $this->expectException(InvalidArgumentException::class);
 
-        $hostConfig = ['host' => 'localhost'];
+        $hostConfig = [
+            'host' => 'localhost',
+        ];
         $poolConfig = [
             'servers' => [$hostConfig, $hostConfig],
-            'strategyClass' => '\Some\RandomClass\ThatDoesnt\Exist'
+            'strategyClass' => '\Some\RandomClass\ThatDoesnt\Exist',
         ];
         Factory::createFromArray($poolConfig);
     }
@@ -87,7 +112,9 @@ class FactoryTest extends TestCase
     public function testCreateConnections()
     {
         $result = true;
-        $config = ['host' => 'locahost'];
+        $config = [
+            'host' => 'locahost',
+        ];
 
         $connections = Factory::createConnections([$config, $config, $config]);
         foreach ($connections as $connection) {

@@ -14,7 +14,7 @@ class StatsTubeTest extends CommandTestCase
     public function testGetCommand()
     {
         $tube = 'test-tube';
-        static::assertEquals("stats-tube $tube", (new StatsTube($tube))->getCommand());
+        static::assertEquals("stats-tube {$tube}", (new StatsTube($tube))->getCommand());
     }
 
     public function testTubeIsValidated()

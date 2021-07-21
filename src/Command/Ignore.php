@@ -38,7 +38,6 @@ class Ignore implements CommandInterface
     }
 
     /**
-     * @param SocketInterface $socket
      * @return integer
      * @throws CommandException
      */
@@ -55,7 +54,7 @@ class Ignore implements CommandInterface
                 throw new CommandException('Can not ignore only tube currently watching.');
 
             default:
-                throw new CommandException("Ignore tube '$this->tube' failed '$status'");
+                throw new CommandException("Ignore tube '{$this->tube}' failed '{$status}'");
         }
     }
 }

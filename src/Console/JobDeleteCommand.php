@@ -2,10 +2,8 @@
 
 namespace Phlib\Beanstalk\Console;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class JobDeleteCommand extends AbstractCommand
@@ -21,7 +19,7 @@ class JobDeleteCommand extends AbstractCommand
     {
         $jobId = $input->getArgument('job-id');
         $this->getBeanstalk()->delete($jobId);
-        $output->writeln("Job '$jobId' successfully deleted.");
+        $output->writeln("Job '{$jobId}' successfully deleted.");
 
         return 0;
     }

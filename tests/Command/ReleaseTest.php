@@ -29,7 +29,7 @@ class ReleaseTest extends CommandTestCase
     {
         $this->socket->expects(static::any())
             ->method('read')
-            ->willReturn("RELEASED");
+            ->willReturn('RELEASED');
 
         $release = new Release(123, 456, 789);
         static::assertInstanceOf(Release::class, $release->process($this->socket));

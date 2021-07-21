@@ -14,7 +14,7 @@ class KickTest extends CommandTestCase
     public function testGetCommand()
     {
         $bound = 10;
-        static::assertEquals("kick $bound", (new Kick($bound))->getCommand());
+        static::assertEquals("kick {$bound}", (new Kick($bound))->getCommand());
     }
 
     public function testSuccessfulCommand()

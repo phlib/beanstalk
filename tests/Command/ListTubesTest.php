@@ -11,6 +11,6 @@ class ListTubesTest extends CommandTestCase
 
     public function testGetCommand()
     {
-        static::assertEquals("list-tubes", (new ListTubes())->getCommand());
+        static::assertEquals('list-tubes', (new ListTubes())->getCommand());
     }
 }

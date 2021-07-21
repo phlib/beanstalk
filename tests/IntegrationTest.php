@@ -2,8 +2,8 @@
 
 namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\NotFoundException;
 use PHPUnit\Framework\TestCase;
 
 /**

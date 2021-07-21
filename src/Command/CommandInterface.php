@@ -16,7 +16,6 @@ interface CommandInterface
     public function getCommand();
 
     /**
-     * @param SocketInterface $socket
      * @return mixed
      */
     public function process(SocketInterface $socket);

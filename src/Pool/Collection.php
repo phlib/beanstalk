@@ -31,8 +31,6 @@ class Collection implements CollectionInterface
 
     /**
      * @param ConnectionInterface[] $connections
-     * @param SelectionStrategyInterface|null $strategy
-     * @param array $options
      * @throws InvalidArgumentException
      */
     public function __construct(array $connections, SelectionStrategyInterface $strategy = null, array $options = [])
@@ -45,16 +43,18 @@ class Collection implements CollectionInterface
             $key = $connection->getName();
             $formatted[$key] = [
                 'connection' => $connection,
-                'retry_at'   => false
+                'retry_at' => false,
             ];
         }
         $this->connections = $formatted;
 
-        if (is_null($strategy)) {
+        if ($strategy === null) {
             $strategy = new RoundRobinStrategy();
         }
         $this->strategy = $strategy;
-        $this->options = $options + ['retry_delay' => 600];
+        $this->options = $options + [
+            'retry_delay' => 600,
+        ];
     }
 
     /**
@@ -87,7 +87,7 @@ class Collection implements CollectionInterface
     public function getConnection($key)
     {
         if (!array_key_exists($key, $this->connections)) {
-            throw new NotFoundException("Specified key '$key' is not in the pool.");
+            throw new NotFoundException("Specified key '{$key}' is not in the pool.");
         }
         $retryAt = $this->connections[$key]['retry_at'];
         if ($retryAt !== false && $retryAt > time()) {
@@ -123,7 +123,7 @@ class Collection implements CollectionInterface
         $e = null;
 
         $keysAvailable = array_keys($this->connections);
-        $keysUsed      = [];
+        $keysUsed = [];
         $keysExhausted = false;
         while (!$keysExhausted && ($key = $this->strategy->pickOne($keysAvailable)) !== false) {
             try {
@@ -143,7 +143,7 @@ class Collection implements CollectionInterface
 
         $message = "Failed to send command '{$command}' to one of the connections.";
         if ($e instanceof \Exception) {
-            $final = new RuntimeException($message, 0 , $e);
+            $final = new RuntimeException($message, 0, $e);
         } else {
             $final = new RuntimeException($message);
         }
@@ -157,10 +157,13 @@ class Collection implements CollectionInterface
     {
         try {
             $connection = $this->getConnection($key);
-            $result     = call_user_func_array([$connection, $command], $arguments);
+            $result = call_user_func_array([$connection, $command], $arguments);
             $this->connections[$key]['retry_at'] = false;
 
-            return ['connection' => $connection, 'response' => $result];
+            return [
+                'connection' => $connection,
+                'response' => $result,
+            ];
         } catch (RuntimeException $e) {
             if ($this->connections[$key]['retry_at'] === false) {
                 $retryDelay = $this->options['retry_delay'];
@@ -183,13 +186,15 @@ class Collection implements CollectionInterface
                     throw $e;
                 }
                 // ignore
-                $result = ['response' => false];
+                $result = [
+                    'response' => false,
+                ];
             }
 
             $continue = true;
-            if ($result['response'] === false && !is_null($failure)) {
+            if ($result['response'] === false && $failure !== null) {
                 $continue = call_user_func($failure);
-            } elseif ($result['response'] !== false && !is_null($success)) {
+            } elseif ($result['response'] !== false && $success !== null) {
                 $continue = call_user_func($success, $result);
             }
 

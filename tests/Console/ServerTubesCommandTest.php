@@ -35,7 +35,7 @@ class ServerTubesCommandTest extends ConsoleTestCase
             'current-watching' => 81,
             'current-waiting' => 6,
             'cmd-delete' => 3636434,
-        ]
+        ],
     ];
 
     /**

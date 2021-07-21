@@ -150,13 +150,13 @@ class CollectionTest extends TestCase
     public function testCanSendToExactConnection()
     {
         $identifier = 'id-123';
-        $command    = 'stats';
+        $command = 'stats';
         $connection = $this->getMockConnection($identifier);
         $connection->expects(static::once())
             ->method($command);
         $collection = new Collection([
             $connection,
-            $this->getMockConnection('id-456')
+            $this->getMockConnection('id-456'),
         ]);
         $collection->sendToExact($identifier, $command);
     }
@@ -166,7 +166,7 @@ class CollectionTest extends TestCase
         $this->expectException(RuntimeException::class);
 
         $identifier = 'id-123';
-        $command    = 'stats';
+        $command = 'stats';
         $connection = $this->getMockConnection($identifier);
         $connection->expects(static::any())
             ->method($command)
@@ -181,7 +181,7 @@ class CollectionTest extends TestCase
         $this->expectExceptionMessage('Connection recently failed.');
 
         $identifier = 'id-123';
-        $command    = 'stats';
+        $command = 'stats';
         $connection = $this->getMockConnection($identifier);
         $connection->expects(static::any())
             ->method($command)
@@ -198,12 +198,14 @@ class CollectionTest extends TestCase
     public function testGetConnectionThatHasErroredButIsDueRetry()
     {
         $identifier = 'id-123';
-        $command    = 'stats';
+        $command = 'stats';
         $connection = $this->getMockConnection($identifier);
         $connection->expects(static::any())
             ->method($command)
             ->willThrowException(new RuntimeException());
-        $collection = new Collection([$connection], $this->strategy, ['retry_delay' => 0]);
+        $collection = new Collection([$connection], $this->strategy, [
+            'retry_delay' => 0,
+        ]);
         try {
             $collection->sendToExact($identifier, $command);
         } catch (\Exception $e) {
@@ -214,9 +216,9 @@ class CollectionTest extends TestCase
 
     public function testSendToAllConnections()
     {
-        $command    = 'stats';
-        $calls      = 0;
-        $callback   = function () use (&$calls) {
+        $command = 'stats';
+        $calls = 0;
+        $callback = function () use (&$calls) {
             $calls++;
         };
 
@@ -237,7 +239,7 @@ class CollectionTest extends TestCase
 
     public function testSendToAllIgnoreErrors()
     {
-        $command     = 'stats';
+        $command = 'stats';
         $connection1 = $this->getMockConnection('id-123');
         $connection1->expects(static::once())
             ->method($command);
@@ -253,7 +255,7 @@ class CollectionTest extends TestCase
 
     public function testSendToAllIgnoreErrorsOfNotFound()
     {
-        $command     = 'stats';
+        $command = 'stats';
         $connection1 = $this->getMockConnection('id-123');
         $connection1->expects(static::once())
             ->method($command);
@@ -269,7 +271,7 @@ class CollectionTest extends TestCase
 
     public function testSendToAllCallsSuccessCallback()
     {
-        $command     = 'stats';
+        $command = 'stats';
         $connection1 = $this->getMockConnection('id-123');
         $connection1->expects(static::any())
             ->method($command);
@@ -290,7 +292,7 @@ class CollectionTest extends TestCase
 
     public function testSendToAllCallsFailureCallback()
     {
-        $command     = 'stats';
+        $command = 'stats';
         $connection1 = $this->getMockConnection('id-123');
         $connection1->expects(static::any())
             ->method($command)
@@ -313,7 +315,7 @@ class CollectionTest extends TestCase
 
     public function testSendToOne()
     {
-        $command     = 'stats';
+        $command = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
         $connection1->expects(static::once())
@@ -333,7 +335,7 @@ class CollectionTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
 
-        $command     = 'stats';
+        $command = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
         $connection1->expects(static::any())
@@ -356,7 +358,7 @@ class CollectionTest extends TestCase
 
     public function testSendToOneIgnoresErrors()
     {
-        $command     = 'stats';
+        $command = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
         $connection1->expects(static::any())
@@ -381,7 +383,7 @@ class CollectionTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
 
-        $command     = 'stats';
+        $command = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
         $connection1->expects(static::any())

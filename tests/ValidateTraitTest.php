@@ -76,7 +76,7 @@ class ValidateTraitTest extends TestCase
             ['Foo Bar Baz'],
             [['my' => 'array']],
             [new \stdClass()],
-            [1234]
+            [1234],
         ];
     }
 

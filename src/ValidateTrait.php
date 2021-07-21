@@ -18,7 +18,12 @@ trait ValidateTrait
      */
     public function validatePriority($priority)
     {
-        $options = ['options' => ['min_range' => 0, 'max_range' => ConnectionInterface::MAX_PRIORITY]];
+        $options = [
+            'options' => [
+                'min_range' => 0,
+                'max_range' => ConnectionInterface::MAX_PRIORITY,
+            ],
+        ];
         if (filter_var($priority, FILTER_VALIDATE_INT, $options) === false) {
             throw new InvalidArgumentException('Priority is not within acceptable range.');
         }
@@ -32,10 +37,15 @@ trait ValidateTrait
      */
     public function validateTubeName($name)
     {
-        $bytes   = strlen($name);
-        $options = ['options' => ['min_range' => 1, 'max_range' => ConnectionInterface::MAX_TUBE_LENGTH]];
+        $bytes = strlen($name);
+        $options = [
+            'options' => [
+                'min_range' => 1,
+                'max_range' => ConnectionInterface::MAX_TUBE_LENGTH,
+            ],
+        ];
         if (filter_var($bytes, FILTER_VALIDATE_INT, $options) === false) {
-            throw new InvalidArgumentException("Specified tube '$name' is not a valid name.");
+            throw new InvalidArgumentException("Specified tube '{$name}' is not a valid name.");
         }
         return true;
     }
@@ -55,9 +65,14 @@ trait ValidateTrait
                 $data = 'Object';
             }
         }
-        $options = ['options' => ['min_range' => 1, 'max_range' => ConnectionInterface::MAX_JOB_LENGTH]];
+        $options = [
+            'options' => [
+                'min_range' => 1,
+                'max_range' => ConnectionInterface::MAX_JOB_LENGTH,
+            ],
+        ];
         if (filter_var(strlen($data), FILTER_VALIDATE_INT, $options) === false) {
-            throw new InvalidArgumentException("The job data is too large. Maximum allowed size is 65,536.");
+            throw new InvalidArgumentException('The job data is too large. Maximum allowed size is 65,536.');
         }
         return true;
     }

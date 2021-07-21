@@ -3,9 +3,9 @@
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool\CollectionInterface;
-use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 class Pool implements ConnectionInterface
 {
@@ -22,11 +22,10 @@ class Pool implements ConnectionInterface
     /**
      * @var array
      */
-    protected $watching = [Connection::DEFAULT_TUBE => true];
+    protected $watching = [
+        Connection::DEFAULT_TUBE => true,
+    ];
 
-    /**
-     * @param CollectionInterface $collection
-     */
     public function __construct(CollectionInterface $collection)
     {
         $this->collection = $collection;
@@ -191,7 +190,7 @@ class Pool implements ConnectionInterface
     {
         $index = array_search($tube, $this->watching);
         if ($index !== false) {
-            if (count($this->watching) == 1) {
+            if (count($this->watching) === 1) {
                 return false;
             }
             $this->collection->sendToAll('ignore', [$tube]);
@@ -207,8 +206,8 @@ class Pool implements ConnectionInterface
     public function peek($id)
     {
         [$key, $jobId] = $this->splitId($id);
-        $result    = $this->collection->sendToExact($key, 'peek', [$jobId]);
-        $job       = $result['response'];
+        $result = $this->collection->sendToExact($key, 'peek', [$jobId]);
+        $job = $result['response'];
         $job['id'] = $id;
         return $job;
     }
@@ -260,7 +259,7 @@ class Pool implements ConnectionInterface
      */
     public function kick($quantity)
     {
-        $kicked    = 0;
+        $kicked = 0;
         $onSuccess = function ($result) use ($quantity, &$kicked) {
             $stats = $result['response'];
             $buriedJobs = $stats['current-jobs-buried'] ?? 0;
@@ -269,7 +268,7 @@ class Pool implements ConnectionInterface
                 return true;
             }
 
-            $kick   = min($buriedJobs, $quantity - $kicked);
+            $kick = min($buriedJobs, $quantity - $kicked);
             $kicked += (int)$result['connection']->kick($kick);
 
             if ($kicked >= $quantity) {
@@ -286,7 +285,7 @@ class Pool implements ConnectionInterface
      */
     public function stats()
     {
-        $stats     = [];
+        $stats = [];
         $onSuccess = function ($result) use (&$stats) {
             if (!is_array($result['response'])) {
                 return;
@@ -308,8 +307,8 @@ class Pool implements ConnectionInterface
     public function statsJob($id)
     {
         [$key, $jobId] = $this->splitId($id);
-        $result    = $this->collection->sendToExact($key, 'statsJob', [$jobId]);
-        $job       = $result['response'];
+        $result = $this->collection->sendToExact($key, 'statsJob', [$jobId]);
+        $job = $result['response'];
         $job['id'] = $id;
         return $job;
     }
@@ -320,7 +319,7 @@ class Pool implements ConnectionInterface
      */
     public function statsTube($tube)
     {
-        $stats     = [];
+        $stats = [];
         $onSuccess = function ($result) use (&$stats) {
             if (!is_array($result['response'])) {
                 return;
@@ -336,13 +335,11 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param array $cumulative
-     * @param array $stats
      * @return array
      */
     protected function statsCombine(array $cumulative, array $stats)
     {
-        $list    = ['pid', 'version', 'hostname', 'name', 'uptime', 'binlog-current-index'];
+        $list = ['pid', 'version', 'hostname', 'name', 'uptime', 'binlog-current-index'];
         $maximum = ['timeouts', 'binlog-max-size', 'binlog-oldest-index'];
         foreach ($stats as $name => $value) {
             if (!array_key_exists($name, $cumulative)) {
@@ -370,7 +367,7 @@ class Pool implements ConnectionInterface
      */
     public function listTubes()
     {
-        $tubes     = [];
+        $tubes = [];
         $onSuccess = function ($result) use (&$tubes) {
             if (!is_array($result['response'])) {
                 return;
@@ -398,7 +395,6 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param ConnectionInterface $connection
      * @param integer $id
      * @return string
      */
@@ -422,8 +418,8 @@ class Pool implements ConnectionInterface
         }
 
         $position = strrpos($id, '.');
-        $key      = substr($id, 0, $position);
-        $jobId    = substr($id, $position + 1);
+        $key = substr($id, 0, $position);
+        $jobId = substr($id, $position + 1);
 
         return [$key, $jobId];
     }

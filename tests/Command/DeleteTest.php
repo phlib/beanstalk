@@ -15,7 +15,7 @@ class DeleteTest extends CommandTestCase
     public function testGetCommand()
     {
         $id = 123;
-        static::assertEquals("delete $id", (new Delete($id))->getCommand());
+        static::assertEquals("delete {$id}", (new Delete($id))->getCommand());
     }
 
     public function testSuccessfulCommand()

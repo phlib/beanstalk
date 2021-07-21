@@ -22,7 +22,6 @@ class ListTubeUsed implements CommandInterface
     }
 
     /**
-     * @param SocketInterface $socket
      * @return string
      * @throws CommandException
      */
@@ -35,7 +34,7 @@ class ListTubeUsed implements CommandInterface
                 return strtok(' ');
 
             default:
-                throw new CommandException("List tube used failed '$status'");
+                throw new CommandException("List tube used failed '{$status}'");
         }
     }
 }

@@ -38,7 +38,6 @@ class Watch implements CommandInterface
     }
 
     /**
-     * @param SocketInterface $socket
      * @return integer
      * @throws CommandException
      */
@@ -52,7 +51,7 @@ class Watch implements CommandInterface
                 return (int)strtok(' ');
 
             default:
-                throw new CommandException("Watch tube '$this->tube' failed '$status'");
+                throw new CommandException("Watch tube '{$this->tube}' failed '{$status}'");
         }
     }
 }

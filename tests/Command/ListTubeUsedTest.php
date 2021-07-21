@@ -13,7 +13,7 @@ class ListTubeUsedTest extends CommandTestCase
 
     public function testGetCommand()
     {
-        static::assertEquals("list-tube-used", (new ListTubeUsed())->getCommand());
+        static::assertEquals('list-tube-used', (new ListTubeUsed())->getCommand());
     }
 
     public function testSuccessfulCommand()
@@ -21,7 +21,7 @@ class ListTubeUsedTest extends CommandTestCase
         $tube = 'test-tube';
         $this->socket->expects(static::any())
             ->method('read')
-            ->willReturn("USING $tube");
+            ->willReturn("USING {$tube}");
         static::assertEquals($tube, (new ListTubeUsed())->process($this->socket));
     }
 

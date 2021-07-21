@@ -3,7 +3,6 @@
 namespace Phlib\Beanstalk\Connection;
 
 use Phlib\Beanstalk\Exception;
-use Phlib\Beanstalk\Connection\SocketInterface;
 
 /**
  * Class Socket
@@ -11,9 +10,11 @@ use Phlib\Beanstalk\Connection\SocketInterface;
  */
 class Socket implements SocketInterface
 {
-    const DEFAULT_PORT = 11300;
-    const EOL          = "\r\n";
-    const READ_LENGTH  = 4096;
+    public const DEFAULT_PORT = 11300;
+
+    public const EOL = "\r\n";
+
+    private const READ_LENGTH = 4096;
 
     /**
      * @var string
@@ -40,13 +41,14 @@ class Socket implements SocketInterface
      *
      * @param string  $host
      * @param integer $port
-     * @param array   $options
      */
     public function __construct($host, $port = self::DEFAULT_PORT, array $options = [])
     {
-        $this->host    = $host;
-        $this->port    = $port;
-        $this->options = $options + ['timeout' => 60];
+        $this->host = $host;
+        $this->port = $port;
+        $this->options = $options + [
+            'timeout' => 60,
+        ];
     }
 
     /**
@@ -108,7 +110,7 @@ class Socket implements SocketInterface
 
         $data .= self::EOL;
         $bytesWritten = strlen($data);
-        $bytesSent    = fwrite($this->connection, $data, $bytesWritten);
+        $bytesSent = fwrite($this->connection, $data, $bytesWritten);
 
         if ($bytesSent !== $bytesWritten) {
             $this->disconnect();

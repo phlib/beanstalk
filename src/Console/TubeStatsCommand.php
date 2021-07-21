@@ -3,7 +3,6 @@
 namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\StatsService;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -29,7 +28,7 @@ class TubeStatsCommand extends AbstractCommand
         $stats = $service->getTubeStats($tube);
 
         if (empty($stats)) {
-            $output->writeln("No statistics found for tube '$tube'.");
+            $output->writeln("No statistics found for tube '{$tube}'.");
             return 0;
         }
 
@@ -42,17 +41,13 @@ class TubeStatsCommand extends AbstractCommand
         return 0;
     }
 
-    /**
-     * @param array $stats
-     * @param OutputInterface $output
-     */
     protected function displayTable(array $stats, OutputInterface $output)
     {
         $table = new Table($output);
         $table->setHeaders(['Statistic', 'Total']);
         foreach ($stats as $stat => $total) {
             if ($stat == 'current-jobs-buried' && $total > 0) {
-                $stat  = "<error>$stat</error>";
+                $stat = "<error>{$stat}</error>";
                 $total = "<error>{$total}</error>";
             }
             $table->addRow([$stat, $total]);
@@ -62,14 +57,12 @@ class TubeStatsCommand extends AbstractCommand
     }
 
     /**
-     * @param array $stats
      * @param string $stat
-     * @param OutputInterface $output
      */
     protected function displayStat(array $stats, $stat, OutputInterface $output)
     {
         if (!isset($stats[$stat])) {
-            throw new InvalidArgumentException("Specified statistic '$stat' is not valid.");
+            throw new InvalidArgumentException("Specified statistic '{$stat}' is not valid.");
         }
 
         $output->writeln($stats[$stat]);

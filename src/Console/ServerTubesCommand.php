@@ -19,7 +19,7 @@ class ServerTubesCommand extends AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $watch    = $input->getOption('watch');
+        $watch = $input->getOption('watch');
         $buffered = new BufferedOutput($output->getVerbosity(), $output->isDecorated());
         $service = $this->getStatsService();
         do {
@@ -45,7 +45,6 @@ class ServerTubesCommand extends AbstractCommand
             $output->write($clearScreen . $buffered->fetch());
 
             $watch && sleep(1);
-
         } while ($watch);
 
         return 0;

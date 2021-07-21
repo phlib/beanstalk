@@ -3,9 +3,9 @@
 namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
-use Symfony\Component\Console\Command\Command;
 use Phlib\Beanstalk\Factory;
 use Phlib\Beanstalk\StatsService;
+use Symfony\Component\Console\Command\Command;
 
 /**
  * Class AbstractCommand
