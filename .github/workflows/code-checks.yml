@@ -24,6 +24,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Install beanstalkd
+        run: sudo apt-get install beanstalkd
+
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
@@ -44,6 +47,8 @@ jobs:
 
       - name: PHPUnit
         run: vendor/bin/phpunit --coverage-clover=coverage.xml
+        env:
+          BSTALK_ENABLED: 1
 
       - name: "Upload coverage to Codecov"
         uses: "codecov/codecov-action@v2"

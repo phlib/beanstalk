@@ -20,15 +20,16 @@ class IntegrationPoolTest extends \PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        if (!isset($GLOBALS['BSTALK_ENABLED']) || $GLOBALS['BSTALK_ENABLED'] != true) {
+        if (getenv('BSTALK_ENABLED') != true) {
             $this->markTestSkipped();
-        } else {
-            $connections = [
-                new Connection(new Socket($GLOBALS['BSTALK1_HOST'], $GLOBALS['BSTALK1_PORT'])),
-                new Connection(new Socket($GLOBALS['BSTALK2_HOST'], $GLOBALS['BSTALK2_PORT']))
-            ];
-            $this->beanstalk = new Pool(new Pool\Collection($connections), new Pool\RandomStrategy());
+            return;
         }
+
+        $connections = [
+            new Connection(new Socket(getenv('BSTALK1_HOST'), getenv('BSTALK1_PORT'))),
+            new Connection(new Socket(getenv('BSTALK2_HOST'), getenv('BSTALK2_PORT')))
+        ];
+        $this->beanstalk = new Pool(new Pool\Collection($connections));
     }
 
     public function testReconnectingAfterDisconnect()
