@@ -1,8 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
-
-use Phlib\Beanstalk\Command\Bury;
+namespace Phlib\Beanstalk\Command;
 
 class BuryTest extends CommandTestCase
 {

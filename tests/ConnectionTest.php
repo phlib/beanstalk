@@ -1,8 +1,7 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests;
+namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Connection\Socket;
 
 class ConnectionTest extends \PHPUnit_Framework_TestCase

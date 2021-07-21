@@ -1,8 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
-
-use Phlib\Beanstalk\Command\Peek;
+namespace Phlib\Beanstalk\Command;
 
 class PeekTest extends CommandTestCase
 {

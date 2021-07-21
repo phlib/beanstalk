@@ -1,8 +1,6 @@
 <?php
 
-namespace Phlib\Tests\Pool;
-
-use Phlib\Beanstalk\Pool\RoundRobinStrategy;
+namespace Phlib\Beanstalk\Pool;
 
 class RoundRobinStrategyTest extends \PHPUnit_Framework_TestCase
 {

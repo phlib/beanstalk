@@ -1,8 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
-
-use Phlib\Beanstalk\Command\Delete;
+namespace Phlib\Beanstalk\Command;
 
 class DeleteTest extends CommandTestCase
 {

@@ -1,8 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
-
-use Phlib\Beanstalk\Command\Release;
+namespace Phlib\Beanstalk\Command;
 
 class ReleaseTest extends CommandTestCase
 {

@@ -1,10 +1,8 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests;
+namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Exception\RuntimeException;
-use Phlib\Beanstalk\Pool;
 use Phlib\Beanstalk\Pool\Collection;
 
 class PoolTest extends \PHPUnit_Framework_TestCase

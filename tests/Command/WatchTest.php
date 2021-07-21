@@ -1,8 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
-
-use Phlib\Beanstalk\Command\Watch;
+namespace Phlib\Beanstalk\Command;
 
 class WatchTest extends CommandTestCase
 {

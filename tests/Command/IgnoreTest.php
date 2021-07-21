@@ -1,8 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
-
-use Phlib\Beanstalk\Command\Ignore;
+namespace Phlib\Beanstalk\Command;
 
 class IgnoreTest extends CommandTestCase
 {

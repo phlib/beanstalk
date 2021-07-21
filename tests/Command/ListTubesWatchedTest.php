@@ -1,8 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
-
-use Phlib\Beanstalk\Command\ListTubesWatched;
+namespace Phlib\Beanstalk\Command;
 
 class ListTubesWatchedTest extends CommandTestCase
 {

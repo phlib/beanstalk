@@ -1,8 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
-
-use Phlib\Beanstalk\Command\Touch;
+namespace Phlib\Beanstalk\Command;
 
 class TouchTest extends CommandTestCase
 {

@@ -1,12 +1,10 @@
 <?php
 
-namespace Phlib\Tests\Pool;
+namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
-use Phlib\Beanstalk\Pool\Collection;
-use Phlib\Beanstalk\Pool\SelectionStrategyInterface;
 
 class CollectionTest extends \PHPUnit_Framework_TestCase
 {

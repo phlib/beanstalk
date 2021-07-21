@@ -1,6 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+namespace Phlib\Beanstalk\Command;
 
 class StatsTraitTest extends CommandTestCase
 {

@@ -1,13 +1,13 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests;
+namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 
 class ValidateTraitTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var \Phlib\Beanstalk\ValidateTrait
+     * @var ValidateTrait
      */
     protected $validate;
 

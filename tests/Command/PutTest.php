@@ -1,8 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
-
-use Phlib\Beanstalk\Command\Put;
+namespace Phlib\Beanstalk\Command;
 
 class PutTest extends CommandTestCase
 {

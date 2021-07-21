@@ -1,12 +1,9 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests;
+namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\Factory;
-use Phlib\Beanstalk\Pool;
 
 class FactoryTest extends \PHPUnit_Framework_TestCase
 {

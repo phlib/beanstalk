@@ -1,8 +1,7 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Connection;
+namespace Phlib\Beanstalk\Connection;
 
-use Phlib\Beanstalk\Connection\Socket;
 use phpmock\phpunit\PHPMock;
 
 class SocketTest extends \PHPUnit_Framework_TestCase

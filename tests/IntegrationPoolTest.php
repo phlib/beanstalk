@@ -1,11 +1,9 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests;
+namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Connection\Socket;
-use Phlib\Beanstalk\Pool;
 
 /**
  * @runTestsInSeparateProcesses

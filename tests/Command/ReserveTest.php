@@ -1,8 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
-
-use Phlib\Beanstalk\Command\Reserve;
+namespace Phlib\Beanstalk\Command;
 
 class ReserveTest extends CommandTestCase
 {

@@ -1,8 +1,6 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
-
-use Phlib\Beanstalk\Command\Kick;
+namespace Phlib\Beanstalk\Command;
 
 class KickTest extends CommandTestCase
 {
