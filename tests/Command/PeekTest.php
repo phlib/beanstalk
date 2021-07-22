@@ -6,7 +6,7 @@ class PeekTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf(CommandInterface::class, new Peek('ready'));
+        static::assertInstanceOf(CommandInterface::class, new Peek('ready'));
     }
 
     /**
@@ -16,7 +16,7 @@ class PeekTest extends CommandTestCase
      */
     public function testGetCommand($subject, $command)
     {
-        $this->assertEquals($command, (new Peek($subject))->getCommand());
+        static::assertEquals($command, (new Peek($subject))->getCommand());
     }
 
     public function getCommandDataProvider()
@@ -43,11 +43,11 @@ class PeekTest extends CommandTestCase
         $body     = 'Foo Bar';
         $response = ['id' => $id, 'body' => $body];
 
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
-            ->will($this->onConsecutiveCalls("FOUND $id 123\r\n", $body . "\r\n"));
+            ->willReturnOnConsecutiveCalls("FOUND $id 123\r\n", $body . "\r\n");
 
-        $this->assertEquals($response, (new Peek(10))->process($this->socket));
+        static::assertEquals($response, (new Peek(10))->process($this->socket));
     }
 
     /**
@@ -55,7 +55,7 @@ class PeekTest extends CommandTestCase
      */
     public function testNotFoundThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_FOUND');
         (new Peek(10))->process($this->socket);
@@ -66,7 +66,7 @@ class PeekTest extends CommandTestCase
      */
     public function testUnknownStatusThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Peek(10))->process($this->socket);

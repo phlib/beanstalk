@@ -5,32 +5,33 @@ namespace Phlib\Beanstalk\Pool;
 use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
+use PHPUnit\Framework\TestCase;
 
-class CollectionTest extends \PHPUnit_Framework_TestCase
+class CollectionTest extends TestCase
 {
     /**
      * @var SelectionStrategyInterface|\PHPUnit_Framework_MockObject_MockObject
      */
     protected $strategy;
 
-    public function setUp()
+    protected function setUp()
     {
-        $this->strategy = $this->getMock(SelectionStrategyInterface::class);
+        $this->strategy = $this->createMock(SelectionStrategyInterface::class);
     }
 
-    public function tearDown()
+    protected function tearDown()
     {
         $this->strategy = null;
     }
 
     public function testImplementsCollectionInterface()
     {
-        $this->assertInstanceOf(CollectionInterface::class, new Collection([], $this->strategy));
+        static::assertInstanceOf(CollectionInterface::class, new Collection([], $this->strategy));
     }
 
     public function testImplementsArrayAggregateInterface()
     {
-        $this->assertInstanceOf(\IteratorAggregate::class, new Collection([], $this->strategy));
+        static::assertInstanceOf(\IteratorAggregate::class, new Collection([], $this->strategy));
     }
 
     public function testArrayAggregateReturnsConnections()
@@ -40,7 +41,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         foreach ($collection as $connection) {
             $result = $result && ($connection instanceof Connection);
         }
-        $this->assertTrue($result);
+        static::assertTrue($result);
     }
 
     public function testArrayAggregateReturnsAllConnections()
@@ -50,19 +51,19 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         foreach ($collection as $connection) {
             $count++;
         }
-        $this->assertEquals(2, $count);
+        static::assertEquals(2, $count);
     }
 
     public function testDefaultStrategyIsRoundRobin()
     {
         $collection = new Collection([]);
-        $this->assertInstanceOf(RoundRobinStrategy::class, $collection->getSelectionStrategy());
+        static::assertInstanceOf(RoundRobinStrategy::class, $collection->getSelectionStrategy());
     }
 
     public function testConstructorCanSetTheStrategy()
     {
         $collection = new Collection([], $this->strategy);
-        $this->assertSame($this->strategy, $collection->getSelectionStrategy());
+        static::assertSame($this->strategy, $collection->getSelectionStrategy());
     }
 
     public function testConstructorTakesListOfValidConnections()
@@ -70,7 +71,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $serverKey = 'my-unique-key';
         $connection = $this->getMockConnection($serverKey);
         $collection = new Collection([$connection]);
-        $this->assertSame($connection, $collection->getConnection($serverKey));
+        static::assertSame($connection, $collection->getConnection($serverKey));
     }
 
     /**
@@ -95,7 +96,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $identifier = 'id-123';
         $command    = 'stats';
         $connection = $this->getMockConnection($identifier);
-        $connection->expects($this->once())
+        $connection->expects(static::once())
             ->method($command);
         $collection = new Collection([
             $connection,
@@ -112,9 +113,9 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $identifier = 'id-123';
         $command    = 'stats';
         $connection = $this->getMockConnection($identifier);
-        $connection->expects($this->any())
+        $connection->expects(static::any())
             ->method($command)
-            ->will($this->throwException(new RuntimeException()));
+            ->willThrowException(new RuntimeException());
         $collection = new Collection([$connection]);
         $collection->sendToExact($identifier, $command);
     }
@@ -128,9 +129,9 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $identifier = 'id-123';
         $command    = 'stats';
         $connection = $this->getMockConnection($identifier);
-        $connection->expects($this->any())
+        $connection->expects(static::any())
             ->method($command)
-            ->will($this->throwException(new RuntimeException()));
+            ->willThrowException(new RuntimeException());
         $collection = new Collection([$connection]);
         try {
             $collection->sendToExact($identifier, $command);
@@ -145,16 +146,16 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $identifier = 'id-123';
         $command    = 'stats';
         $connection = $this->getMockConnection($identifier);
-        $connection->expects($this->any())
+        $connection->expects(static::any())
             ->method($command)
-            ->will($this->throwException(new RuntimeException()));
+            ->willThrowException(new RuntimeException());
         $collection = new Collection([$connection], $this->strategy, ['retry_delay' => 0]);
         try {
             $collection->sendToExact($identifier, $command);
         } catch (\Exception $e) {
             // void
         }
-        $this->assertSame($connection, $collection->getConnection($identifier));
+        static::assertSame($connection, $collection->getConnection($identifier));
     }
 
     public function testSendToAllConnections()
@@ -166,31 +167,31 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         };
 
         $connection1 = $this->getMockConnection('id-123');
-        $connection1->expects($this->any())
+        $connection1->expects(static::any())
             ->method($command)
-            ->will($this->returnCallback($callback));
+            ->willReturnCallback($callback);
 
         $connection2 = $this->getMockConnection('id-456');
-        $connection2->expects($this->any())
+        $connection2->expects(static::any())
             ->method($command)
-            ->will($this->returnCallback($callback));
+            ->willReturnCallback($callback);
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command);
-        $this->assertEquals(2, $calls);
+        static::assertEquals(2, $calls);
     }
 
     public function testSendToAllIgnoreErrors()
     {
         $command     = 'stats';
         $connection1 = $this->getMockConnection('id-123');
-        $connection1->expects($this->once())
+        $connection1->expects(static::once())
             ->method($command);
 
         $connection2 = $this->getMockConnection('id-456');
-        $connection2->expects($this->any())
+        $connection2->expects(static::any())
             ->method($command)
-            ->will($this->throwException(new RuntimeException()));
+            ->willThrowException(new RuntimeException());
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command);
@@ -200,13 +201,13 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
     {
         $command     = 'stats';
         $connection1 = $this->getMockConnection('id-123');
-        $connection1->expects($this->once())
+        $connection1->expects(static::once())
             ->method($command);
 
         $connection2 = $this->getMockConnection('id-456');
-        $connection2->expects($this->any())
+        $connection2->expects(static::any())
             ->method($command)
-            ->will($this->throwException(new NotFoundException()));
+            ->willThrowException(new NotFoundException());
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command);
@@ -216,11 +217,11 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
     {
         $command     = 'stats';
         $connection1 = $this->getMockConnection('id-123');
-        $connection1->expects($this->any())
+        $connection1->expects(static::any())
             ->method($command);
 
         $connection2 = $this->getMockConnection('id-456');
-        $connection2->expects($this->any())
+        $connection2->expects(static::any())
             ->method($command);
 
         $called = 0;
@@ -230,21 +231,21 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command, [], $onSuccess);
-        $this->assertEquals(2, $called);
+        static::assertEquals(2, $called);
     }
 
     public function testSendToAllCallsFailureCallback()
     {
         $command     = 'stats';
         $connection1 = $this->getMockConnection('id-123');
-        $connection1->expects($this->any())
+        $connection1->expects(static::any())
             ->method($command)
-            ->will($this->throwException(new RuntimeException()));
+            ->willThrowException(new RuntimeException());
 
         $connection2 = $this->getMockConnection('id-456');
-        $connection2->expects($this->any())
+        $connection2->expects(static::any())
             ->method($command)
-            ->will($this->throwException(new RuntimeException()));
+            ->willThrowException(new RuntimeException());
 
         $failed = 0;
         $onFailure = function () use (&$failed) {
@@ -253,7 +254,7 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command, [], null, $onFailure);
-        $this->assertEquals(2, $failed);
+        static::assertEquals(2, $failed);
     }
 
     public function testSendToOne()
@@ -261,14 +262,14 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $command     = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
-        $connection1->expects($this->once())
+        $connection1->expects(static::once())
             ->method($command);
 
         $connection2 = $this->getMockConnection('id-456');
 
-        $this->strategy->expects($this->any())
+        $this->strategy->expects(static::any())
             ->method('pickOne')
-            ->will($this->returnValue($identifier1));
+            ->willReturn($identifier1);
 
         $collection = new Collection([$connection1, $connection2], $this->strategy);
         $collection->sendToOne($command);
@@ -282,19 +283,19 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $command     = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
-        $connection1->expects($this->any())
+        $connection1->expects(static::any())
             ->method($command)
-            ->will($this->returnValue(false));
+            ->willReturn(false);
 
         $identifier2 = 'id-456';
         $connection2 = $this->getMockConnection($identifier2);
-        $connection2->expects($this->any())
+        $connection2->expects(static::any())
             ->method($command)
-            ->will($this->returnValue(false));
+            ->willReturn(false);
 
-        $this->strategy->expects($this->any())
+        $this->strategy->expects(static::any())
             ->method('pickOne')
-            ->will($this->onConsecutiveCalls($identifier1, $identifier2));
+            ->willReturnOnConsecutiveCalls($identifier1, $identifier2);
 
         $collection = new Collection([$connection1, $connection2], $this->strategy);
         $collection->sendToOne($command);
@@ -305,19 +306,19 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $command     = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
-        $connection1->expects($this->any())
+        $connection1->expects(static::any())
             ->method($command)
-            ->will($this->throwException(new RuntimeException()));
+            ->willThrowException(new RuntimeException());
 
         $identifier2 = 'id-456';
         $connection2 = $this->getMockConnection($identifier2);
-        $connection2->expects($this->once())
+        $connection2->expects(static::once())
             ->method($command)
-            ->will($this->returnValue(234));
+            ->willReturn(234);
 
-        $this->strategy->expects($this->any())
+        $this->strategy->expects(static::any())
             ->method('pickOne')
-            ->will($this->onConsecutiveCalls($identifier1, $identifier2));
+            ->willReturnOnConsecutiveCalls($identifier1, $identifier2);
 
         $collection = new Collection([$connection1, $connection2], $this->strategy);
         $collection->sendToOne($command);
@@ -331,19 +332,19 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
         $command     = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
-        $connection1->expects($this->any())
+        $connection1->expects(static::any())
             ->method($command)
-            ->will($this->throwException(new RuntimeException()));
+            ->willThrowException(new RuntimeException());
 
         $identifier2 = 'id-456';
         $connection2 = $this->getMockConnection($identifier2);
-        $connection2->expects($this->once())
+        $connection2->expects(static::once())
             ->method($command)
-            ->will($this->throwException(new RuntimeException()));
+            ->willThrowException(new RuntimeException());
 
-        $this->strategy->expects($this->any())
+        $this->strategy->expects(static::any())
             ->method('pickOne')
-            ->will($this->onConsecutiveCalls($identifier1, $identifier2));
+            ->willReturnOnConsecutiveCalls($identifier1, $identifier2);
 
         $collection = new Collection([$connection1, $connection2], $this->strategy);
         $collection->sendToOne($command);
@@ -362,9 +363,9 @@ class CollectionTest extends \PHPUnit_Framework_TestCase
             $builder->setMethods($methods);
         }
         $connection = $builder->getMock();
-        $connection->expects($this->any())
+        $connection->expects(static::any())
             ->method('getName')
-            ->will($this->returnValue($identifier));
+            ->willReturn($identifier);
         return $connection;
     }
 }

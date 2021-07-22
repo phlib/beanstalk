@@ -6,21 +6,21 @@ class DeleteTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf(CommandInterface::class, new Delete(123));
+        static::assertInstanceOf(CommandInterface::class, new Delete(123));
     }
 
     public function testGetCommand()
     {
         $id = 123;
-        $this->assertEquals("delete $id", (new Delete($id))->getCommand());
+        static::assertEquals("delete $id", (new Delete($id))->getCommand());
     }
 
     public function testSuccessfulCommand()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('DELETED');
-        $this->assertInstanceOf(Delete::class, (new Delete(123))->process($this->socket));
+        static::assertInstanceOf(Delete::class, (new Delete(123))->process($this->socket));
     }
 
     /**
@@ -28,7 +28,7 @@ class DeleteTest extends CommandTestCase
      */
     public function testNotFoundThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_FOUND');
         (new Delete(123))->process($this->socket);
@@ -39,7 +39,7 @@ class DeleteTest extends CommandTestCase
      */
     public function testUnknownStatusThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Delete(123))->process($this->socket);

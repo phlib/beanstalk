@@ -6,12 +6,12 @@ class ReleaseTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf(CommandInterface::class, new Release(123, 456, 789));
+        static::assertInstanceOf(CommandInterface::class, new Release(123, 456, 789));
     }
 
     public function testGetCommand()
     {
-        $this->assertEquals('release 123 456 789', (new Release(123, 456, 789))->getCommand());
+        static::assertEquals('release 123 456 789', (new Release(123, 456, 789))->getCommand());
     }
 
     /**
@@ -24,12 +24,12 @@ class ReleaseTest extends CommandTestCase
 
     public function testSuccessfulCommand()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("RELEASED");
 
         $release = new Release(123, 456, 789);
-        $this->assertInstanceOf(Release::class, $release->process($this->socket));
+        static::assertInstanceOf(Release::class, $release->process($this->socket));
     }
 
     /**
@@ -37,7 +37,7 @@ class ReleaseTest extends CommandTestCase
      */
     public function testNotFoundThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_FOUND');
         (new Release(123, 456, 789))->process($this->socket);
@@ -48,7 +48,7 @@ class ReleaseTest extends CommandTestCase
      */
     public function testUnknownStatusThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Release(123, 456, 789))->process($this->socket);

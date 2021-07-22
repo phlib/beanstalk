@@ -10,15 +10,15 @@ class StatsTraitTest extends CommandTestCase
         $testString   = 'my test data';
         $expectedData = [$testString];
 
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("OK $testString");
 
-        $stat->expects($this->any())
+        $stat->expects(static::any())
             ->method('decode')
             ->willReturn([$testString]);
 
-        $this->assertEquals($expectedData, $stat->process($this->socket));
+        static::assertEquals($expectedData, $stat->process($this->socket));
     }
 
     /**
@@ -26,7 +26,7 @@ class StatsTraitTest extends CommandTestCase
      */
     public function testWhenStatusNotFound()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("NOT_FOUND");
         $this->getMockStat(['process'])
@@ -38,7 +38,7 @@ class StatsTraitTest extends CommandTestCase
      */
     public function testWhenStatusUnknown()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("UNKNOWN_STATUS data");
         $this->getMockStat(['process'])
@@ -52,11 +52,11 @@ class StatsTraitTest extends CommandTestCase
      */
     public function testYamlFormatIsDecoded($yaml, array $expectedOutput)
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
-            ->will($this->onConsecutiveCalls("OK 1234\r\n", "---\n$yaml\r\n"));
+            ->willReturnOnConsecutiveCalls("OK 1234\r\n", "---\n$yaml\r\n");
         $stat = $this->getMockStat(['process', 'decode']);
-        $this->assertEquals($expectedOutput, $stat->process($this->socket));
+        static::assertEquals($expectedOutput, $stat->process($this->socket));
     }
 
     public function yamlFormatIsDecodedDataProvider()

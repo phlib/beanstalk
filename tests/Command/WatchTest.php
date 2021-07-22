@@ -6,13 +6,13 @@ class WatchTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf(CommandInterface::class, new Watch('test-tube'));
+        static::assertInstanceOf(CommandInterface::class, new Watch('test-tube'));
     }
 
     public function testGetCommand()
     {
         $tube = 'test-tube';
-        $this->assertEquals("watch $tube", (new Watch($tube))->getCommand());
+        static::assertEquals("watch $tube", (new Watch($tube))->getCommand());
     }
 
     /**
@@ -27,11 +27,11 @@ class WatchTest extends CommandTestCase
     {
         $tube = 'test-tube';
         $watchingCount = 12;
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("WATCHING $watchingCount");
 
-        $this->assertEquals($watchingCount, (new Watch($tube))->process($this->socket));
+        static::assertEquals($watchingCount, (new Watch($tube))->process($this->socket));
     }
 
     /**
@@ -39,7 +39,7 @@ class WatchTest extends CommandTestCase
      */
     public function testUnknownStatusThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Watch('test-tube'))->process($this->socket);

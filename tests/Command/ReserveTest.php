@@ -6,7 +6,7 @@ class ReserveTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf(CommandInterface::class, new Reserve(123));
+        static::assertInstanceOf(CommandInterface::class, new Reserve(123));
     }
 
     /**
@@ -14,7 +14,7 @@ class ReserveTest extends CommandTestCase
      */
     public function testGetCommand($timeout, $command)
     {
-        $this->assertEquals($command, (new Reserve($timeout))->getCommand());
+        static::assertEquals($command, (new Reserve($timeout))->getCommand());
     }
 
     public function getCommandDataProvider()
@@ -32,11 +32,11 @@ class ReserveTest extends CommandTestCase
         $bytes    = strlen($data);
         $response = ['id' => $id, 'body' => $data];
 
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
-            ->will($this->onConsecutiveCalls("RESERVED $id $bytes\r\n", $data . "\r\n"));
+            ->willReturnOnConsecutiveCalls("RESERVED $id $bytes\r\n", $data . "\r\n");
 
-        $this->assertEquals($response, (new Reserve())->process($this->socket));
+        static::assertEquals($response, (new Reserve())->process($this->socket));
     }
 
     /**
@@ -45,10 +45,10 @@ class ReserveTest extends CommandTestCase
      */
     public function testFailureStatusReturnsFalse($status)
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn($status);
-        $this->assertFalse((new Reserve(123))->process($this->socket));
+        static::assertFalse((new Reserve(123))->process($this->socket));
     }
 
     public function failureStatusReturnsFalseDataProvider()
@@ -64,7 +64,7 @@ class ReserveTest extends CommandTestCase
      */
     public function testUnknownStatusThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Reserve(123))->process($this->socket);

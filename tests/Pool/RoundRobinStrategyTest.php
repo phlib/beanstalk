@@ -2,11 +2,13 @@
 
 namespace Phlib\Beanstalk\Pool;
 
-class RoundRobinStrategyTest extends \PHPUnit_Framework_TestCase
+use PHPUnit\Framework\TestCase;
+
+class RoundRobinStrategyTest extends TestCase
 {
     public function testImplementsSelectionStrategyInterface()
     {
-        $this->assertInstanceOf(SelectionStrategyInterface::class, new RoundRobinStrategy());
+        static::assertInstanceOf(SelectionStrategyInterface::class, new RoundRobinStrategy());
     }
 
     public function testAllowsContinuousSelection()
@@ -17,7 +19,7 @@ class RoundRobinStrategyTest extends \PHPUnit_Framework_TestCase
         for ($i = 0; $i < count($keys); $i++) {
             $strategy->pickOne($keys);
         }
-        $this->assertEquals($firstHost, $strategy->pickOne($keys));
+        static::assertEquals($firstHost, $strategy->pickOne($keys));
     }
 
     /**
@@ -37,6 +39,6 @@ class RoundRobinStrategyTest extends \PHPUnit_Framework_TestCase
 
         $newHost = 'host456';
         $keys[] = $newHost;
-        $this->assertEquals($newHost, $strategy->pickOne($keys));
+        static::assertEquals($newHost, $strategy->pickOne($keys));
     }
 }

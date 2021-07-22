@@ -6,11 +6,11 @@ class ListTubesTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf(CommandInterface::class, new ListTubes());
+        static::assertInstanceOf(CommandInterface::class, new ListTubes());
     }
 
     public function testGetCommand()
     {
-        $this->assertEquals("list-tubes", (new ListTubes())->getCommand());
+        static::assertEquals("list-tubes", (new ListTubes())->getCommand());
     }
 }

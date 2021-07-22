@@ -3,15 +3,16 @@
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
+use PHPUnit\Framework\TestCase;
 
-class ValidateTraitTest extends \PHPUnit_Framework_TestCase
+class ValidateTraitTest extends TestCase
 {
     /**
      * @var ValidateTrait
      */
     protected $validate;
 
-    public function setUp()
+    protected function setUp()
     {
         $this->validate = $this->getMockForTrait(ValidateTrait::class);
         parent::setUp();
@@ -19,7 +20,7 @@ class ValidateTraitTest extends \PHPUnit_Framework_TestCase
 
     public function testValidPriority()
     {
-        $this->assertTrue($this->validate->validatePriority(123));
+        static::assertTrue($this->validate->validatePriority(123));
     }
 
     /**
@@ -39,7 +40,7 @@ class ValidateTraitTest extends \PHPUnit_Framework_TestCase
 
     public function testValidTubeName()
     {
-        $this->assertTrue($this->validate->validateTubeName('mytube'));
+        static::assertTrue($this->validate->validateTubeName('mytube'));
     }
 
     /**
@@ -63,7 +64,7 @@ class ValidateTraitTest extends \PHPUnit_Framework_TestCase
      */
     public function testValidJobData($data)
     {
-        $this->assertTrue($this->validate->validateJobData($data));
+        static::assertTrue($this->validate->validateJobData($data));
     }
 
     public function validJobDataDataProvider()

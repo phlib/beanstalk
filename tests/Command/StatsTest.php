@@ -6,11 +6,11 @@ class StatsTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf(CommandInterface::class, new Stats());
+        static::assertInstanceOf(CommandInterface::class, new Stats());
     }
 
     public function testGetCommand()
     {
-        $this->assertEquals('stats', (new Stats())->getCommand());
+        static::assertEquals('stats', (new Stats())->getCommand());
     }
 }

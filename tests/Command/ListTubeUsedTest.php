@@ -6,21 +6,21 @@ class ListTubeUsedTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf(CommandInterface::class, new ListTubeUsed());
+        static::assertInstanceOf(CommandInterface::class, new ListTubeUsed());
     }
 
     public function testGetCommand()
     {
-        $this->assertEquals("list-tube-used", (new ListTubeUsed())->getCommand());
+        static::assertEquals("list-tube-used", (new ListTubeUsed())->getCommand());
     }
 
     public function testSuccessfulCommand()
     {
         $tube = 'test-tube';
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("USING $tube");
-        $this->assertEquals($tube, (new ListTubeUsed())->process($this->socket));
+        static::assertEquals($tube, (new ListTubeUsed())->process($this->socket));
     }
 
     /**
@@ -28,7 +28,7 @@ class ListTubeUsedTest extends CommandTestCase
      */
     public function testUnknownStatusThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new ListTubeUsed())->process($this->socket);

@@ -4,8 +4,9 @@ namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool\Collection;
+use PHPUnit\Framework\TestCase;
 
-class PoolTest extends \PHPUnit_Framework_TestCase
+class PoolTest extends TestCase
 {
 
     /**
@@ -18,7 +19,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
      */
     protected $collection;
 
-    public function setUp()
+    protected function setUp()
     {
         parent::setUp();
 
@@ -28,7 +29,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $this->pool = new Pool($this->collection);
     }
 
-    public function tearDown()
+    protected function tearDown()
     {
         parent::tearDown();
         $this->servers = null;
@@ -40,11 +41,11 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $connection = $this->getMockBuilder(Connection::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $connection->expects($this->exactly(2))
+        $connection->expects(static::exactly(2))
             ->method('disconnect')
             ->willReturn(true);
         $collection = new \ArrayIterator([$connection, $connection]);
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('getIterator')
             ->willReturn($collection);
         $this->pool->disconnect();
@@ -60,14 +61,14 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $connection = $this->getMockBuilder(Connection::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $connection->expects($this->any())
+        $connection->expects(static::any())
             ->method('disconnect')
-            ->will(call_user_func_array([$this, 'onConsecutiveCalls'], $returnValues));
+            ->willReturnOnConsecutiveCalls(...$returnValues);
         $collection = new \ArrayIterator([$connection, $connection]);
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('getIterator')
             ->willReturn($collection);
-        $this->assertEquals($expected, $this->pool->disconnect());
+        static::assertEquals($expected, $this->pool->disconnect());
     }
 
     public function disconnectReturnsValueDataProvider()
@@ -83,7 +84,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     public function testUseTubeCallsAllConnections()
     {
         $tube = 'test-tube';
-        $this->collection->expects($this->once())
+        $this->collection->expects(static::once())
             ->method('sendToAll');
         $this->pool->useTube($tube);
     }
@@ -91,13 +92,13 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     public function testIgnoreDoesNotAllowLessThanOneWatching()
     {
         // 'default' tube is already being watched
-        $this->assertFalse($this->pool->ignore('default'));
+        static::assertFalse($this->pool->ignore('default'));
     }
 
     public function testIgnore()
     {
         $this->pool->watch('test-tube');
-        $this->assertEquals(1, $this->pool->ignore('default'));
+        static::assertEquals(1, $this->pool->ignore('default'));
     }
 
     public function testPutSuccess()
@@ -105,9 +106,9 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $connection = $this->getMockBuilder(Connection::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $this->collection->expects($this->once())
+        $this->collection->expects(static::once())
             ->method('sendToOne')
-            ->will($this->returnValue(['connection' => $connection, 'response' => '123']));
+            ->willReturn(['connection' => $connection, 'response' => '123']);
         $this->pool->put('myJobData');
     }
 
@@ -115,20 +116,20 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     {
         $host = 'host123';
         $connection = $this->createMockConnection($host);
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToOne')
-            ->will($this->returnValue(['connection' => $connection, 'response' => '123']));
-        $this->assertContains($host, $this->pool->put('myJobData'));
+            ->willReturn(['connection' => $connection, 'response' => '123']);
+        static::assertContains($host, $this->pool->put('myJobData'));
     }
 
     public function testPutReturnsJobIdContainingTheOriginalJobId()
     {
         $jobId = '432';
         $connection = $this->createMockConnection('host:123');
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToOne')
-            ->will($this->returnValue(['connection' => $connection, 'response' => $jobId]));
-        $this->assertContains($jobId, $this->pool->put('myJobData'));
+            ->willReturn(['connection' => $connection, 'response' => $jobId]);
+        static::assertContains($jobId, $this->pool->put('myJobData'));
     }
 
     /**
@@ -136,9 +137,9 @@ class PoolTest extends \PHPUnit_Framework_TestCase
      */
     public function testPutTotalFailure()
     {
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToOne')
-            ->will($this->throwException(new RuntimeException()));
+            ->willThrowException(new RuntimeException());
         $this->pool->put('myJobData');
     }
 
@@ -148,17 +149,17 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     public function testReserveWithNoJobsDoesNotTakeLongerThanTimeout()
     {
         $connection = $this->createMockConnection('host:123');
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('getAvailableKeys')
-            ->will($this->returnValue(['host:123', 'host:456']));
-        $this->collection->expects($this->any())
+            ->willReturn(['host:123', 'host:456']);
+        $this->collection->expects(static::any())
             ->method('sendToExact')
-            ->will($this->returnValue(['connection' => $connection, 'response' => false]));
+            ->willReturn(['connection' => $connection, 'response' => false]);
         $startTime = time();
         $this->pool->reserve(2);
         $totalTime = time() - $startTime;
-        $this->assertGreaterThanOrEqual(2, $totalTime);
-        $this->assertLessThanOrEqual(3, $totalTime);
+        static::assertGreaterThanOrEqual(2, $totalTime);
+        static::assertLessThanOrEqual(3, $totalTime);
     }
 
     public function testReserve()
@@ -169,13 +170,13 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $expected   = ['id' => "{$host}.{$jobId}", 'body' => 'jobData'];
         $connection = $this->createMockConnection($host);
 
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('getAvailableKeys')
-            ->will($this->returnValue([$host]));
-        $this->collection->expects($this->any())
+            ->willReturn([$host]);
+        $this->collection->expects(static::any())
             ->method('sendToExact')
-            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
-        $this->assertEquals($expected, $this->pool->reserve());
+            ->willReturn(['connection' => $connection, 'response' => $response]);
+        static::assertEquals($expected, $this->pool->reserve());
     }
 
     public function testReserveWithNoJobsOnFirstServer()
@@ -186,16 +187,16 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $expected   = ['id' => "{$host}.{$jobId}", 'body' => 'jobData'];
         $connection = $this->createMockConnection($host);
 
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('getAvailableKeys')
-            ->will($this->returnValue(['host:456', $host]));
-        $this->collection->expects($this->at(0))
+            ->willReturn(['host:456', $host]);
+        $this->collection->expects(static::at(0))
             ->method('sendToExact')
-            ->will($this->returnValue(false)); // <-- should ignore this one
-        $this->collection->expects($this->at(1))
+            ->willReturn(false); // <-- should ignore this one
+        $this->collection->expects(static::at(1))
             ->method('sendToExact')
-            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
-        $this->assertEquals($expected, $this->pool->reserve());
+            ->willReturn(['connection' => $connection, 'response' => $response]);
+        static::assertEquals($expected, $this->pool->reserve());
     }
 
     public function testReserveWithFailingServer()
@@ -206,16 +207,16 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $expected   = ['id' => "{$host}.{$jobId}", 'body' => 'jobData'];
         $connection = $this->createMockConnection($host);
 
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('getAvailableKeys')
-            ->will($this->returnValue(['host:456', $host]));
-        $this->collection->expects($this->at(0))
+            ->willReturn(['host:456', $host]);
+        $this->collection->expects(static::at(0))
             ->method('sendToExact')
-            ->will($this->throwException(new RuntimeException())); // <-- should continue after this one
-        $this->collection->expects($this->at(1))
+            ->willThrowException(new RuntimeException()); // <-- should continue after this one
+        $this->collection->expects(static::at(1))
             ->method('sendToExact')
-            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
-        $this->assertEquals($expected, $this->pool->reserve());
+            ->willReturn(['connection' => $connection, 'response' => $response]);
+        static::assertEquals($expected, $this->pool->reserve());
     }
 
     /**
@@ -234,12 +235,12 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     {
         $host  = 'host:456';
         $jobId = '123';
-        $this->collection->expects($this->once())
+        $this->collection->expects(static::once())
             ->method('sendToExact')
             ->with(
-                $this->equalTo($host),
-                $this->equalTo($method),
-                $this->contains($jobId)
+                static::equalTo($host),
+                static::equalTo($method),
+                static::contains($jobId)
             );
         $this->pool->$method("$host.$jobId");
     }
@@ -258,11 +259,11 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $expected   = ['id' => "$host.$jobId", 'body' => $jobBody];
         $connection = $this->createMockConnection($host);
 
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToExact')
-            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
+            ->willReturn(['connection' => $connection, 'response' => $response]);
 
-        $this->assertEquals($expected, $this->pool->peek("$host.$jobId"));
+        static::assertEquals($expected, $this->pool->peek("$host.$jobId"));
     }
 
     public function testPeekReady()
@@ -274,19 +275,19 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $expected   = ['id' => "$host.$jobId", 'body' => $jobBody];
         $connection = $this->createMockConnection($host);
 
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToOne')
-            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
+            ->willReturn(['connection' => $connection, 'response' => $response]);
 
-        $this->assertEquals($expected, $this->pool->peekReady());
+        static::assertEquals($expected, $this->pool->peekReady());
     }
 
     public function testPeekReadyWithNoReadyJobs()
     {
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToOne')
-            ->will($this->returnValue(['connection' => null, 'response' => false]));
-        $this->assertFalse($this->pool->peekReady());
+            ->willReturn(['connection' => null, 'response' => false]);
+        static::assertFalse($this->pool->peekReady());
     }
 
     public function testPeekDelayed()
@@ -298,19 +299,19 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $expected   = ['id' => "$host.$jobId", 'body' => $jobBody];
         $connection = $this->createMockConnection($host);
 
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToOne')
-            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
+            ->willReturn(['connection' => $connection, 'response' => $response]);
 
-        $this->assertEquals($expected, $this->pool->peekDelayed());
+        static::assertEquals($expected, $this->pool->peekDelayed());
     }
 
     public function testPeekDelayedWithNoDelayedJobs()
     {
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToOne')
-            ->will($this->returnValue(['connection' => null, 'response' => false]));
-        $this->assertFalse($this->pool->peekDelayed());
+            ->willReturn(['connection' => null, 'response' => false]);
+        static::assertFalse($this->pool->peekDelayed());
     }
 
     public function testPeekBuried()
@@ -322,19 +323,19 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $expected   = ['id' => "$host.$jobId", 'body' => $jobBody];
         $connection = $this->createMockConnection($host);
 
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToOne')
-            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
+            ->willReturn(['connection' => $connection, 'response' => $response]);
 
-        $this->assertEquals($expected, $this->pool->peekBuried());
+        static::assertEquals($expected, $this->pool->peekBuried());
     }
 
     public function testPeekBuriedWithNoBuriedJobs()
     {
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToOne')
-            ->will($this->throwException(new RuntimeException()));
-        $this->assertFalse($this->pool->peekBuried());
+            ->willThrowException(new RuntimeException());
+        static::assertFalse($this->pool->peekBuried());
     }
 
     public function testStats()
@@ -343,14 +344,14 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $ready       = 2;
         $other       = 8;
         $response    = ['current-jobs-ready' => $ready, 'some-other' => $other];
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToAll')
-            ->will($this->returnCallback(function ($command, $arguments, $success, $failure) use ($response, $noOfServers) {
+            ->willReturnCallback(function ($command, $arguments, $success, $failure) use ($response, $noOfServers) {
                 for ($i = 0; $i < $noOfServers; $i++) {
                     call_user_func($success, ['connection' => null, 'response' => $response]);
                 }
-            }));
-        $this->assertEquals(
+            });
+        static::assertEquals(
             ['current-jobs-ready' => ($ready * $noOfServers), 'some-other' => ($other * $noOfServers)],
             $this->pool->stats()
         );
@@ -366,10 +367,10 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $response   = ['id' => $jobId, 'body' => $jobBody];
         $expected   = ['id' => $hostJobId, 'body' => $jobBody];
 
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToExact')
-            ->will($this->returnValue(['connection' => $connection, 'response' => $response]));
-        $this->assertEquals($expected, $this->pool->statsJob($hostJobId));
+            ->willReturn(['connection' => $connection, 'response' => $response]);
+        static::assertEquals($expected, $this->pool->statsJob($hostJobId));
     }
 
     public function testStatsTube()
@@ -378,14 +379,14 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $ready       = 2;
         $other       = 8;
         $response    = ['current-jobs-ready' => $ready, 'some-other' => $other];
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToAll')
-            ->will($this->returnCallback(function ($command, $arguments, $success, $failure) use ($response, $noOfServers) {
+            ->willReturnCallback(function ($command, $arguments, $success, $failure) use ($response, $noOfServers) {
                 for ($i = 0; $i < $noOfServers; $i++) {
                     call_user_func($success, ['connection' => null, 'response' => $response]);
                 }
-            }));
-        $this->assertEquals(
+            });
+        static::assertEquals(
             ['current-jobs-ready' => ($ready * $noOfServers), 'some-other' => ($other * $noOfServers)],
             $this->pool->statsTube('test-tube')
         );
@@ -405,23 +406,23 @@ class PoolTest extends \PHPUnit_Framework_TestCase
             if ($kickValue == 0) {
                 continue;
             }
-            $connection->expects($this->at($at++))
+            $connection->expects(static::at($at++))
                 ->method('kick')
-                ->will($this->returnCallback(function ($quantity) use ($kickValue) {
+                ->willReturnCallback(function ($quantity) use ($kickValue) {
                     return $quantity < $kickValue ? $quantity : $kickValue;
-                }));
+                });
         }
 
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToAll')
-            ->will($this->returnCallback(function ($command, $arguments, $success, $failure) use ($kickValues, $connection) {
+            ->willReturnCallback(function ($command, $arguments, $success, $failure) use ($kickValues, $connection) {
                 foreach ($kickValues as $count) {
                     $response = ['current-jobs-buried' => $count];
                     call_user_func($success, ['connection' => $connection, 'response' => $response]);
                 }
-            }));
+            });
 
-        $this->assertEquals($expected, $this->pool->kick($kickAmount));
+        static::assertEquals($expected, $this->pool->kick($kickAmount));
     }
 
     public function kickDataProvider()
@@ -440,49 +441,49 @@ class PoolTest extends \PHPUnit_Framework_TestCase
     {
         $expected = ['test1', 'test2', 'test3', 'test4'];
 
-        $this->collection->expects($this->any())
+        $this->collection->expects(static::any())
             ->method('sendToAll')
-            ->will($this->returnCallback(function ($command, $args, $success, $failure) use ($expected) {
+            ->willReturnCallback(function ($command, $args, $success, $failure) use ($expected) {
                 $success(['connection' => null, 'response' => array_slice($expected, 0, 2)]);
                 $success(['connection' => null, 'response' => array_slice($expected, 2, 1)]);
                 $success(['connection' => null, 'response' => array_slice($expected, 2, 2)]);
-            }));
+            });
 
         $actual = $this->pool->listTubes();
         sort($actual); // this is so they match
-        $this->assertEquals($expected, $actual);
+        static::assertEquals($expected, $actual);
     }
 
     public function testListTubeUsed()
     {
         $tube = 'test-tube';
         $this->pool->useTube($tube);
-        $this->assertSame($tube, $this->pool->listTubeUsed());
+        static::assertSame($tube, $this->pool->listTubeUsed());
     }
 
     public function testListTubesWatchDefaultState()
     {
-        $this->assertEquals(['default'], $this->pool->listTubesWatched());
+        static::assertEquals(['default'], $this->pool->listTubesWatched());
     }
 
     public function testListTubesWatched()
     {
         $this->pool->watch('test');
-        $this->assertEquals(['default', 'test'], $this->pool->listTubesWatched());
+        static::assertEquals(['default', 'test'], $this->pool->listTubesWatched());
     }
 
     public function testCombineIdIsNotTheJobId()
     {
         $jobId = 123;
         $connection = $this->createMockConnection('host');
-        $this->assertNotEquals($jobId, $this->pool->combineId($connection, $jobId));
+        static::assertNotEquals($jobId, $this->pool->combineId($connection, $jobId));
     }
 
     public function testCombineIdContainsJob()
     {
         $jobId = 123;
         $connection = $this->createMockConnection('host');
-        $this->assertContains((string)$jobId, $this->pool->combineId($connection, $jobId));
+        static::assertContains((string)$jobId, $this->pool->combineId($connection, $jobId));
     }
 
     public function testCombineAndSplitReturnCorrectJob()
@@ -492,7 +493,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
 
         $poolId = $this->pool->combineId($connection, $jobId);
         [$actualHost, $actualJobId] = $this->pool->splitId($poolId);
-        $this->assertEquals($jobId, $actualJobId);
+        static::assertEquals($jobId, $actualJobId);
     }
 
     public function testCombineAndSplitReturnCorrectHost()
@@ -502,7 +503,7 @@ class PoolTest extends \PHPUnit_Framework_TestCase
 
         $poolId = $this->pool->combineId($connection, 123);
         [$actualHost, ] = $this->pool->splitId($poolId);
-        $this->assertEquals($host, $actualHost);
+        static::assertEquals($host, $actualHost);
     }
 
     /**
@@ -514,9 +515,9 @@ class PoolTest extends \PHPUnit_Framework_TestCase
         $connection = $this->getMockBuilder(Connection::class)
             ->disableOriginalConstructor()
             ->getMock();
-        $connection->expects($this->any())
+        $connection->expects(static::any())
             ->method('getName')
-            ->will($this->returnValue($host));
+            ->willReturn($host);
         return $connection;
     }
 }
