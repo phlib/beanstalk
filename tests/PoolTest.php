@@ -2,8 +2,10 @@
 
 namespace Phlib\Beanstalk;
 
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool\Collection;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class PoolTest extends TestCase
@@ -15,7 +17,7 @@ class PoolTest extends TestCase
     protected $pool;
 
     /**
-     * @var Collection|\PHPUnit_Framework_MockObject_MockObject
+     * @var Collection|MockObject
      */
     protected $collection;
 
@@ -23,9 +25,7 @@ class PoolTest extends TestCase
     {
         parent::setUp();
 
-        $this->collection = $this->getMockBuilder(Collection::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->collection = $this->createMock(Collection::class);
         $this->pool = new Pool($this->collection);
     }
 
@@ -38,9 +38,7 @@ class PoolTest extends TestCase
 
     public function testDisconnectCallsAllConnections()
     {
-        $connection = $this->getMockBuilder(Connection::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $connection = $this->createMock(Connection::class);
         $connection->expects(static::exactly(2))
             ->method('disconnect')
             ->willReturn(true);
@@ -58,9 +56,7 @@ class PoolTest extends TestCase
      */
     public function testDisconnectReturnsValue($expected, array $returnValues)
     {
-        $connection = $this->getMockBuilder(Connection::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $connection = $this->createMock(Connection::class);
         $connection->expects(static::any())
             ->method('disconnect')
             ->willReturnOnConsecutiveCalls(...$returnValues);
@@ -103,9 +99,7 @@ class PoolTest extends TestCase
 
     public function testPutSuccess()
     {
-        $connection = $this->getMockBuilder(Connection::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $connection = $this->createMock(Connection::class);
         $this->collection->expects(static::once())
             ->method('sendToOne')
             ->willReturn(['connection' => $connection, 'response' => '123']);
@@ -132,11 +126,10 @@ class PoolTest extends TestCase
         static::assertContains($jobId, $this->pool->put('myJobData'));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\RuntimeException
-     */
     public function testPutTotalFailure()
     {
+        $this->expectException(RuntimeException::class);
+
         $this->collection->expects(static::any())
             ->method('sendToOne')
             ->willThrowException(new RuntimeException());
@@ -219,11 +212,10 @@ class PoolTest extends TestCase
         static::assertEquals($expected, $this->pool->reserve());
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testPoolIdWithInvalidFormat()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $this->pool->release('123');
     }
 
@@ -508,13 +500,11 @@ class PoolTest extends TestCase
 
     /**
      * @param string $host
-     * @return Connection|\PHPUnit_Framework_MockObject_MockObject
+     * @return Connection|MockObject
      */
     protected function createMockConnection($host)
     {
-        $connection = $this->getMockBuilder(Connection::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $connection = $this->createMock(Connection::class);
         $connection->expects(static::any())
             ->method('getName')
             ->willReturn($host);

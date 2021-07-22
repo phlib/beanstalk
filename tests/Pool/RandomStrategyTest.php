@@ -2,6 +2,7 @@
 
 namespace Phlib\Beanstalk\Pool;
 
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 class RandomStrategyTest extends TestCase
@@ -11,11 +12,10 @@ class RandomStrategyTest extends TestCase
         static::assertInstanceOf(SelectionStrategyInterface::class, new RandomStrategy());
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testFailsWhenGivenEmptyCollection()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         (new RandomStrategy())->pickOne([]);
     }
 

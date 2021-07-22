@@ -65,11 +65,10 @@ class FactoryTest extends TestCase
         ];
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testCreatingPoolFailsWithInvalidStrategyClass()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $hostConfig = ['host' => 'localhost'];
         $poolConfig = [
             'servers' => [$hostConfig, $hostConfig],
@@ -78,11 +77,10 @@ class FactoryTest extends TestCase
         Factory::createFromArray($poolConfig);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testCreateFromArrayFailsWhenEmpty()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         Factory::createFromArray([]);
     }
 

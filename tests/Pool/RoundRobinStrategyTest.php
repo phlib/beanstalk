@@ -2,6 +2,7 @@
 
 namespace Phlib\Beanstalk\Pool;
 
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 class RoundRobinStrategyTest extends TestCase
@@ -22,11 +23,10 @@ class RoundRobinStrategyTest extends TestCase
         static::assertEquals($firstHost, $strategy->pickOne($keys));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testFailsWhenGivenEmptyCollection()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         (new RoundRobinStrategy())->pickOne([]);
     }
 

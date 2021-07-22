@@ -2,7 +2,9 @@
 
 namespace Phlib\Beanstalk\Connection;
 
+use Phlib\Beanstalk\Exception\SocketException;
 use phpmock\phpunit\PHPMock;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class SocketTest extends TestCase
@@ -31,11 +33,10 @@ class SocketTest extends TestCase
         static::assertInstanceOf(Socket::class, (new Socket('host'))->connect());
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\SocketException
-     */
     public function testConnectOnFailureThrowsError()
     {
+        $this->expectException(SocketException::class);
+
         $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
         $fsockopen->expects(static::any())->willReturnCallback(function ($host, $port, &$errNum, &$errStr, $timeout) {
             $errNum = 123;
@@ -48,6 +49,9 @@ class SocketTest extends TestCase
         (new Socket('host'))->connect();
     }
 
+    /**
+     * @doesNotPerformAssertions PHPMock assertions are not counted
+     */
     public function testConnectsWithTheCorrectDetails()
     {
         $host    = 'someHost';
@@ -98,6 +102,9 @@ class SocketTest extends TestCase
         $socket->disconnect();
     }
 
+    /**
+     * @doesNotPerformAssertions PHPMock assertions are not counted
+     */
     public function testWriteSuccessfullyToTheConnection()
     {
         $data = 'Some Data';
@@ -116,11 +123,10 @@ class SocketTest extends TestCase
             ->write($data);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\SocketException
-     */
     public function testWriteThrowsExceptionOnError()
     {
+        $this->expectException(SocketException::class);
+
         $fwrite = $this->getFunctionMock(__NAMESPACE__, 'fwrite');
         $fwrite->expects(static::any())
             ->willReturn(0);
@@ -149,11 +155,10 @@ class SocketTest extends TestCase
         static::assertEquals($expectedData, $this->getMockSocket(['read'])->read(9));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\SocketException
-     */
     public function testReadFailsWithBadData()
     {
+        $this->expectException(SocketException::class);
+
         $stream_get_line = $this->getFunctionMock(__NAMESPACE__, 'stream_get_line');
         $stream_get_line->expects(static::any())->willReturn(false);
         $this->getMockSocket(['read'])->read();
@@ -161,7 +166,7 @@ class SocketTest extends TestCase
 
     /**
      * @param array $mockFns
-     * @return Socket|\PHPUnit_Framework_MockObject_MockObject
+     * @return Socket|MockObject
      */
     protected function getMockSocket(array $mockFns)
     {

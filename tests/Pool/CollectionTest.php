@@ -3,14 +3,16 @@
 namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Connection;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class CollectionTest extends TestCase
 {
     /**
-     * @var SelectionStrategyInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var SelectionStrategyInterface|MockObject
      */
     protected $strategy;
 
@@ -74,19 +76,17 @@ class CollectionTest extends TestCase
         static::assertSame($connection, $collection->getConnection($serverKey));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testConstructorChecksForValidConnections()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         new Collection(['sdfdsf']);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testForUnknownConnection()
     {
+        $this->expectException(NotFoundException::class);
+
         $collection = new Collection([$this->getMockConnection('id-123')]);
         $collection->getConnection('foo-bar');
     }
@@ -105,11 +105,10 @@ class CollectionTest extends TestCase
         $collection->sendToExact($identifier, $command);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\RuntimeException
-     */
     public function testSendToExactOnError()
     {
+        $this->expectException(RuntimeException::class);
+
         $identifier = 'id-123';
         $command    = 'stats';
         $connection = $this->getMockConnection($identifier);
@@ -120,12 +119,11 @@ class CollectionTest extends TestCase
         $collection->sendToExact($identifier, $command);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\RuntimeException
-     * @expectedExceptionMessage Connection recently failed.
-     */
     public function testGetConnectionThatHasErrored()
     {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Connection recently failed.');
+
         $identifier = 'id-123';
         $command    = 'stats';
         $connection = $this->getMockConnection($identifier);
@@ -275,11 +273,10 @@ class CollectionTest extends TestCase
         $collection->sendToOne($command);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\RuntimeException
-     */
     public function testSendToOneWhenAllConnectionsAreUsed()
     {
+        $this->expectException(RuntimeException::class);
+
         $command     = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
@@ -324,11 +321,10 @@ class CollectionTest extends TestCase
         $collection->sendToOne($command);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\RuntimeException
-     */
     public function testSendToOneThrowsTheLastError()
     {
+        $this->expectException(RuntimeException::class);
+
         $command     = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
@@ -353,7 +349,7 @@ class CollectionTest extends TestCase
     /**
      * @param mixed $identifier
      * @param array $methods
-     * @return Connection|\PHPUnit_Framework_MockObject_MockObject
+     * @return Connection|MockObject
      */
     public function getMockConnection($identifier, array $methods = null)
     {

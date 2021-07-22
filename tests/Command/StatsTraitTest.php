@@ -2,6 +2,10 @@
 
 namespace Phlib\Beanstalk\Command;
 
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
+use PHPUnit\Framework\MockObject\MockObject;
+
 class StatsTraitTest extends CommandTestCase
 {
     public function testProcessCompletesOnSuccess()
@@ -21,11 +25,10 @@ class StatsTraitTest extends CommandTestCase
         static::assertEquals($expectedData, $stat->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testWhenStatusNotFound()
     {
+        $this->expectException(NotFoundException::class);
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("NOT_FOUND");
@@ -33,11 +36,10 @@ class StatsTraitTest extends CommandTestCase
             ->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testWhenStatusUnknown()
     {
+        $this->expectException(CommandException::class);
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("UNKNOWN_STATUS data");
@@ -74,7 +76,7 @@ class StatsTraitTest extends CommandTestCase
 
     /**
      * @param array $mockFns
-     * @return StatsTrait|\PHPUnit_Framework_MockObject_MockObject
+     * @return StatsTrait|MockObject
      */
     public function getMockStat(array $mockFns)
     {

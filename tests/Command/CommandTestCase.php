@@ -3,12 +3,13 @@
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class CommandTestCase extends TestCase
 {
     /**
-     * @var SocketInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var SocketInterface|MockObject
      */
     protected $socket;
 

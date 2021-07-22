@@ -2,6 +2,9 @@
 
 namespace Phlib\Beanstalk\Command;
 
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
+
 class WatchTest extends CommandTestCase
 {
     public function testImplementsCommand()
@@ -15,11 +18,10 @@ class WatchTest extends CommandTestCase
         static::assertEquals("watch $tube", (new Watch($tube))->getCommand());
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testTubeIsValidated()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         new Watch('');
     }
 
@@ -34,11 +36,10 @@ class WatchTest extends CommandTestCase
         static::assertEquals($watchingCount, (new Watch($tube))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
+        $this->expectException(CommandException::class);
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');

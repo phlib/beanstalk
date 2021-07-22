@@ -4,12 +4,14 @@ namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\NotFoundException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class ConnectionTest extends TestCase
 {
     /**
-     * @var Socket|\PHPUnit_Framework_MockObject_MockObject
+     * @var Socket|MockObject
      */
     protected $socket;
 
@@ -20,9 +22,7 @@ class ConnectionTest extends TestCase
 
     protected function setUp()
     {
-        $this->socket = $this->getMockBuilder(Socket::class)
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->socket = $this->createMock(Socket::class);
         $this->beanstalk = new Connection($this->socket);
         parent::setUp();
     }
@@ -172,11 +172,10 @@ class ConnectionTest extends TestCase
         $this->execute("peek-buried", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekBuried');
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testPeekNotFound()
     {
+        $this->expectException(NotFoundException::class);
+
         $id = 245;
         static::assertFalse($this->execute("peek $id", 'NOT_FOUND', 'peek', [$id]));
     }

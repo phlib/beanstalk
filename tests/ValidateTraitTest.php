@@ -3,6 +3,7 @@
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
 
 class ValidateTraitTest extends TestCase
@@ -25,11 +26,12 @@ class ValidateTraitTest extends TestCase
 
     /**
      * @param mixed $priority
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
      * @dataProvider invalidPriorityDataProvider
      */
     public function testInvalidPriority($priority)
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $this->validate->validatePriority($priority);
     }
 
@@ -45,11 +47,12 @@ class ValidateTraitTest extends TestCase
 
     /**
      * @param mixed $name
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
      * @dataProvider invalidTubeNameDataProvider
      */
     public function testInvalidTubeName($name)
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $this->validate->validateTubeName($name);
     }
 
@@ -78,11 +81,12 @@ class ValidateTraitTest extends TestCase
     }
 
     /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
      * @dataProvider invalidJobDataDataProvider
      */
     public function testInvalidJobData($data)
     {
+        $this->expectException(InvalidArgumentException::class);
+
         $this->validate->validateJobData($data);
     }
 

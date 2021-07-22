@@ -2,6 +2,9 @@
 
 namespace Phlib\Beanstalk\Command;
 
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
+
 class UseTubeTest extends CommandTestCase
 {
     public function testImplementsCommand()
@@ -15,11 +18,10 @@ class UseTubeTest extends CommandTestCase
         static::assertEquals("use $tube", (new UseTube($tube))->getCommand());
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testTubeIsValidated()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         new UseTube('');
     }
 
@@ -33,11 +35,10 @@ class UseTubeTest extends CommandTestCase
         static::assertEquals($tube, (new UseTube($tube))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
+        $this->expectException(CommandException::class);
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');

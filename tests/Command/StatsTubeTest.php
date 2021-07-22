@@ -2,6 +2,8 @@
 
 namespace Phlib\Beanstalk\Command;
 
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
+
 class StatsTubeTest extends CommandTestCase
 {
     public function testImplementsCommand()
@@ -15,11 +17,10 @@ class StatsTubeTest extends CommandTestCase
         static::assertEquals("stats-tube $tube", (new StatsTube($tube))->getCommand());
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testTubeIsValidated()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         new StatsTube('');
     }
 }
