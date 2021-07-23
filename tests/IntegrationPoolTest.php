@@ -7,7 +7,6 @@ use Phlib\Beanstalk\Connection\Socket;
 use PHPUnit\Framework\TestCase;
 
 /**
- * @runTestsInSeparateProcesses
  * @group integration
  */
 class IntegrationPoolTest extends TestCase
