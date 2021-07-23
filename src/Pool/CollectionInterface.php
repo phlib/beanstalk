@@ -36,8 +36,13 @@ interface CollectionInterface extends \IteratorAggregate
 
     /**
      * @param $command
-     * @param callable $success
-     * @param callable $failure
+     * @param callable|null $success {
+     *     @param array $result
+     *     @return bool continue iteration to other connections
+     * }
+     * @param callable|null $failure {
+     *     @return bool continue iteration to other connections
+     * }
      * @return mixed
      */
     public function sendToAll($command, array $arguments = [], callable $success = null, callable $failure = null);

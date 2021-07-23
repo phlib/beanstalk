@@ -367,21 +367,44 @@ class CollectionTest extends TestCase
     {
         $command = 'stats';
         $connection1 = $this->getMockConnection('id-123');
-        $connection1->expects(static::any())
+        $connection1->expects(static::once())
             ->method($command);
 
         $connection2 = $this->getMockConnection('id-456');
-        $connection2->expects(static::any())
+        $connection2->expects(static::once())
             ->method($command);
 
         $called = 0;
-        $onSuccess = function () use (&$called) {
+        $onSuccess = function () use (&$called): bool {
             $called++;
+            return true;
         };
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command, [], $onSuccess);
         static::assertEquals(2, $called);
+    }
+
+    public function testSendToAllSuccessCallbackStopsIteration(): void
+    {
+        $command = 'stats';
+        $connection1 = $this->getMockConnection('id-123');
+        $connection1->expects(static::once())
+            ->method($command);
+
+        $connection2 = $this->getMockConnection('id-456');
+        $connection2->expects(static::never())
+            ->method($command);
+
+        $called = 0;
+        $onSuccess = function () use (&$called): bool {
+            $called++;
+            return false;
+        };
+
+        $collection = new Collection([$connection1, $connection2]);
+        $collection->sendToAll($command, [], $onSuccess);
+        static::assertSame(1, $called);
     }
 
     public function testSendToAllCallsFailureCallback()
@@ -398,13 +421,38 @@ class CollectionTest extends TestCase
             ->willThrowException(new RuntimeException());
 
         $failed = 0;
-        $onFailure = function () use (&$failed) {
+        $onFailure = function () use (&$failed): bool {
             $failed++;
+            return true;
         };
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command, [], null, $onFailure);
         static::assertEquals(2, $failed);
+    }
+
+    public function testSendToAllFailureCallbackStopsIteration(): void
+    {
+        $command = 'stats';
+        $connection1 = $this->getMockConnection('id-123');
+        $connection1->expects(static::once())
+            ->method($command)
+            ->willThrowException(new RuntimeException());
+
+        $connection2 = $this->getMockConnection('id-456');
+        $connection2->expects(static::never())
+            ->method($command)
+            ->willThrowException(new RuntimeException());
+
+        $failed = 0;
+        $onFailure = function () use (&$failed): bool {
+            $failed++;
+            return false;
+        };
+
+        $collection = new Collection([$connection1, $connection2]);
+        $collection->sendToAll($command, [], null, $onFailure);
+        static::assertSame(1, $failed);
     }
 
     public function testSendToOne()

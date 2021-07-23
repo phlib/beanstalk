@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Add type definitions docblocks for `Collection::sendToAll()` callbacks.
+  There is no change to functionality, but this better explains how these work.
 ### Changed
 - **BC break**: Restrict `Collection::send*` methods to only accept commands
   defined in `ConnectionInterface`, rather than allowing any method to be called

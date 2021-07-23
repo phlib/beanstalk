@@ -260,7 +260,7 @@ class Pool implements ConnectionInterface
     public function kick($quantity)
     {
         $kicked = 0;
-        $onSuccess = function ($result) use ($quantity, &$kicked) {
+        $onSuccess = function (array $result) use ($quantity, &$kicked): bool {
             $stats = $result['response'];
             $buriedJobs = $stats['current-jobs-buried'] ?? 0;
 
@@ -274,6 +274,7 @@ class Pool implements ConnectionInterface
             if ($kicked >= $quantity) {
                 return false;
             }
+            return true;
         };
         $this->collection->sendToAll('statsTube', [$this->using], $onSuccess);
 
@@ -286,11 +287,12 @@ class Pool implements ConnectionInterface
     public function stats()
     {
         $stats = [];
-        $onSuccess = function ($result) use (&$stats) {
+        $onSuccess = function (array $result) use (&$stats): bool {
             if (!is_array($result['response'])) {
-                return;
+                return true;
             }
             $stats = $this->statsCombine($stats, $result['response']);
+            return true;
         };
         $this->collection->sendToAll('stats', [], $onSuccess);
 
@@ -320,11 +322,12 @@ class Pool implements ConnectionInterface
     public function statsTube($tube)
     {
         $stats = [];
-        $onSuccess = function ($result) use (&$stats) {
+        $onSuccess = function (array $result) use (&$stats): bool {
             if (!is_array($result['response'])) {
-                return;
+                return true;
             }
             $stats = $this->statsCombine($stats, $result['response']);
+            return true;
         };
         $this->collection->sendToAll('statsTube', [$tube], $onSuccess);
 
@@ -368,11 +371,12 @@ class Pool implements ConnectionInterface
     public function listTubes()
     {
         $tubes = [];
-        $onSuccess = function ($result) use (&$tubes) {
+        $onSuccess = function (array $result) use (&$tubes): bool {
             if (!is_array($result['response'])) {
-                return;
+                return true;
             }
             $tubes = array_merge($result['response'], $tubes);
+            return true;
         };
         $this->collection->sendToAll('listTubes', [], $onSuccess);
         return array_unique($tubes);
