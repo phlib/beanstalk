@@ -148,13 +148,12 @@ class Pool implements ConnectionInterface
      */
     public function ignore(string $tube)
     {
-        $index = array_search($tube, $this->watching);
-        if ($index !== false) {
+        if (isset($this->watching[$tube])) {
             if (count($this->watching) === 1) {
                 return false;
             }
             $this->collection->sendToAll('ignore', [$tube]);
-            unset($this->watching[$index]);
+            unset($this->watching[$tube]);
         }
         return count($this->watching);
     }

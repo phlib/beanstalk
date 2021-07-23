@@ -10,6 +10,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   where possible. Some methods return mixed type so docblocks are still used.
 - Add type definitions docblocks for `Collection::sendToAll()` callbacks.
   There is no change to functionality, but this better explains how these work.
+### Fixed
+- `Pool::ignore()` incorrectly updated its own cache of watched tubes, meaning
+  multiple calls may have had unexpected results.
 ### Changed
 - **BC break**: Split `Command\Peek(<string>)` to `Command\PeekStatus`.
   `Command\Peek` now only accepts a Job ID integer. Will not impact standard
