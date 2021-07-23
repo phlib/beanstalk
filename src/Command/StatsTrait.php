@@ -41,7 +41,13 @@ trait StatsTrait
         $result = [];
         foreach ($lines as $line) {
             if ($line[0] === '-') {
-                $result[] = trim(ltrim($line, '- '));
+                $value = trim(ltrim($line, '- '));
+
+                if (is_numeric($value)) {
+                    $value = $value + 0;
+                }
+
+                $result[] = $value;
             } else {
                 $key = strtok($line, ': ');
                 if ($key) {
