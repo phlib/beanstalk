@@ -7,10 +7,34 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
 class CollectionTest extends TestCase
 {
+    private const SEND_COMMANDS_ALLOWED = [
+        'useTube' => ['tube', 'self'],
+        'put' => ['data', 123],
+        'reserve' => [123, 123],
+        'touch' => [123, 'self'],
+        'release' => [123, 'self'],
+        'bury' => [123, 'self'],
+        'delete' => [123, 'self'],
+        'watch' => ['tube', 'self'],
+        'ignore' => ['tube', 123],
+        'peek' => [123, ['some result']],
+        'statsJob' => [123, ['some result']],
+        'peekReady' => ['some result'],
+        'peekDelayed' => ['some result'],
+        'peekBuried' => ['some result'],
+        'kick' => [123, 123],
+        'statsTube' => ['tube', ['some result']],
+        'stats' => [['some result']],
+        'listTubes' => [['some result']],
+        'listTubeUsed' => ['some result'],
+        'listTubesWatched' => [['some result']],
+    ];
+
     /**
      * @var SelectionStrategyInterface|MockObject
      */
@@ -173,6 +197,76 @@ class CollectionTest extends TestCase
             ->willThrowException(new RuntimeException());
         $collection = new Collection([$connection]);
         $collection->sendToExact($identifier, $command);
+    }
+
+    /**
+     * @dataProvider dataSendToExactCommandAllowed
+     */
+    public function testSendToExactCommandAllowed(string $command, array $placeholderArgs, Stub $returnStub): void
+    {
+        $identifier = 'id-123';
+        $connection = $this->getMockConnection($identifier);
+        $connection->expects(static::once())
+            ->method($command)
+            ->will($returnStub);
+
+        $collection = new Collection([$connection]);
+        $collection->sendToExact($identifier, $command, $placeholderArgs);
+    }
+
+    public function dataSendToExactCommandAllowed(): iterable
+    {
+        /**
+         * Allow calls to all command methods in
+         * @see Connection\ConnectionInterface
+         */
+        foreach (self::SEND_COMMANDS_ALLOWED as $command => $map) {
+            $result = array_pop($map);
+            if ($result === 'self') {
+                $stub = static::returnSelf();
+            } else {
+                $stub = static::returnValue($result);
+            }
+            yield $command => [$command, $map, $stub];
+        }
+    }
+
+    /**
+     * @dataProvider dataSendToExactMethodNotAllowed
+     */
+    public function testSendToExactMethodNotAllowed(string $command): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Specified command '{$command}' is not allowed.");
+
+        $identifier = 'id-123';
+        $connection = $this->getMockConnection($identifier);
+        $collection = new Collection([$connection]);
+
+        // Expectation must be after the construction of Collection, as that calls `getName()`
+        $connection->expects(static::never())
+            ->method($command);
+
+        $collection->sendToExact($identifier, $command);
+    }
+
+    public function dataSendToExactMethodNotAllowed(): iterable
+    {
+        /**
+         * Block calls to non-command methods on
+         * @see Connection
+         */
+        $connection = new \ReflectionClass(Connection::class);
+        foreach ($connection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+            $methodName = $method->getName();
+            if (in_array($methodName, self::SEND_COMMANDS_ALLOWED)) {
+                continue;
+            }
+            if ($methodName === '__construct') {
+                continue;
+            }
+            yield $methodName => [$methodName];
+        }
     }
 
     public function testGetConnectionThatHasErrored()

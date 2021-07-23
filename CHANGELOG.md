@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 ### Changed
+- **BC break**: Restrict `Collection::send*` methods to only accept commands
+  defined in `ConnectionInterface`, rather than allowing any method to be called
+  on the connection.
 - Order of stats in `server:stats` CLI command to match order from Beanstalkd.
 ### Removed
 - **BC break**: Removed support for PHP versions <= v7.3 as they are no longer

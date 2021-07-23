@@ -157,7 +157,72 @@ class Collection implements CollectionInterface
     {
         try {
             $connection = $this->getConnection($key);
-            $result = call_user_func_array([$connection, $command], $arguments);
+
+            // Use switch instead of `->{$command}` to allow static analysis
+            switch ($command) {
+                case 'useTube':
+                    $result = $connection->useTube(...$arguments);
+                    break;
+                case 'put':
+                    $result = $connection->put(...$arguments);
+                    break;
+                case 'reserve':
+                    $result = $connection->reserve(...$arguments);
+                    break;
+                case 'touch':
+                    $result = $connection->touch(...$arguments);
+                    break;
+                case 'release':
+                    $result = $connection->release(...$arguments);
+                    break;
+                case 'bury':
+                    $result = $connection->bury(...$arguments);
+                    break;
+                case 'delete':
+                    $result = $connection->delete(...$arguments);
+                    break;
+                case 'watch':
+                    $result = $connection->watch(...$arguments);
+                    break;
+                case 'ignore':
+                    $result = $connection->ignore(...$arguments);
+                    break;
+                case 'peek':
+                    $result = $connection->peek(...$arguments);
+                    break;
+                case 'statsJob':
+                    $result = $connection->statsJob(...$arguments);
+                    break;
+                case 'peekReady':
+                    $result = $connection->peekReady();
+                    break;
+                case 'peekDelayed':
+                    $result = $connection->peekDelayed();
+                    break;
+                case 'peekBuried':
+                    $result = $connection->peekBuried();
+                    break;
+                case 'kick':
+                    $result = $connection->kick(...$arguments);
+                    break;
+                case 'statsTube':
+                    $result = $connection->statsTube(...$arguments);
+                    break;
+                case 'stats':
+                    $result = $connection->stats();
+                    break;
+                case 'listTubes':
+                    $result = $connection->listTubes();
+                    break;
+                case 'listTubeUsed':
+                    $result = $connection->listTubeUsed();
+                    break;
+                case 'listTubesWatched':
+                    $result = $connection->listTubesWatched();
+                    break;
+                default:
+                    throw new InvalidArgumentException("Specified command '{$command}' is not allowed.");
+            }
             $this->connections[$key]['retry_at'] = false;
 
             return [

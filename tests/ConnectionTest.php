@@ -269,6 +269,6 @@ class ConnectionTest extends TestCase
                 ->method('read')
                 ->willReturn($response);
         }
-        return call_user_func_array([$this->beanstalk, $method], $arguments);
+        return $this->beanstalk->{$method}(...$arguments);
     }
 }
