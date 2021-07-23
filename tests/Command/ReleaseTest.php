@@ -17,7 +17,7 @@ class ReleaseTest extends CommandTestCase
 
     public function testGetCommand(): void
     {
-        static::assertEquals('release 123 456 789', (new Release(123, 456, 789))->getCommand());
+        static::assertSame('release 123 456 789', (new Release(123, 456, 789))->getCommand());
     }
 
     public function testWithInvalidPriority(): void

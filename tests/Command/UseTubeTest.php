@@ -17,7 +17,7 @@ class UseTubeTest extends CommandTestCase
     public function testGetCommand(): void
     {
         $tube = 'test-tube';
-        static::assertEquals("use {$tube}", (new UseTube($tube))->getCommand());
+        static::assertSame("use {$tube}", (new UseTube($tube))->getCommand());
     }
 
     public function testTubeIsValidated(): void
@@ -34,7 +34,7 @@ class UseTubeTest extends CommandTestCase
             ->method('read')
             ->willReturn("USING {$tube}");
 
-        static::assertEquals($tube, (new UseTube($tube))->process($this->socket));
+        static::assertSame($tube, (new UseTube($tube))->process($this->socket));
     }
 
     public function testUnknownStatusThrowsException(): void

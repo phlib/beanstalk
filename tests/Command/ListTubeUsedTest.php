@@ -15,7 +15,7 @@ class ListTubeUsedTest extends CommandTestCase
 
     public function testGetCommand(): void
     {
-        static::assertEquals('list-tube-used', (new ListTubeUsed())->getCommand());
+        static::assertSame('list-tube-used', (new ListTubeUsed())->getCommand());
     }
 
     public function testSuccessfulCommand(): void
@@ -24,7 +24,7 @@ class ListTubeUsedTest extends CommandTestCase
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("USING {$tube}");
-        static::assertEquals($tube, (new ListTubeUsed())->process($this->socket));
+        static::assertSame($tube, (new ListTubeUsed())->process($this->socket));
     }
 
     public function testUnknownStatusThrowsException(): void

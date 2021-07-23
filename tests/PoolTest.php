@@ -53,7 +53,7 @@ class PoolTest extends TestCase
         $this->collection->expects(static::any())
             ->method('getIterator')
             ->willReturn($collection);
-        static::assertEquals($expected, $this->pool->disconnect());
+        static::assertSame($expected, $this->pool->disconnect());
     }
 
     public function disconnectReturnsValueDataProvider(): array
@@ -83,7 +83,7 @@ class PoolTest extends TestCase
     public function testIgnore(): void
     {
         $this->pool->watch('test-tube');
-        static::assertEquals(1, $this->pool->ignore('default'));
+        static::assertSame(1, $this->pool->ignore('default'));
     }
 
     public function testPutSuccess(): void
@@ -179,7 +179,7 @@ class PoolTest extends TestCase
                 'connection' => $connection,
                 'response' => $response,
             ]);
-        static::assertEquals($expected, $this->pool->reserve());
+        static::assertSame($expected, $this->pool->reserve());
     }
 
     public function testReserveWithNoJobsOnFirstServer(): void
@@ -208,7 +208,7 @@ class PoolTest extends TestCase
                 'connection' => $connection,
                 'response' => $response,
             ]);
-        static::assertEquals($expected, $this->pool->reserve());
+        static::assertSame($expected, $this->pool->reserve());
     }
 
     public function testReserveWithFailingServer(): void
@@ -237,7 +237,7 @@ class PoolTest extends TestCase
                 'connection' => $connection,
                 'response' => $response,
             ]);
-        static::assertEquals($expected, $this->pool->reserve());
+        static::assertSame($expected, $this->pool->reserve());
     }
 
     public function testPoolIdWithInvalidFormat(): void
@@ -291,7 +291,7 @@ class PoolTest extends TestCase
                 'response' => $response,
             ]);
 
-        static::assertEquals($expected, $this->pool->peek("{$host}.{$jobId}"));
+        static::assertSame($expected, $this->pool->peek("{$host}.{$jobId}"));
     }
 
     public function testPeekReady(): void
@@ -316,7 +316,7 @@ class PoolTest extends TestCase
                 'response' => $response,
             ]);
 
-        static::assertEquals($expected, $this->pool->peekReady());
+        static::assertSame($expected, $this->pool->peekReady());
     }
 
     public function testPeekReadyWithNoReadyJobs(): void
@@ -352,7 +352,7 @@ class PoolTest extends TestCase
                 'response' => $response,
             ]);
 
-        static::assertEquals($expected, $this->pool->peekDelayed());
+        static::assertSame($expected, $this->pool->peekDelayed());
     }
 
     public function testPeekDelayedWithNoDelayedJobs(): void
@@ -388,7 +388,7 @@ class PoolTest extends TestCase
                 'response' => $response,
             ]);
 
-        static::assertEquals($expected, $this->pool->peekBuried());
+        static::assertSame($expected, $this->pool->peekBuried());
     }
 
     public function testPeekBuriedWithNoBuriedJobs(): void
@@ -418,7 +418,7 @@ class PoolTest extends TestCase
                     ]);
                 }
             });
-        static::assertEquals(
+        static::assertSame(
             [
                 'current-jobs-ready' => ($ready * $noOfServers),
                 'some-other' => ($other * $noOfServers),
@@ -449,7 +449,7 @@ class PoolTest extends TestCase
                 'connection' => $connection,
                 'response' => $response,
             ]);
-        static::assertEquals($expected, $this->pool->statsJob($hostJobId));
+        static::assertSame($expected, $this->pool->statsJob($hostJobId));
     }
 
     public function testStatsTube(): void
@@ -471,7 +471,7 @@ class PoolTest extends TestCase
                     ]);
                 }
             });
-        static::assertEquals(
+        static::assertSame(
             [
                 'current-jobs-ready' => ($ready * $noOfServers),
                 'some-other' => ($other * $noOfServers),
@@ -488,7 +488,7 @@ class PoolTest extends TestCase
         $connection = $this->createMockConnection('host:123');
         $at = 0;
         foreach ($kickValues as $index => $kickValue) {
-            if ($kickValue == 0) {
+            if ($kickValue === 0) {
                 continue;
             }
             $connection->expects(static::at($at++))
@@ -512,7 +512,7 @@ class PoolTest extends TestCase
                 }
             });
 
-        static::assertEquals($expected, $this->pool->kick($kickAmount));
+        static::assertSame($expected, $this->pool->kick($kickAmount));
     }
 
     public function kickDataProvider(): array
@@ -550,7 +550,7 @@ class PoolTest extends TestCase
 
         $actual = $this->pool->listTubes();
         sort($actual); // this is so they match
-        static::assertEquals($expected, $actual);
+        static::assertSame($expected, $actual);
     }
 
     public function testListTubeUsed(): void
@@ -562,20 +562,20 @@ class PoolTest extends TestCase
 
     public function testListTubesWatchDefaultState(): void
     {
-        static::assertEquals(['default'], $this->pool->listTubesWatched());
+        static::assertSame(['default'], $this->pool->listTubesWatched());
     }
 
     public function testListTubesWatched(): void
     {
         $this->pool->watch('test');
-        static::assertEquals(['default', 'test'], $this->pool->listTubesWatched());
+        static::assertSame(['default', 'test'], $this->pool->listTubesWatched());
     }
 
     public function testCombineIdIsNotTheJobId(): void
     {
         $jobId = 123;
         $connection = $this->createMockConnection('host');
-        static::assertNotEquals($jobId, $this->pool->combineId($connection, $jobId));
+        static::assertNotSame($jobId, $this->pool->combineId($connection, $jobId));
     }
 
     public function testCombineIdContainsJob(): void
@@ -592,7 +592,7 @@ class PoolTest extends TestCase
 
         $poolId = $this->pool->combineId($connection, $jobId);
         [$actualHost, $actualJobId] = $this->pool->splitId($poolId);
-        static::assertEquals($jobId, $actualJobId);
+        static::assertSame($jobId, $actualJobId);
     }
 
     public function testCombineAndSplitReturnCorrectHost(): void
@@ -602,7 +602,7 @@ class PoolTest extends TestCase
 
         $poolId = $this->pool->combineId($connection, 123);
         [$actualHost, ] = $this->pool->splitId($poolId);
-        static::assertEquals($host, $actualHost);
+        static::assertSame($host, $actualHost);
     }
 
     /**

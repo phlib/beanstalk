@@ -18,7 +18,7 @@ class BuryTest extends CommandTestCase
     {
         $id = 123;
         $priority = 1;
-        static::assertEquals("bury {$id} {$priority}", (new Bury($id, $priority))->getCommand());
+        static::assertSame("bury {$id} {$priority}", (new Bury($id, $priority))->getCommand());
     }
 
     public function testSuccessfulCommand(): void

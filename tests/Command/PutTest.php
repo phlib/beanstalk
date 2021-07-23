@@ -18,7 +18,7 @@ class PutTest extends CommandTestCase
     {
         $data = 'data';
         $bytes = strlen($data);
-        static::assertEquals("put 123 456 789 {$bytes}", (new Put($data, 123, 456, 789))->getCommand());
+        static::assertSame("put 123 456 789 {$bytes}", (new Put($data, 123, 456, 789))->getCommand());
     }
 
     public function testWithInvalidPriority(): void
@@ -36,7 +36,7 @@ class PutTest extends CommandTestCase
             ->method('read')
             ->willReturn("INSERTED {$id}");
 
-        static::assertEquals($id, (new Put('data', 123, 456, 789))->process($this->socket));
+        static::assertSame($id, (new Put('data', 123, 456, 789))->process($this->socket));
     }
 
     public function testErrorThrowsException(): void

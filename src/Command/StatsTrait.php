@@ -40,7 +40,7 @@ trait StatsTrait
 
         $result = [];
         foreach ($lines as $line) {
-            if ($line[0] == '-') {
+            if ($line[0] === '-') {
                 $result[] = trim(ltrim($line, '- '));
             } else {
                 $key = strtok($line, ': ');

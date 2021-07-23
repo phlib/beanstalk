@@ -150,7 +150,7 @@ class Connection implements ConnectionInterface
     public function ignore(string $tube)
     {
         if (isset($this->watching[$tube])) {
-            if (count($this->watching) == 1) {
+            if (count($this->watching) === 1) {
                 return false;
             }
 

@@ -17,7 +17,7 @@ class IntegrationPoolTest extends TestCase
 
     protected function setUp(): void
     {
-        if (getenv('BSTALK_ENABLED') != true) {
+        if ((bool)getenv('BSTALK_ENABLED') !== true) {
             static::markTestSkipped();
             return;
         }
@@ -41,19 +41,19 @@ class IntegrationPoolTest extends TestCase
 
     public function testStartWithDefaultTube(): void
     {
-        static::assertEquals('default', $this->beanstalk->listTubeUsed());
+        static::assertSame('default', $this->beanstalk->listTubeUsed());
     }
 
     public function testSwitchingUsedTube(): void
     {
         $tube = 'test-tube';
         $this->beanstalk->useTube($tube);
-        static::assertEquals($tube, $this->beanstalk->listTubeUsed());
+        static::assertSame($tube, $this->beanstalk->listTubeUsed());
     }
 
     public function testStartWithDefaultWatching(): void
     {
-        static::assertEquals(['default'], $this->beanstalk->listTubesWatched());
+        static::assertSame(['default'], $this->beanstalk->listTubesWatched());
     }
 
     public function testWatchingMoreTubes(): void
@@ -80,8 +80,8 @@ class IntegrationPoolTest extends TestCase
         $id = $this->beanstalk->put($data);
         $jobData = $this->beanstalk->reserve();
 
-        static::assertEquals($id, $jobData['id']);
-        static::assertEquals($data, $jobData['body']);
+        static::assertSame($id, $jobData['id']);
+        static::assertSame($data, $jobData['body']);
 
         $this->beanstalk->touch($jobData['id']);
         $this->beanstalk->delete($jobData['id']);
@@ -102,13 +102,13 @@ class IntegrationPoolTest extends TestCase
         $id = $this->beanstalk->put($data);
         $jobData = $this->beanstalk->reserve();
 
-        static::assertEquals($id, $jobData['id']);
-        static::assertEquals($data, $jobData['body']);
+        static::assertSame($id, $jobData['id']);
+        static::assertSame($data, $jobData['body']);
 
         $this->beanstalk->bury($jobData['id']);
 
         $buriedData = $this->beanstalk->peekBuried();
-        static::assertEquals($jobData['id'], $buriedData['id']);
+        static::assertSame($jobData['id'], $buriedData['id']);
 
         $this->beanstalk->kick(1);
         $this->beanstalk->delete($buriedData['id']);
@@ -124,7 +124,7 @@ class IntegrationPoolTest extends TestCase
         $jobData = $this->beanstalk->reserve();
         $this->beanstalk->delete($jobData['id']);
 
-        static::assertEquals($length, strlen($jobData['body']));
+        static::assertSame($length, strlen($jobData['body']));
     }
 
     public function setupTube($tube): void

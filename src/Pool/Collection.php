@@ -116,7 +116,7 @@ class Collection implements CollectionInterface
             }
 
             $keysUsed[$key] = true;
-            if (count($keysUsed) == count($keysAvailable)) {
+            if (count($keysUsed) === count($keysAvailable)) {
                 $keysExhausted = true;
             }
         }

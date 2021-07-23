@@ -16,7 +16,7 @@ class IgnoreTest extends CommandTestCase
     public function testGetCommand(): void
     {
         $tube = 'test-tube';
-        static::assertEquals("ignore {$tube}", (new Ignore($tube))->getCommand());
+        static::assertSame("ignore {$tube}", (new Ignore($tube))->getCommand());
     }
 
     public function testSuccessfulCommand(): void

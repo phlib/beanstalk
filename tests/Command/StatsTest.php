@@ -13,6 +13,6 @@ class StatsTest extends CommandTestCase
 
     public function testGetCommand(): void
     {
-        static::assertEquals('stats', (new Stats())->getCommand());
+        static::assertSame('stats', (new Stats())->getCommand());
     }
 }

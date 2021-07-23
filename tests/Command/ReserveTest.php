@@ -18,7 +18,7 @@ class ReserveTest extends CommandTestCase
      */
     public function testGetCommand(?int $timeout, string $command): void
     {
-        static::assertEquals($command, (new Reserve($timeout))->getCommand());
+        static::assertSame($command, (new Reserve($timeout))->getCommand());
     }
 
     public function getCommandDataProvider(): array
@@ -43,7 +43,7 @@ class ReserveTest extends CommandTestCase
             ->method('read')
             ->willReturnOnConsecutiveCalls("RESERVED {$id} {$bytes}\r\n", $data . "\r\n");
 
-        static::assertEquals($response, (new Reserve())->process($this->socket));
+        static::assertSame($response, (new Reserve())->process($this->socket));
     }
 
     /**

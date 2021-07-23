@@ -22,7 +22,7 @@ class SocketTest extends TestCase
     {
         $socket1 = new Socket('localhost', 11300);
         $socket2 = new Socket('localhost', 11301);
-        static::assertNotEquals($socket1->getUniqueIdentifier(), $socket2->getUniqueIdentifier());
+        static::assertNotSame($socket1->getUniqueIdentifier(), $socket2->getUniqueIdentifier());
     }
 
     public function testConnectOnSuccessReturnsSelf(): void
@@ -144,7 +144,7 @@ class SocketTest extends TestCase
         $expectedData = 'Some Data';
         $stream_get_line = $this->getFunctionMock(__NAMESPACE__, 'stream_get_line');
         $stream_get_line->expects(static::any())->willReturn($expectedData);
-        static::assertEquals($expectedData, $this->getMockSocket(['read'])->read());
+        static::assertSame($expectedData, $this->getMockSocket(['read'])->read());
     }
 
     public function testReadSuccessfullyWithLengthParam(): void
@@ -156,7 +156,7 @@ class SocketTest extends TestCase
         $fread = $this->getFunctionMock(__NAMESPACE__, 'fread');
         $fread->expects(static::any())->willReturn($expectedData);
 
-        static::assertEquals($expectedData, $this->getMockSocket(['read'])->read(9));
+        static::assertSame($expectedData, $this->getMockSocket(['read'])->read(9));
     }
 
     public function testReadFailsWithBadData(): void

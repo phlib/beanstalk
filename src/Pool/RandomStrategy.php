@@ -20,7 +20,7 @@ class RandomStrategy implements SelectionStrategyInterface
         if (empty($collection)) {
             throw new InvalidArgumentException('Can not select from an empty collection.');
         }
-        if (count($collection) == 1) {
+        if (count($collection) === 1) {
             return current($collection);
         }
 

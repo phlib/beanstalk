@@ -14,6 +14,6 @@ class StatsJobTest extends CommandTestCase
     public function testGetCommand(): void
     {
         $id = 123;
-        static::assertEquals("stats-job {$id}", (new StatsJob($id))->getCommand());
+        static::assertSame("stats-job {$id}", (new StatsJob($id))->getCommand());
     }
 }

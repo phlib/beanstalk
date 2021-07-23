@@ -74,7 +74,7 @@ class CollectionTest extends TestCase
         foreach ($collection as $connection) {
             $count++;
         }
-        static::assertEquals(2, $count);
+        static::assertSame(2, $count);
     }
 
     public function testArrayAggregateSkipsErroredConnections(): void
@@ -95,7 +95,7 @@ class CollectionTest extends TestCase
         foreach ($collection as $connection) {
             $count++;
         }
-        static::assertEquals(1, $count);
+        static::assertSame(1, $count);
     }
 
     public function testGetAvailableKeys(): void
@@ -325,7 +325,7 @@ class CollectionTest extends TestCase
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command);
-        static::assertEquals(2, $calls);
+        static::assertSame(2, $calls);
     }
 
     public function testSendToAllIgnoreErrors(): void
@@ -379,7 +379,7 @@ class CollectionTest extends TestCase
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command, [], $onSuccess);
-        static::assertEquals(2, $called);
+        static::assertSame(2, $called);
     }
 
     public function testSendToAllSuccessCallbackStopsIteration(): void
@@ -425,7 +425,7 @@ class CollectionTest extends TestCase
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command, [], null, $onFailure);
-        static::assertEquals(2, $failed);
+        static::assertSame(2, $failed);
     }
 
     public function testSendToAllFailureCallbackStopsIteration(): void

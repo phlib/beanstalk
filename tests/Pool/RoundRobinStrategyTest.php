@@ -22,7 +22,7 @@ class RoundRobinStrategyTest extends TestCase
         for ($i = 0; $i < count($keys); $i++) {
             $strategy->pickOne($keys);
         }
-        static::assertEquals($firstHost, $strategy->pickOne($keys));
+        static::assertSame($firstHost, $strategy->pickOne($keys));
     }
 
     public function testFailsWhenGivenEmptyCollection(): void
@@ -41,6 +41,6 @@ class RoundRobinStrategyTest extends TestCase
 
         $newHost = 'host456';
         $keys[] = $newHost;
-        static::assertEquals($newHost, $strategy->pickOne($keys));
+        static::assertSame($newHost, $strategy->pickOne($keys));
     }
 }

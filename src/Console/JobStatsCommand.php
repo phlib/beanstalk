@@ -28,7 +28,7 @@ class JobStatsCommand extends AbstractCommand
         $table->setStyle('compact');
         $details = array_intersect_key($stats, array_flip(['tube', 'state']));
         foreach ($details as $detail => $value) {
-            if ($detail == 'state' && $value == 'buried') {
+            if ($detail === 'state' && $value === 'buried') {
                 $value = "<error>{$value}</error>";
             }
             $table->addRow([$detail, $value]);
@@ -40,11 +40,11 @@ class JobStatsCommand extends AbstractCommand
         $stats = array_diff_key($stats, array_flip(['id', 'tube', 'state']));
         $table->setHeaders(['Stat', 'Value']);
         foreach ($stats as $stat => $value) {
-            if ($stat == 'age') {
+            if ($stat === 'age') {
                 $created = time() - (int)$value;
                 $dt = date('Y-m-d H:i:s', $created);
                 $table->addRow(['created', $dt]);
-            } elseif ($stat == 'delay') {
+            } elseif ($stat === 'delay') {
                 $dt = date('Y-m-d H:i:s', $created + (int)$value);
                 $table->addRow(['scheduled', $dt]);
             }

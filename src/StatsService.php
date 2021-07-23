@@ -114,7 +114,7 @@ class StatsService
     protected function filterServerKeys($filter): array
     {
         $serverKeys = self::SERVER_KEYS;
-        if ($filter != self::SERVER_ALL) {
+        if ($filter !== self::SERVER_ALL) {
             $include = [];
             if ($filter & self::SERVER_BINLOG) {
                 $include[] = 'binlog-';
@@ -128,7 +128,7 @@ class StatsService
             $filtered = [];
             foreach ($include as $beginsWith) {
                 foreach ($serverKeys as $serverKey) {
-                    if (substr($serverKey, 0, strlen($beginsWith)) != $beginsWith) {
+                    if (substr($serverKey, 0, strlen($beginsWith)) !== $beginsWith) {
                         continue;
                     }
                     $filtered[] = $serverKey;

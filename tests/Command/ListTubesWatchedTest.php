@@ -13,6 +13,6 @@ class ListTubesWatchedTest extends CommandTestCase
 
     public function testGetCommand(): void
     {
-        static::assertEquals('list-tubes-watched', (new ListTubesWatched())->getCommand());
+        static::assertSame('list-tubes-watched', (new ListTubesWatched())->getCommand());
     }
 }

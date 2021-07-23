@@ -216,9 +216,9 @@ class Pool implements ConnectionInterface
         $kicked = 0;
         $onSuccess = function (array $result) use ($quantity, &$kicked): bool {
             $stats = $result['response'];
-            $buriedJobs = $stats['current-jobs-buried'] ?? 0;
+            $buriedJobs = (int)$stats['current-jobs-buried'] ?? 0;
 
-            if ($buriedJobs == 0) {
+            if ($buriedJobs === 0) {
                 return true;
             }
 
@@ -299,11 +299,11 @@ class Pool implements ConnectionInterface
                 continue;
             }
 
-            if (in_array($name, $list)) {
-                if ($cumulative[$name] != $value) {
+            if (in_array($name, $list, true)) {
+                if ($cumulative[$name] !== $value) {
                     $cumulative[$name] .= ',' . $value;
                 }
-            } elseif (in_array($name, $maximum)) {
+            } elseif (in_array($name, $maximum, true)) {
                 if ($value > $cumulative[$name]) {
                     $cumulative[$name] = $value;
                 }

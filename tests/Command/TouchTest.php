@@ -17,7 +17,7 @@ class TouchTest extends CommandTestCase
     public function testGetCommand(): void
     {
         $id = 234;
-        static::assertEquals("touch {$id}", (new Touch($id))->getCommand());
+        static::assertSame("touch {$id}", (new Touch($id))->getCommand());
     }
 
     public function testSuccessfulCommand(): void

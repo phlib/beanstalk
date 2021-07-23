@@ -27,7 +27,7 @@ class ServerStatsCommand extends AbstractCommand
         $service = $this->getStatsService();
 
         $this->outputDetectedConfig($output);
-        if ($stat == '') {
+        if (empty($stat)) {
             $this->outputInfo($service, $output);
             $this->outputStats($service, $output);
         } else {
@@ -43,7 +43,7 @@ class ServerStatsCommand extends AbstractCommand
             return;
         }
         $configPath = $this->getHelper('configuration')->getConfigPath();
-        if ($configPath == '[default]') {
+        if ($configPath === '[default]') {
             $configPath = '[default fallback localhost]';
         }
 

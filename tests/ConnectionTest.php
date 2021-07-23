@@ -33,7 +33,7 @@ class ConnectionTest extends TestCase
 
     public function testSocketIsSetCorrectly(): void
     {
-        static::assertEquals($this->socket, $this->beanstalk->getSocket());
+        static::assertSame($this->socket, $this->beanstalk->getSocket());
     }
 
     public function testDefaultSocketImplementation(): void
@@ -84,7 +84,7 @@ class ConnectionTest extends TestCase
             ->method('read')
             ->willReturnOnConsecutiveCalls('RESERVED 123 456', "Array\r\n");
         $jobData = $this->beanstalk->reserve();
-        static::assertEquals($expectedData, $jobData['body']);
+        static::assertSame($expectedData, $jobData['body']);
     }
 
     public function testDelete(): void
@@ -207,18 +207,18 @@ class ConnectionTest extends TestCase
     {
         $bound = 1;
         $quantity = $this->execute("kick {$bound}", 'KICKED 0', 'kick', [$bound]);
-        static::assertEquals(0, $quantity);
+        static::assertSame(0, $quantity);
     }
 
     public function testDefaultListOfTubesWatched(): void
     {
         $expected = ['default'];
-        static::assertEquals($expected, $this->beanstalk->listTubesWatched());
+        static::assertSame($expected, $this->beanstalk->listTubesWatched());
     }
 
     public function testDefaultTubeUsed(): void
     {
-        static::assertEquals('default', $this->beanstalk->listTubeUsed());
+        static::assertSame('default', $this->beanstalk->listTubeUsed());
     }
 
     public function testStats(): void
@@ -229,7 +229,7 @@ class ConnectionTest extends TestCase
         ];
 
         $actual = $this->execute('stats', ["OK 1234\r\n", "---\n{$yaml}\r\n"], 'stats');
-        static::assertEquals($stats, $actual);
+        static::assertSame($stats, $actual);
     }
 
     public function testStatsJob(): void
@@ -240,7 +240,7 @@ class ConnectionTest extends TestCase
         ];
 
         $actual = $this->execute('stats-job', ["OK 1234\r\n", "---\n{$yaml}\r\n"], 'statsJob', [123]);
-        static::assertEquals($stats, $actual);
+        static::assertSame($stats, $actual);
     }
 
     public function testStatsTube(): void
@@ -251,7 +251,7 @@ class ConnectionTest extends TestCase
         ];
 
         $actual = $this->execute('stats-tube', ["OK 1234\r\n", "---\n{$yaml}\r\n"], 'statsTube', ['test-tube']);
-        static::assertEquals($stats, $actual);
+        static::assertSame($stats, $actual);
     }
 
     /**

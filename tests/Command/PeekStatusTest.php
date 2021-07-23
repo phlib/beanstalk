@@ -22,7 +22,7 @@ class PeekStatusTest extends CommandTestCase
      */
     public function testGetCommand($subject, $command)
     {
-        static::assertEquals($command, (new PeekStatus($subject))->getCommand());
+        static::assertSame($command, (new PeekStatus($subject))->getCommand());
     }
 
     public function getCommandDataProvider()
@@ -54,7 +54,7 @@ class PeekStatusTest extends CommandTestCase
             ->method('read')
             ->willReturnOnConsecutiveCalls("FOUND {$id} 54\r\n", $body . "\r\n");
 
-        static::assertEquals($response, (new PeekStatus(PeekStatus::BURIED))->process($this->socket));
+        static::assertSame($response, (new PeekStatus(PeekStatus::BURIED))->process($this->socket));
     }
 
     public function testNotFoundThrowsException()

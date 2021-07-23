@@ -24,7 +24,7 @@ class StatsTraitTest extends CommandTestCase
             ->method('decode')
             ->willReturn([$testString]);
 
-        static::assertEquals($expectedData, $stat->process($this->socket));
+        static::assertSame($expectedData, $stat->process($this->socket));
     }
 
     public function testWhenStatusNotFound(): void
@@ -58,7 +58,7 @@ class StatsTraitTest extends CommandTestCase
             ->method('read')
             ->willReturnOnConsecutiveCalls("OK 1234\r\n", "---\n{$yaml}\r\n");
         $stat = $this->getMockStat(['process', 'decode']);
-        static::assertEquals($expectedOutput, $stat->process($this->socket));
+        static::assertSame($expectedOutput, $stat->process($this->socket));
     }
 
     public function yamlFormatIsDecodedDataProvider(): array
