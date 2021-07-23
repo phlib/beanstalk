@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add type definitions docblocks for `Collection::sendToAll()` callbacks.
   There is no change to functionality, but this better explains how these work.
 ### Changed
+- **BC break**: Split `Command\Peek(<string>)` to `Command\PeekStatus`.
+  `Command\Peek` now only accepts a Job ID integer. Will not impact standard
+  implementations which directly use the `Connection::peek*` methods.
+  `Command\Peek` status constants are now on `Command\PeekStatus`.
 - **BC break**: Restrict `Collection::send*` methods to only accept commands
   defined in `ConnectionInterface`, rather than allowing any method to be called
   on the connection.

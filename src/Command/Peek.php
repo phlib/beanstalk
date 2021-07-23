@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
@@ -15,54 +17,16 @@ class Peek implements CommandInterface
 {
     use ToStringTrait;
 
-    public const READY = 'ready';
+    protected int $jobId;
 
-    public const DELAYED = 'delayed';
-
-    public const BURIED = 'buried';
-
-    /**
-     * @var string|integer
-     */
-    protected $jobId = null;
-
-    /**
-     * @var string
-     */
-    protected $subCommand = null;
-
-    /**
-     * @var array
-     */
-    protected $subCommands = [
-        self::READY,
-        self::DELAYED,
-        self::BURIED,
-    ];
-
-    /**
-     * @param string $subject
-     * @throws InvalidArgumentException
-     */
-    public function __construct($subject)
+    public function __construct(int $jobId)
     {
-        if (is_int($subject) || ctype_digit($subject)) {
-            $this->jobId = $subject;
-        } elseif (in_array($subject, $this->subCommands)) {
-            $this->subCommand = $subject;
-        } else {
-            throw new InvalidArgumentException(sprintf('Invalid peek subject: %s', $subject));
-        }
+        $this->jobId = $jobId;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
-        return isset($this->jobId) ?
-            sprintf('peek %u', $this->jobId) :
-            sprintf('peek-%s', $this->subCommand);
+        return sprintf('peek %u', $this->jobId);
     }
 
     /**
