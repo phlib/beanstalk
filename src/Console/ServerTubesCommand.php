@@ -21,7 +21,7 @@ class ServerTubesCommand extends AbstractCommand
     {
         $watch    = $input->getOption('watch');
         $buffered = new BufferedOutput($output->getVerbosity(), $output->isDecorated());
-        $service  = new StatsService($this->getBeanstalk());
+        $service = $this->getStatsService();
         do {
             $tubes = $service->getAllTubeStats();
 
