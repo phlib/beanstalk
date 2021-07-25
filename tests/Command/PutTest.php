@@ -2,55 +2,55 @@
 
 namespace Phlib\Beanstalk\Command;
 
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
+
 class PutTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Put('data', 1, 0, 60));
+        static::assertInstanceOf(CommandInterface::class, new Put('data', 1, 0, 60));
     }
 
     public function testGetCommand()
     {
         $data  = 'data';
         $bytes = strlen($data);
-        $this->assertEquals("put 123 456 789 $bytes", (new Put($data, 123, 456, 789))->getCommand());
+        static::assertEquals("put 123 456 789 $bytes", (new Put($data, 123, 456, 789))->getCommand());
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testWithInvalidPriority()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         new Put('data', 'foo', 123, 456);
     }
 
     public function testSuccessfulCommand()
     {
         $id = 123;
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("INSERTED $id");
 
-        $this->assertEquals($id, (new Put('data', 123, 456, 789))->process($this->socket));
+        static::assertEquals($id, (new Put('data', 123, 456, 789))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testErrorThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('DRAINING');
         (new Put('data', 123, 456, 789))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Put('data', 123, 456, 789))->process($this->socket);

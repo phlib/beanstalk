@@ -129,7 +129,7 @@ class Pool implements ConnectionInterface
      */
     public function touch($id)
     {
-        list($key, $jobId) = $this->splitId($id);
+        [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'touch', [$jobId]);
         return $this;
     }
@@ -142,7 +142,7 @@ class Pool implements ConnectionInterface
      */
     public function release($id, $priority = self::DEFAULT_PRIORITY, $delay = self::DEFAULT_DELAY)
     {
-        list($key, $jobId) = $this->splitId($id);
+        [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'release', [$jobId, $priority, $delay]);
         return $this;
     }
@@ -154,7 +154,7 @@ class Pool implements ConnectionInterface
      */
     public function bury($id, $priority = self::DEFAULT_PRIORITY)
     {
-        list($key, $jobId) = $this->splitId($id);
+        [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'bury', [$jobId, $priority]);
         return $this;
     }
@@ -165,7 +165,7 @@ class Pool implements ConnectionInterface
      */
     public function delete($id)
     {
-        list($key, $jobId) = $this->splitId($id);
+        [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'delete', [$jobId]);
         return $this;
     }
@@ -206,7 +206,7 @@ class Pool implements ConnectionInterface
      */
     public function peek($id)
     {
-        list($key, $jobId) = $this->splitId($id);
+        [$key, $jobId] = $this->splitId($id);
         $result    = $this->collection->sendToExact($key, 'peek', [$jobId]);
         $job       = $result['response'];
         $job['id'] = $id;
@@ -263,8 +263,7 @@ class Pool implements ConnectionInterface
         $kicked    = 0;
         $onSuccess = function ($result) use ($quantity, &$kicked) {
             $stats = $result['response'];
-            $buriedJobs = isset($stats['current-jobs-buried'])
-                ? $stats['current-jobs-buried'] : 0;
+            $buriedJobs = $stats['current-jobs-buried'] ?? 0;
 
             if ($buriedJobs == 0) {
                 return true;
@@ -308,7 +307,7 @@ class Pool implements ConnectionInterface
      */
     public function statsJob($id)
     {
-        list($key, $jobId) = $this->splitId($id);
+        [$key, $jobId] = $this->splitId($id);
         $result    = $this->collection->sendToExact($key, 'statsJob', [$jobId]);
         $job       = $result['response'];
         $job['id'] = $id;

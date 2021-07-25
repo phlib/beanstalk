@@ -2,12 +2,16 @@
 
 namespace Phlib\Beanstalk;
 
+use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\NotFoundException;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 
-class ConnectionTest extends \PHPUnit_Framework_TestCase
+class ConnectionTest extends TestCase
 {
     /**
-     * @var Socket|\PHPUnit_Framework_MockObject_MockObject
+     * @var Socket|MockObject
      */
     protected $socket;
 
@@ -16,33 +20,31 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
      */
     protected $beanstalk;
 
-    public function setUp()
+    protected function setUp()
     {
-        $this->socket = $this->getMockBuilder('\Phlib\Beanstalk\Connection\Socket')
-            ->disableOriginalConstructor()
-            ->getMock();
+        $this->socket = $this->createMock(Socket::class);
         $this->beanstalk = new Connection($this->socket);
         parent::setUp();
     }
 
     public function testImplementsInterface()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\ConnectionInterface', $this->beanstalk);
+        static::assertInstanceOf(ConnectionInterface::class, $this->beanstalk);
     }
 
     public function testSocketIsSetCorrectly()
     {
-        $this->assertEquals($this->socket, $this->beanstalk->getSocket());
+        static::assertEquals($this->socket, $this->beanstalk->getSocket());
     }
 
     public function testDefaultSocketImplementation()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Connection\Socket', $this->beanstalk->getSocket());
+        static::assertInstanceOf(Socket::class, $this->beanstalk->getSocket());
     }
 
     public function testDisconnectCallsSocket()
     {
-        $this->socket->expects($this->once())
+        $this->socket->expects(static::once())
             ->method('disconnect')
             ->willReturn(true);
         $this->beanstalk->disconnect();
@@ -50,15 +52,15 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
     public function testDisconnectReturnsValue()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('disconnect')
             ->willReturn(true);
-        $this->assertTrue($this->beanstalk->disconnect());
+        static::assertTrue($this->beanstalk->disconnect());
     }
 
     public function testPut()
     {
-        $this->socket->expects($this->atLeastOnce())
+        $this->socket->expects(static::atLeastOnce())
             ->method('read')
             ->willReturn('INSERTED 123');
         $this->beanstalk->put('foo-bar');
@@ -66,7 +68,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
 
     public function testReserve()
     {
-        $this->socket->expects($this->atLeastOnce())
+        $this->socket->expects(static::atLeastOnce())
             ->method('read')
             ->willReturn('RESERVED 123 456');
         $this->beanstalk->reserve();
@@ -76,11 +78,11 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
     {
         $expectedData = ['foo' => 'bar' , 'bar' => 'baz'];
         $expectedData = @(string)$expectedData;
-        $this->socket->expects($this->atLeastOnce())
+        $this->socket->expects(static::atLeastOnce())
             ->method('read')
-            ->will($this->onConsecutiveCalls('RESERVED 123 456', "Array\r\n"));
+            ->willReturnOnConsecutiveCalls('RESERVED 123 456', "Array\r\n");
         $jobData = $this->beanstalk->reserve();
-        $this->assertEquals($expectedData, $jobData['body']);
+        static::assertEquals($expectedData, $jobData['body']);
     }
 
     public function testDelete()
@@ -129,7 +131,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
     public function testIgnore()
     {
         $tube = 'test-tube';
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('WATCHING 123');
         $this->beanstalk->watch($tube);
@@ -139,14 +141,14 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
     public function testIgnoreDoesNothingWhenNotWatching()
     {
         $tube = 'test-tube';
-        $this->socket->expects($this->never())
+        $this->socket->expects(static::never())
             ->method('write');
         $this->beanstalk->ignore($tube);
     }
 
     public function testIgnoreDoesNothingWhenOnlyHasOneTube()
     {
-        $this->assertFalse($this->beanstalk->ignore('default'));
+        static::assertFalse($this->beanstalk->ignore('default'));
     }
 
     public function testPeek()
@@ -170,28 +172,27 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
         $this->execute("peek-buried", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekBuried');
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testPeekNotFound()
     {
+        $this->expectException(NotFoundException::class);
+
         $id = 245;
-        $this->assertFalse($this->execute("peek $id", 'NOT_FOUND', 'peek', [$id]));
+        static::assertFalse($this->execute("peek $id", 'NOT_FOUND', 'peek', [$id]));
     }
 
     public function testPeekReadyNotFound()
     {
-        $this->assertFalse($this->execute("peek-ready", 'NOT_FOUND', 'peekReady'));
+        static::assertFalse($this->execute("peek-ready", 'NOT_FOUND', 'peekReady'));
     }
 
     public function testPeekDelayedNotFound()
     {
-        $this->assertFalse($this->execute("peek-delayed", 'NOT_FOUND', 'peekDelayed'));
+        static::assertFalse($this->execute("peek-delayed", 'NOT_FOUND', 'peekDelayed'));
     }
 
     public function testPeekBuriedNotFound()
     {
-        $this->assertFalse($this->execute("peek-buried", 'NOT_FOUND', 'peekBuried'));
+        static::assertFalse($this->execute("peek-buried", 'NOT_FOUND', 'peekBuried'));
     }
 
     public function testKick()
@@ -204,18 +205,18 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
     {
         $bound = 1;
         $quantity = $this->execute("kick $bound", "KICKED 0", 'kick', [$bound]);
-        $this->assertEquals(0, $quantity);
+        static::assertEquals(0, $quantity);
     }
 
     public function testDefaultListOfTubesWatched()
     {
         $expected = ['default'];
-        $this->assertEquals($expected, $this->beanstalk->listTubesWatched());
+        static::assertEquals($expected, $this->beanstalk->listTubesWatched());
     }
 
     public function testDefaultTubeUsed()
     {
-        $this->assertEquals('default', $this->beanstalk->listTubeUsed());
+        static::assertEquals('default', $this->beanstalk->listTubeUsed());
     }
 
     public function testStats()
@@ -224,7 +225,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
         $stats = ['key1' => 'value1'];
 
         $actual = $this->execute('stats', ["OK 1234\r\n", "---\n$yaml\r\n"], 'stats');
-        $this->assertEquals($stats, $actual);
+        static::assertEquals($stats, $actual);
     }
 
     public function testStatsJob()
@@ -233,7 +234,7 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
         $stats = ['key1' => 'value1'];
 
         $actual = $this->execute('stats-job', ["OK 1234\r\n", "---\n$yaml\r\n"], 'statsJob', [123]);
-        $this->assertEquals($stats, $actual);
+        static::assertEquals($stats, $actual);
     }
 
     public function testStatsTube()
@@ -242,21 +243,20 @@ class ConnectionTest extends \PHPUnit_Framework_TestCase
         $stats = ['key1' => 'value1'];
 
         $actual = $this->execute('stats-tube', ["OK 1234\r\n", "---\n$yaml\r\n"], 'statsTube', ['test-tube']);
-        $this->assertEquals($stats, $actual);
+        static::assertEquals($stats, $actual);
     }
 
     protected function execute($command, $response, $method, array $arguments = [])
     {
-        $this->socket->expects($this->once())
+        $this->socket->expects(static::once())
             ->method('write')
-            ->with($this->stringContains($command));
+            ->with(static::stringContains($command));
         if (is_array($response)) {
-            $thisReturn = call_user_func_array([$this, 'onConsecutiveCalls'], $response);
-            $this->socket->expects($this->any())
+            $this->socket->expects(static::any())
                 ->method('read')
-                ->will($thisReturn);
+                ->willReturnOnConsecutiveCalls(...$response);
         } else {
-            $this->socket->expects($this->any())
+            $this->socket->expects(static::any())
                 ->method('read')
                 ->willReturn($response);
         }

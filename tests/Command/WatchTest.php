@@ -2,24 +2,26 @@
 
 namespace Phlib\Beanstalk\Command;
 
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
+
 class WatchTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Watch('test-tube'));
+        static::assertInstanceOf(CommandInterface::class, new Watch('test-tube'));
     }
 
     public function testGetCommand()
     {
         $tube = 'test-tube';
-        $this->assertEquals("watch $tube", (new Watch($tube))->getCommand());
+        static::assertEquals("watch $tube", (new Watch($tube))->getCommand());
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testTubeIsValidated()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         new Watch('');
     }
 
@@ -27,19 +29,18 @@ class WatchTest extends CommandTestCase
     {
         $tube = 'test-tube';
         $watchingCount = 12;
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("WATCHING $watchingCount");
 
-        $this->assertEquals($watchingCount, (new Watch($tube))->process($this->socket));
+        static::assertEquals($watchingCount, (new Watch($tube))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Watch('test-tube'))->process($this->socket);

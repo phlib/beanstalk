@@ -2,33 +2,34 @@
 
 namespace Phlib\Beanstalk\Command;
 
+use Phlib\Beanstalk\Exception\CommandException;
+
 class KickTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Kick(10));
+        static::assertInstanceOf(CommandInterface::class, new Kick(10));
     }
 
     public function testGetCommand()
     {
         $bound = 10;
-        $this->assertEquals("kick $bound", (new Kick($bound))->getCommand());
+        static::assertEquals("kick $bound", (new Kick($bound))->getCommand());
     }
 
     public function testSuccessfulCommand()
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('KICKED');
-        $this->assertInternalType('int', (new Kick(10))->process($this->socket));
+        static::assertInternalType('int', (new Kick(10))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Kick(10))->process($this->socket);

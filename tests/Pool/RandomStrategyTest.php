@@ -2,18 +2,20 @@
 
 namespace Phlib\Beanstalk\Pool;
 
-class RandomStrategyTest extends \PHPUnit_Framework_TestCase
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
+
+class RandomStrategyTest extends TestCase
 {
     public function testImplementsSelectionStrategyInterface()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Pool\SelectionStrategyInterface', new RandomStrategy());
+        static::assertInstanceOf(SelectionStrategyInterface::class, new RandomStrategy());
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testFailsWhenGivenEmptyCollection()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         (new RandomStrategy())->pickOne([]);
     }
 
@@ -24,7 +26,7 @@ class RandomStrategyTest extends \PHPUnit_Framework_TestCase
         for ($i = 0; $i < count($keys); $i++) {
             $strategy->pickOne($keys);
         }
-        $this->assertContains($strategy->pickOne($keys), $keys);
+        static::assertContains($strategy->pickOne($keys), $keys);
     }
 
     public function testWithDifferingCollections()
@@ -36,6 +38,6 @@ class RandomStrategyTest extends \PHPUnit_Framework_TestCase
 
         $newHost = 'host456';
         $keys[] = $newHost;
-        $this->assertContains($strategy->pickOne($keys), $keys);
+        static::assertContains($strategy->pickOne($keys), $keys);
     }
 }

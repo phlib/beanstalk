@@ -2,11 +2,15 @@
 
 namespace Phlib\Beanstalk\Command;
 
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\Exception\NotFoundException;
+
 class PeekTest extends CommandTestCase
 {
     public function testImplementsCommand()
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Peek('ready'));
+        static::assertInstanceOf(CommandInterface::class, new Peek('ready'));
     }
 
     /**
@@ -16,7 +20,7 @@ class PeekTest extends CommandTestCase
      */
     public function testGetCommand($subject, $command)
     {
-        $this->assertEquals($command, (new Peek($subject))->getCommand());
+        static::assertEquals($command, (new Peek($subject))->getCommand());
     }
 
     public function getCommandDataProvider()
@@ -29,11 +33,10 @@ class PeekTest extends CommandTestCase
         ];
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
     public function testWithInvalidSubject()
     {
+        $this->expectException(InvalidArgumentException::class);
+
         new Peek('foo-bar');
     }
 
@@ -43,30 +46,28 @@ class PeekTest extends CommandTestCase
         $body     = 'Foo Bar';
         $response = ['id' => $id, 'body' => $body];
 
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
-            ->will($this->onConsecutiveCalls("FOUND $id 123\r\n", $body . "\r\n"));
+            ->willReturnOnConsecutiveCalls("FOUND $id 123\r\n", $body . "\r\n");
 
-        $this->assertEquals($response, (new Peek(10))->process($this->socket));
+        static::assertEquals($response, (new Peek(10))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
     public function testNotFoundThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->expectException(NotFoundException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_FOUND');
         (new Peek(10))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
     public function testUnknownStatusThrowsException()
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Peek(10))->process($this->socket);
