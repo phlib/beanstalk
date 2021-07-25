@@ -56,6 +56,62 @@ class CollectionTest extends TestCase
         static::assertEquals(2, $count);
     }
 
+    public function testArrayAggregateSkipsErroredConnections(): void
+    {
+        $connection1 = $this->getMockConnection('id-123');
+
+        // Make connection2 marked for retry
+        $connection2 = $this->getMockConnection('id-456');
+        $connection2->method('stats')
+            ->willThrowException(new RuntimeException());
+
+        $collection = new Collection([$connection1, $connection2]);
+
+        // Make the collection send a command and get the RuntimeException
+        $collection->sendToAll('stats');
+
+        $count = 0;
+        foreach ($collection as $connection) {
+            $count++;
+        }
+        static::assertEquals(1, $count);
+    }
+
+    public function testGetAvailableKeys(): void
+    {
+        $key1 = 'id-123';
+        $key2 = 'id-456';
+        $collection = new Collection([$this->getMockConnection($key1), $this->getMockConnection($key2)]);
+        $expected = [
+            $key1,
+            $key2,
+        ];
+        static::assertSame($expected, $collection->getAvailableKeys());
+    }
+
+    public function testGetAvailableKeysSkipsErroredConnections(): void
+    {
+        $key1 = 'id-123';
+        $key2 = 'id-456';
+
+        $connection1 = $this->getMockConnection($key1);
+
+        // Make connection2 marked for retry
+        $connection2 = $this->getMockConnection($key2);
+        $connection2->method('stats')
+            ->willThrowException(new RuntimeException());
+
+        $collection = new Collection([$connection1, $connection2]);
+
+        // Make the collection send a command and get the RuntimeException
+        $collection->sendToAll('stats');
+
+        $expected = [
+            $key1,
+        ];
+        static::assertSame($expected, $collection->getAvailableKeys());
+    }
+
     public function testDefaultStrategyIsRoundRobin()
     {
         $collection = new Collection([]);
