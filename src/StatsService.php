@@ -113,7 +113,6 @@ class StatsService
     {
         $serverKeys = $this->filterServerKeys($filter);
         $stats = $this->filterTheseKeys($serverKeys, $this->getStats());
-        ksort($stats);
         return $stats;
     }
 

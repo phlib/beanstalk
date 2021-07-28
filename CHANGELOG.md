@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Changed
+- Order of stats in `server:stats` CLI command to match order from Beanstalkd.
 ### Removed
 - **BC break**: Removed support for PHP versions <= v7.3 as they are no longer
   [actively supported](https://php.net/supported-versions.php) by the PHP project.
