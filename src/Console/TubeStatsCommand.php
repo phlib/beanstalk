@@ -25,7 +25,7 @@ class TubeStatsCommand extends AbstractCommand
         $tube = $input->getArgument('tube');
         $stat = $input->getOption('stat');
 
-        $service = new StatsService($this->getBeanstalk());
+        $service = $this->getStatsService();
         $stats = $service->getTubeStats($tube);
 
         if (empty($stats)) {

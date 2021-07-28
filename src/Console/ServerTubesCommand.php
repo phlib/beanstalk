@@ -21,7 +21,7 @@ class ServerTubesCommand extends AbstractCommand
     {
         $watch    = $input->getOption('watch');
         $buffered = new BufferedOutput($output->getVerbosity(), $output->isDecorated());
-        $service  = new StatsService($this->getBeanstalk());
+        $service = $this->getStatsService();
         do {
             $tubes = $service->getAllTubeStats();
 
@@ -31,7 +31,7 @@ class ServerTubesCommand extends AbstractCommand
             }
 
             $table = new Table($buffered);
-            $table->setHeaders($service->getTubeHeaderMapping());
+            $table->setHeaders(StatsService::TUBE_HEADER_MAPPING);
             foreach ($tubes as $stats) {
                 if ($stats['current-jobs-buried'] > 0) {
                     $stats['name'] = "<error>{$stats['name']}</error>";

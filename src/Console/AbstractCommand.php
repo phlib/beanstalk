@@ -5,6 +5,7 @@ namespace Phlib\Beanstalk\Console;
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Symfony\Component\Console\Command\Command;
 use Phlib\Beanstalk\Factory;
+use Phlib\Beanstalk\StatsService;
 
 /**
  * Class AbstractCommand
@@ -17,6 +18,8 @@ abstract class AbstractCommand extends Command
      */
     protected $beanstalk;
 
+    private StatsService $statsService;
+
     /**
      * @return ConnectionInterface
      */
@@ -28,5 +31,30 @@ abstract class AbstractCommand extends Command
         }
 
         return $this->beanstalk;
+    }
+
+    /**
+     * @internal This method is not part of the backward-compatibility promise. Used for DI in unit tests.
+     */
+    public function setBeanstalk(ConnectionInterface $beanstalk): void
+    {
+        $this->beanstalk = $beanstalk;
+    }
+
+    protected function getStatsService(): StatsService
+    {
+        if (!isset($this->statsService)) {
+            $this->statsService = new StatsService($this->getBeanstalk());
+        }
+
+        return $this->statsService;
+    }
+
+    /**
+     * @internal This method is not part of the backward-compatibility promise. Used for DI in unit tests.
+     */
+    public function setStatsService(StatsService $statsService): void
+    {
+        $this->statsService = $statsService;
     }
 }

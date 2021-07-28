@@ -22,7 +22,7 @@ class ServerStatsCommand extends AbstractCommand
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $stat    = $input->getOption('stat');
-        $service = new StatsService($this->getBeanstalk());
+        $service = $this->getStatsService();
 
         $this->outputDetectedConfig($output);
         if ($stat == '') {
