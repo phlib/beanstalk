@@ -31,7 +31,7 @@ class ServerTubesCommand extends AbstractCommand
             }
 
             $table = new Table($buffered);
-            $table->setHeaders($service->getTubeHeaderMapping());
+            $table->setHeaders(StatsService::TUBE_HEADER_MAPPING);
             foreach ($tubes as $stats) {
                 if ($stats['current-jobs-buried'] > 0) {
                     $stats['name'] = "<error>{$stats['name']}</error>";
