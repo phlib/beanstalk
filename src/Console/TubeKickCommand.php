@@ -1,16 +1,16 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Console;
 
-use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class TubeKickCommand extends AbstractCommand
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('tube:kick')
             ->setDescription('Kick a number of delayed or buried jobs in the tube.')
@@ -18,12 +18,12 @@ class TubeKickCommand extends AbstractCommand
             ->addArgument('quantity', InputArgument::REQUIRED, 'The number of jobs to kick.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $quantity = $this->getBeanstalk()
             ->useTube($input->getArgument('tube'))
             ->kick($input->getArgument('quantity'));
-        $output->writeln("Successfully kicked $quantity jobs.");
+        $output->writeln("Successfully kicked {$quantity} jobs.");
 
         return 0;
     }

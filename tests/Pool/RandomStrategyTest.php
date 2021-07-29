@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
@@ -7,19 +9,19 @@ use PHPUnit\Framework\TestCase;
 
 class RandomStrategyTest extends TestCase
 {
-    public function testImplementsSelectionStrategyInterface()
+    public function testImplementsSelectionStrategyInterface(): void
     {
         static::assertInstanceOf(SelectionStrategyInterface::class, new RandomStrategy());
     }
 
-    public function testFailsWhenGivenEmptyCollection()
+    public function testFailsWhenGivenEmptyCollection(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         (new RandomStrategy())->pickOne([]);
     }
 
-    public function testAllowsContinuousSelection()
+    public function testAllowsContinuousSelection(): void
     {
         $keys = ['host123', 'host456', 'host789'];
         $strategy = new RandomStrategy();
@@ -29,7 +31,7 @@ class RandomStrategyTest extends TestCase
         static::assertContains($strategy->pickOne($keys), $keys);
     }
 
-    public function testWithDifferingCollections()
+    public function testWithDifferingCollections(): void
     {
         $strategy = new RandomStrategy();
 

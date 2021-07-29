@@ -1,31 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Console;
 
-use Phlib\Beanstalk\StatsService;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\StatsService;
 use Symfony\Component\Console\Helper\FormatterHelper;
+use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Helper\Table;
 
 class ServerStatsCommand extends AbstractCommand
 {
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('server:stats')
             ->setDescription('Get a list of details about the beanstalk server(s).')
             ->addOption('stat', 's', InputOption::VALUE_REQUIRED, 'Output a specific statistic.');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $stat    = $input->getOption('stat');
+        $stat = $input->getOption('stat');
         $service = $this->getStatsService();
 
         $this->outputDetectedConfig($output);
-        if ($stat == '') {
+        if (empty($stat)) {
             $this->outputInfo($service, $output);
             $this->outputStats($service, $output);
         } else {
@@ -35,20 +37,20 @@ class ServerStatsCommand extends AbstractCommand
         return 0;
     }
 
-    protected function outputDetectedConfig(OutputInterface $output)
+    protected function outputDetectedConfig(OutputInterface $output): void
     {
         if (!$output->isVerbose()) {
             return;
         }
         $configPath = $this->getHelper('configuration')->getConfigPath();
-        if ($configPath == '[default]') {
+        if ($configPath === '[default]') {
             $configPath = '[default fallback localhost]';
         }
 
         $output->writeln('Configuration: ' . $configPath);
     }
 
-    protected function outputInfo(StatsService $stats, OutputInterface $output)
+    protected function outputInfo(StatsService $stats, OutputInterface $output): void
     {
         $info = $stats->getServerInfo();
 
@@ -59,7 +61,7 @@ class ServerStatsCommand extends AbstractCommand
                 "Host: {$info['hostname']} (pid {$info['pid']})",
                 "Beanstalk Version: {$info['version']}",
                 "Resources: uptime/{$info['uptime']}, connections/{$info['total-connections']}",
-                "Jobs: total/{$info['total-jobs']}, timeouts/{$info['job-timeouts']}"
+                "Jobs: total/{$info['total-jobs']}, timeouts/{$info['job-timeouts']}",
             ],
             'info',
             true
@@ -69,13 +71,9 @@ class ServerStatsCommand extends AbstractCommand
         $output->writeln($block);
     }
 
-    /**
-     * @param StatsService $stats
-     * @param OutputInterface $output
-     */
-    protected function outputStats(StatsService $stats, OutputInterface $output)
+    protected function outputStats(StatsService $stats, OutputInterface $output): void
     {
-        $binlog  = $stats->getServerStats(StatsService::SERVER_BINLOG);
+        $binlog = $stats->getServerStats(StatsService::SERVER_BINLOG);
         $command = $stats->getServerStats(StatsService::SERVER_COMMAND);
         $current = $stats->getServerStats(StatsService::SERVER_CURRENT);
 
@@ -83,15 +81,15 @@ class ServerStatsCommand extends AbstractCommand
         $table->setStyle('borderless');
         $table->setHeaders(['Current', 'Stat', 'Command', 'Stat', 'Binlog', 'Stat']);
 
-        $binlogKeys    = array_keys($binlog);
-        $binlogValues  = array_values($binlog);
-        $commandKeys   = array_keys($command);
+        $binlogKeys = array_keys($binlog);
+        $binlogValues = array_values($binlog);
+        $commandKeys = array_keys($command);
         $commandValues = array_values($command);
-        $currentKeys   = array_keys($current);
+        $currentKeys = array_keys($current);
         $currentValues = array_values($current);
 
         $maxRows = max(count($binlog), count($command), count($current));
-        for ($i=0; $i < $maxRows; $i++) {
+        for ($i = 0; $i < $maxRows; $i++) {
             $row = [
                 $currentKeys[$i] ?? '',
                 $currentValues[$i] ?? '',
@@ -107,17 +105,11 @@ class ServerStatsCommand extends AbstractCommand
         $table->render();
     }
 
-    /**
-     * @param StatsService $service
-     * @param string $stat
-     * @param OutputInterface $output
-     * @throws InvalidArgumentException
-     */
-    protected function outputStat(StatsService $service, $stat, OutputInterface $output)
+    protected function outputStat(StatsService $service, string $stat, OutputInterface $output): void
     {
         $stats = $service->getServerStats(StatsService::SERVER_ALL) + $service->getServerInfo();
         if (!isset($stats[$stat])) {
-            throw new InvalidArgumentException("Specified statistic '$stat' is not valid.");
+            throw new InvalidArgumentException("Specified statistic '{$stat}' is not valid.");
         }
 
         $output->writeln($stats[$stat]);

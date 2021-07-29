@@ -1,25 +1,28 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class ValidateTraitTest extends TestCase
 {
     /**
-     * @var ValidateTrait
+     * @var ValidateTrait|MockObject
      */
-    protected $validate;
+    protected MockObject $validate;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->validate = $this->getMockForTrait(ValidateTrait::class);
         parent::setUp();
     }
 
-    public function testValidPriority()
+    public function testValidPriority(): void
     {
         static::assertTrue($this->validate->validatePriority(123));
     }
@@ -28,69 +31,78 @@ class ValidateTraitTest extends TestCase
      * @param mixed $priority
      * @dataProvider invalidPriorityDataProvider
      */
-    public function testInvalidPriority($priority)
+    public function testInvalidPriority($priority, string $exception): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException($exception);
 
         $this->validate->validatePriority($priority);
     }
 
-    public function invalidPriorityDataProvider()
+    public function invalidPriorityDataProvider(): array
     {
-        return [['string'], [-123], [12.43]];
+        // Priority must be integer between 0 and 4,294,967,295
+        return [
+            'string' => ['string', \TypeError::class],
+            'below zero' => [-123, InvalidArgumentException::class],
+            'decimal' => [12.43, \TypeError::class],
+            'over max' => [4294967296, InvalidArgumentException::class],
+        ];
     }
 
-    public function testValidTubeName()
+    public function testValidTubeName(): void
     {
         static::assertTrue($this->validate->validateTubeName('mytube'));
     }
 
     /**
-     * @param mixed $name
      * @dataProvider invalidTubeNameDataProvider
      */
-    public function testInvalidTubeName($name)
+    public function testInvalidTubeName(?string $name, string $exception): void
     {
-        $this->expectException(InvalidArgumentException::class);
+        $this->expectException($exception);
 
         $this->validate->validateTubeName($name);
     }
 
-    public function invalidTubeNameDataProvider()
+    public function invalidTubeNameDataProvider(): array
     {
-        return [[''], [null], [str_repeat('.', ConnectionInterface::MAX_TUBE_LENGTH + 1)]];
+        return [
+            'empty' => ['', InvalidArgumentException::class],
+            'null' => [null, \TypeError::class],
+            'too long' => [str_repeat('.', ConnectionInterface::MAX_TUBE_LENGTH + 1), InvalidArgumentException::class],
+        ];
     }
 
     /**
      * @param mixed $data
      * @dataProvider validJobDataDataProvider
      */
-    public function testValidJobData($data)
+    public function testValidJobData($data): void
     {
         static::assertTrue($this->validate->validateJobData($data));
     }
 
-    public function validJobDataDataProvider()
+    public function validJobDataDataProvider(): array
     {
         return [
-            ['Foo Bar Baz'],
-            [['my' => 'array']],
-            [new \stdClass()],
-            [1234]
+            'string' => ['Foo Bar Baz'],
+            'array' => [['my' => 'array']],
+            'object' => [new \stdClass()],
+            'integer' => [1234],
         ];
     }
 
     /**
      * @dataProvider invalidJobDataDataProvider
      */
-    public function testInvalidJobData($data)
+    public function testInvalidJobData($data): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         $this->validate->validateJobData($data);
     }
 
-    public function invalidJobDataDataProvider()
+    public function invalidJobDataDataProvider(): array
     {
         return [[''], [str_pad('', ConnectionInterface::MAX_JOB_LENGTH + 1)]];
     }

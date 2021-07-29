@@ -1,11 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
-use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
  * Class Peek
@@ -15,78 +16,39 @@ class Peek implements CommandInterface
 {
     use ToStringTrait;
 
-    const READY   = 'ready';
-    const DELAYED = 'delayed';
-    const BURIED  = 'buried';
+    protected int $jobId;
 
-    /**
-     * @var string|integer
-     */
-    protected $jobId = null;
-
-    /**
-     * @var string
-     */
-    protected $subCommand = null;
-
-    /**
-     * @var array
-     */
-    protected $subCommands = [
-        self::READY,
-        self::DELAYED,
-        self::BURIED
-    ];
-
-    /**
-     * @param string $subject
-     * @throws InvalidArgumentException
-     */
-    public function __construct($subject)
+    public function __construct(int $jobId)
     {
-        if (is_int($subject) || ctype_digit($subject)) {
-            $this->jobId = $subject;
-        } elseif (in_array($subject, $this->subCommands)) {
-            $this->subCommand = $subject;
-        } else {
-            throw new InvalidArgumentException(sprintf('Invalid peek subject: %s', $subject));
-        }
+        $this->jobId = $jobId;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
-        return isset($this->jobId) ?
-            sprintf('peek %u', $this->jobId) :
-            sprintf('peek-%s', $this->subCommand);
+        return sprintf('peek %u', $this->jobId);
     }
 
-    /**
-     * @param SocketInterface $socket
-     * @return array
-     * @throws NotFoundException
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): array
     {
         $socket->write($this->getCommand());
 
         $response = strtok($socket->read(), ' ');
         switch ($response) {
             case 'FOUND':
-                $id     = (int)strtok(' ');
-                $bytes  = (int)strtok(' ');
-                $body   = substr($socket->read($bytes + 2), 0, -2);
+                $id = (int)strtok(' ');
+                $bytes = (int)strtok(' ');
+                $body = substr($socket->read($bytes + 2), 0, -2);
 
-                return ['id' => $id, 'body' => $body];
+                return [
+                    'id' => $id,
+                    'body' => $body,
+                ];
 
             case 'NOT_FOUND':
-                throw new NotFoundException("Peek failed to find any jobs");
+                throw new NotFoundException('Peek failed to find any jobs');
 
             default:
-                throw new CommandException("Unknown peek response '$response'");
+                throw new CommandException("Unknown peek response '{$response}'");
         }
     }
 }

@@ -1,11 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
-use Symfony\Component\Console\Command\Command;
 use Phlib\Beanstalk\Factory;
 use Phlib\Beanstalk\StatsService;
+use Symfony\Component\Console\Command\Command;
 
 /**
  * Class AbstractCommand
@@ -13,19 +15,13 @@ use Phlib\Beanstalk\StatsService;
  */
 abstract class AbstractCommand extends Command
 {
-    /**
-     * @var ConnectionInterface
-     */
-    protected $beanstalk;
+    protected ConnectionInterface $beanstalk;
 
     private StatsService $statsService;
 
-    /**
-     * @return ConnectionInterface
-     */
-    public function getBeanstalk()
+    public function getBeanstalk(): ConnectionInterface
     {
-        if (!$this->beanstalk) {
+        if (!isset($this->beanstalk)) {
             $config = $this->getHelper('configuration')->fetch();
             $this->beanstalk = Factory::createFromArray($config);
         }

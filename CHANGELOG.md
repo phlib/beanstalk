@@ -5,7 +5,22 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Added
+- Type declarations have been added to all method parameters and return types
+  where possible. Some methods return mixed type so docblocks are still used.
+- Add type definitions docblocks for `Collection::sendToAll()` callbacks.
+  There is no change to functionality, but this better explains how these work.
+### Fixed
+- `Pool::ignore()` incorrectly updated its own cache of watched tubes, meaning
+  multiple calls may have had unexpected results.
 ### Changed
+- **BC break**: Split `Command\Peek(<string>)` to `Command\PeekStatus`.
+  `Command\Peek` now only accepts a Job ID integer. Will not impact standard
+  implementations which directly use the `Connection::peek*` methods.
+  `Command\Peek` status constants are now on `Command\PeekStatus`.
+- **BC break**: Restrict `Collection::send*` methods to only accept commands
+  defined in `ConnectionInterface`, rather than allowing any method to be called
+  on the connection.
 - Order of stats in `server:stats` CLI command to match order from Beanstalkd.
 ### Removed
 - **BC break**: Removed support for PHP versions <= v7.3 as they are no longer

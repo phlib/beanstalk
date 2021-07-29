@@ -1,15 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 
 class StatsService
 {
-    public const SERVER_BINLOG  = 1;
+    public const SERVER_BINLOG = 1;
+
     public const SERVER_COMMAND = 2;
+
     public const SERVER_CURRENT = 4;
-    public const SERVER_ALL     = 7;
+
+    public const SERVER_ALL = 7;
 
     public const TUBE_HEADER_MAPPING = [
         'name' => 'Tube',
@@ -79,37 +84,24 @@ class StatsService
         'binlog-max-size',
     ];
 
-    /**
-     * @var ConnectionInterface
-     */
-    private $beanstalk;
+    private ConnectionInterface $beanstalk;
 
     /**
      * @var array
      */
     protected $stats;
 
-    /**
-     * @param ConnectionInterface $beanstalk
-     */
     public function __construct(ConnectionInterface $beanstalk)
     {
         $this->beanstalk = $beanstalk;
     }
 
-    /**
-     * @return array
-     */
-    public function getServerInfo()
+    public function getServerInfo(): array
     {
         return $this->filterTheseKeys(self::INFO_KEYS, $this->getStats());
     }
 
-    /**
-     * @param int $filter
-     * @return array
-     */
-    public function getServerStats($filter = self::SERVER_ALL)
+    public function getServerStats(int $filter = self::SERVER_ALL): array
     {
         $serverKeys = $this->filterServerKeys($filter);
         $stats = $this->filterTheseKeys($serverKeys, $this->getStats());
@@ -118,12 +110,11 @@ class StatsService
 
     /**
      * @param $filter
-     * @return array
      */
-    protected function filterServerKeys($filter)
+    protected function filterServerKeys($filter): array
     {
         $serverKeys = self::SERVER_KEYS;
-        if ($filter != self::SERVER_ALL) {
+        if ($filter !== self::SERVER_ALL) {
             $include = [];
             if ($filter & self::SERVER_BINLOG) {
                 $include[] = 'binlog-';
@@ -137,7 +128,7 @@ class StatsService
             $filtered = [];
             foreach ($include as $beginsWith) {
                 foreach ($serverKeys as $serverKey) {
-                    if (substr($serverKey, 0, strlen($beginsWith)) != $beginsWith) {
+                    if (substr($serverKey, 0, strlen($beginsWith)) !== $beginsWith) {
                         continue;
                     }
                     $filtered[] = $serverKey;
@@ -148,23 +139,16 @@ class StatsService
         return $serverKeys;
     }
 
-    /**
-     * @param string $tube
-     * @return array
-     */
-    public function getTubeStats($tube)
+    public function getTubeStats(string $tube): array
     {
         $stats = $this->beanstalk->statsTube($tube);
         unset($stats['name']);
         return $stats;
     }
 
-    /**
-     * @return array
-     */
-    public function getAllTubeStats()
+    public function getAllTubeStats(): array
     {
-        $tubes     = $this->beanstalk->listTubes();
+        $tubes = $this->beanstalk->listTubes();
         $tubeStats = [];
         foreach ($tubes as $tube) {
             $stats = $this->beanstalk->statsTube($tube);
@@ -183,19 +167,14 @@ class StatsService
     }
 
     /**
-     * @param array $keys
      * @param $data
-     * @return array
      */
-    protected function filterTheseKeys(array $keys, $data)
+    protected function filterTheseKeys(array $keys, $data): array
     {
         return array_intersect_key($data, array_flip($keys));
     }
 
-    /**
-     * @return array
-     */
-    protected function getStats()
+    protected function getStats(): array
     {
         if (!$this->stats) {
             $this->stats = $this->beanstalk->stats();

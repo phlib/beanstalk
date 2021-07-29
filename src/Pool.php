@@ -1,41 +1,30 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool\CollectionInterface;
-use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 class Pool implements ConnectionInterface
 {
-    /**
-     * @var CollectionInterface
-     */
-    protected $collection;
+    protected CollectionInterface $collection;
 
-    /**
-     * @var string
-     */
-    protected $using = Connection::DEFAULT_TUBE;
+    protected string $using = Connection::DEFAULT_TUBE;
 
-    /**
-     * @var array
-     */
-    protected $watching = [Connection::DEFAULT_TUBE => true];
+    protected array $watching = [
+        Connection::DEFAULT_TUBE => true,
+    ];
 
-    /**
-     * @param CollectionInterface $collection
-     */
     public function __construct(CollectionInterface $collection)
     {
         $this->collection = $collection;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function disconnect()
+    public function disconnect(): bool
     {
         $result = true;
         /** @var ConnectionInterface $connection */
@@ -45,58 +34,40 @@ class Pool implements ConnectionInterface
         return $result;
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getName()
+    public function getName(): string
     {
         return __CLASS__;
     }
 
-    /**
-     * @return CollectionInterface
-     */
-    public function getCollection()
+    public function getCollection(): CollectionInterface
     {
         return $this->collection;
     }
 
-    /**
-     * @param string $tube
-     * @return $this
-     */
-    public function useTube($tube)
+    public function useTube(string $tube): self
     {
         $this->collection->sendToAll('useTube', [$tube]);
         $this->using = $tube;
         return $this;
     }
 
-    /**
-     * @param string   $data
-     * @param integer $priority
-     * @param integer $delay
-     * @param integer $ttr
-     * @return string
-     */
     public function put(
-        $data,
-        $priority = self::DEFAULT_PRIORITY,
-        $delay = self::DEFAULT_DELAY,
-        $ttr = self::DEFAULT_TTR
-    ) {
+        string $data,
+        int $priority = self::DEFAULT_PRIORITY,
+        int $delay = self::DEFAULT_DELAY,
+        int $ttr = self::DEFAULT_TTR
+    ): string {
         $result = $this->collection->sendToOne('put', func_get_args());
         if (!$result['connection'] instanceof ConnectionInterface || $result['response'] === false) {
             throw new RuntimeException('Failed to put the job into the tube.');
         }
-        return $this->combineId($result['connection'], $result['response']);
+        return $this->combineId($result['connection'], (int)$result['response']);
     }
 
     /**
-     * @param integer $timeout
      * @return array|false
      */
-    public function reserve($timeout = null)
+    public function reserve(?int $timeout = null)
     {
         $startTime = time();
         do {
@@ -110,7 +81,7 @@ class Pool implements ConnectionInterface
                         continue;
                     }
 
-                    $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
+                    $result['response']['id'] = $this->combineId($result['connection'], (int)$result['response']['id']);
                     return $result['response'];
                 } catch (RuntimeException $e) {
                     // ignore servers not responding
@@ -124,10 +95,9 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string $id
-     * @return $this
+     * @param string|int $id
      */
-    public function touch($id)
+    public function touch($id): self
     {
         [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'touch', [$jobId]);
@@ -135,12 +105,9 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string  $id
-     * @param integer $priority
-     * @param integer $delay
-     * @return $this
+     * @param string|int $id
      */
-    public function release($id, $priority = self::DEFAULT_PRIORITY, $delay = self::DEFAULT_DELAY)
+    public function release($id, int $priority = self::DEFAULT_PRIORITY, int $delay = self::DEFAULT_DELAY): self
     {
         [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'release', [$jobId, $priority, $delay]);
@@ -148,11 +115,9 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string  $id
-     * @param integer $priority
-     * @return $this
+     * @param string|int $id
      */
-    public function bury($id, $priority = self::DEFAULT_PRIORITY)
+    public function bury($id, int $priority = self::DEFAULT_PRIORITY): self
     {
         [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'bury', [$jobId, $priority]);
@@ -160,21 +125,16 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string $id
-     * @return $this
+     * @param string|int $id
      */
-    public function delete($id)
+    public function delete($id): self
     {
         [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'delete', [$jobId]);
         return $this;
     }
 
-    /**
-     * @param string $tube
-     * @return $this
-     */
-    public function watch($tube)
+    public function watch(string $tube): self
     {
         if (!isset($this->watching[$tube])) {
             $this->collection->sendToAll('watch', [$tube]);
@@ -184,31 +144,28 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string $tube
-     * @return integer|false
+     * @return int|false
      */
-    public function ignore($tube)
+    public function ignore(string $tube)
     {
-        $index = array_search($tube, $this->watching);
-        if ($index !== false) {
-            if (count($this->watching) == 1) {
+        if (isset($this->watching[$tube])) {
+            if (count($this->watching) === 1) {
                 return false;
             }
             $this->collection->sendToAll('ignore', [$tube]);
-            unset($this->watching[$index]);
+            unset($this->watching[$tube]);
         }
         return count($this->watching);
     }
 
     /**
-     * @param string $id
-     * @return array
+     * @param string|int $id
      */
-    public function peek($id)
+    public function peek($id): array
     {
         [$key, $jobId] = $this->splitId($id);
-        $result    = $this->collection->sendToExact($key, 'peek', [$jobId]);
-        $job       = $result['response'];
+        $result = $this->collection->sendToExact($key, 'peek', [$jobId]);
+        $job = $result['response'];
         $job['id'] = $id;
         return $job;
     }
@@ -238,43 +195,39 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string $command
      * @return array|false
      */
-    protected function peekStatus($command)
+    protected function peekStatus(string $command)
     {
         try {
-            $result = $this->collection->sendToOne($command, [], true);
+            $result = $this->collection->sendToOne($command, []);
         } catch (RuntimeException $e) {
             return false;
         }
         if (isset($result['response']) && is_array($result['response']) && isset($result['response']['id'])) {
-            $result['response']['id'] = $this->combineId($result['connection'], $result['response']['id']);
+            $result['response']['id'] = $this->combineId($result['connection'], (int)$result['response']['id']);
         }
         return $result['response'];
     }
 
-    /**
-     * @param integer $quantity
-     * @return integer
-     */
-    public function kick($quantity)
+    public function kick(int $quantity): int
     {
-        $kicked    = 0;
-        $onSuccess = function ($result) use ($quantity, &$kicked) {
+        $kicked = 0;
+        $onSuccess = function (array $result) use ($quantity, &$kicked): bool {
             $stats = $result['response'];
-            $buriedJobs = $stats['current-jobs-buried'] ?? 0;
+            $buriedJobs = (int)$stats['current-jobs-buried'] ?? 0;
 
-            if ($buriedJobs == 0) {
+            if ($buriedJobs === 0) {
                 return true;
             }
 
-            $kick   = min($buriedJobs, $quantity - $kicked);
+            $kick = min($buriedJobs, $quantity - $kicked);
             $kicked += (int)$result['connection']->kick($kick);
 
             if ($kicked >= $quantity) {
                 return false;
             }
+            return true;
         };
         $this->collection->sendToAll('statsTube', [$this->using], $onSuccess);
 
@@ -282,16 +235,17 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @return array
+     * @return array|false
      */
     public function stats()
     {
-        $stats     = [];
-        $onSuccess = function ($result) use (&$stats) {
+        $stats = [];
+        $onSuccess = function (array $result) use (&$stats): bool {
             if (!is_array($result['response'])) {
-                return;
+                return true;
             }
             $stats = $this->statsCombine($stats, $result['response']);
+            return true;
         };
         $this->collection->sendToAll('stats', [], $onSuccess);
 
@@ -302,30 +256,29 @@ class Pool implements ConnectionInterface
     }
 
     /**
-     * @param string $id
-     * @return array
+     * @param string|int $id
      */
-    public function statsJob($id)
+    public function statsJob($id): array
     {
         [$key, $jobId] = $this->splitId($id);
-        $result    = $this->collection->sendToExact($key, 'statsJob', [$jobId]);
-        $job       = $result['response'];
+        $result = $this->collection->sendToExact($key, 'statsJob', [$jobId]);
+        $job = $result['response'];
         $job['id'] = $id;
         return $job;
     }
 
     /**
-     * @param string $tube
-     * @return array
+     * @return array|false
      */
-    public function statsTube($tube)
+    public function statsTube(string $tube)
     {
-        $stats     = [];
-        $onSuccess = function ($result) use (&$stats) {
+        $stats = [];
+        $onSuccess = function (array $result) use (&$stats): bool {
             if (!is_array($result['response'])) {
-                return;
+                return true;
             }
             $stats = $this->statsCombine($stats, $result['response']);
+            return true;
         };
         $this->collection->sendToAll('statsTube', [$tube], $onSuccess);
 
@@ -335,14 +288,9 @@ class Pool implements ConnectionInterface
         return $stats;
     }
 
-    /**
-     * @param array $cumulative
-     * @param array $stats
-     * @return array
-     */
-    protected function statsCombine(array $cumulative, array $stats)
+    protected function statsCombine(array $cumulative, array $stats): array
     {
-        $list    = ['pid', 'version', 'hostname', 'name', 'uptime', 'binlog-current-index'];
+        $list = ['pid', 'version', 'hostname', 'name', 'uptime', 'binlog-current-index'];
         $maximum = ['timeouts', 'binlog-max-size', 'binlog-oldest-index'];
         foreach ($stats as $name => $value) {
             if (!array_key_exists($name, $cumulative)) {
@@ -350,11 +298,11 @@ class Pool implements ConnectionInterface
                 continue;
             }
 
-            if (in_array($name, $list)) {
-                if ($cumulative[$name] != $value) {
+            if (in_array($name, $list, true)) {
+                if ($cumulative[$name] !== $value) {
                     $cumulative[$name] .= ',' . $value;
                 }
-            } elseif (in_array($name, $maximum)) {
+            } elseif (in_array($name, $maximum, true)) {
                 if ($value > $cumulative[$name]) {
                     $cumulative[$name] = $value;
                 }
@@ -365,44 +313,31 @@ class Pool implements ConnectionInterface
         return $cumulative;
     }
 
-    /**
-     * @return array
-     */
-    public function listTubes()
+    public function listTubes(): array
     {
-        $tubes     = [];
-        $onSuccess = function ($result) use (&$tubes) {
+        $tubes = [];
+        $onSuccess = function (array $result) use (&$tubes): bool {
             if (!is_array($result['response'])) {
-                return;
+                return true;
             }
             $tubes = array_merge($result['response'], $tubes);
+            return true;
         };
         $this->collection->sendToAll('listTubes', [], $onSuccess);
         return array_unique($tubes);
     }
 
-    /**
-     * @return string
-     */
-    public function listTubeUsed()
+    public function listTubeUsed(): string
     {
         return $this->using;
     }
 
-    /**
-     * @return array
-     */
-    public function listTubesWatched()
+    public function listTubesWatched(): array
     {
         return array_keys($this->watching);
     }
 
-    /**
-     * @param ConnectionInterface $connection
-     * @param integer $id
-     * @return string
-     */
-    public function combineId(ConnectionInterface $connection, $id)
+    public function combineId(ConnectionInterface $connection, int $id): string
     {
         if (!is_numeric($id)) {
             throw new InvalidArgumentException('Specified job id must be a number.');
@@ -410,20 +345,15 @@ class Pool implements ConnectionInterface
         return "{$connection->getName()}.{$id}";
     }
 
-    /**
-     * @param string $id
-     * @return array Indexed array of key and id.
-     * @throws InvalidArgumentException
-     */
-    public function splitId($id)
+    public function splitId(string $id): array
     {
         if (strpos($id, '.') === false) {
             throw new InvalidArgumentException('Job ID is not in expected pool format.');
         }
 
         $position = strrpos($id, '.');
-        $key      = substr($id, 0, $position);
-        $jobId    = substr($id, $position + 1);
+        $key = substr($id, 0, $position);
+        $jobId = (int)substr($id, $position + 1);
 
         return [$key, $jobId];
     }

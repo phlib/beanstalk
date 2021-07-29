@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
@@ -12,7 +14,7 @@ class TubePeekCommand extends AbstractCommand
 {
     use DisplayJobTrait;
 
-    protected function configure()
+    protected function configure(): void
     {
         $this->setName('tube:peek')
             ->setDescription('Look at a job in the job based on status.')
@@ -20,20 +22,35 @@ class TubePeekCommand extends AbstractCommand
             ->addOption('status', 's', InputOption::VALUE_OPTIONAL, 'The tube status. Value can be ready, delayed or buried.', 'buried');
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $status = $input->getOption('status');
+
+        // Fail early if status is not supported
         if (!in_array($status, ['ready', 'delayed', 'buried'], true)) {
-            throw new InvalidArgumentException("Specified status '$status' is not valid.");
+            throw new InvalidArgumentException("Specified status '{$status}' is not valid.");
         }
 
         $this->getBeanstalk()
             ->useTube($input->getArgument('tube'));
-        $method = 'peek' . ucfirst($status);
-        $job = call_user_func([$this->getBeanstalk(), $method]);
+
+        // Use switch instead of `->{'peek' . $status}` to allow static analysis
+        switch ($status) {
+            case 'ready':
+                $job = $this->getBeanstalk()->peekReady();
+                break;
+            case 'delayed':
+                $job = $this->getBeanstalk()->peekDelayed();
+                break;
+            case 'buried':
+                $job = $this->getBeanstalk()->peekBuried();
+                break;
+            default:
+                throw new InvalidArgumentException("Specified status '{$status}' is not valid.");
+        }
 
         if ($job === false) {
-            $output->writeln("No jobs found in '$status' status.");
+            $output->writeln("No jobs found in '{$status}' status.");
         } else {
             $this->displayJob($job, $output);
         }

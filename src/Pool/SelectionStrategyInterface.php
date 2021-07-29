@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Pool;
 
 /**
@@ -10,7 +12,6 @@ interface SelectionStrategyInterface
 {
     /**
      * @param string[] $collection
-     * @return string
      */
-    public function pickOne(array $collection);
+    public function pickOne(array $collection): string;
 }

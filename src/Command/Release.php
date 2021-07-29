@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
-use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\ValidateTrait;
 
 /**
@@ -16,50 +18,27 @@ class Release implements CommandInterface
     use ValidateTrait;
     use ToStringTrait;
 
-    /**
-     * @var string|integer
-     */
-    protected $id;
+    protected int $id;
 
-    /**
-     * @var integer
-     */
-    protected $priority;
+    protected int $priority;
 
-    /**
-     * @var integer
-     */
-    protected $delay;
+    protected int $delay;
 
-    /**
-     * @param string  $id
-     * @param integer $priority
-     * @param integer $delay
-     */
-    public function __construct($id, $priority, $delay)
+    public function __construct(int $id, int $priority, int $delay)
     {
         $this->validatePriority($priority);
 
-        $this->id       = $id;
+        $this->id = $id;
         $this->priority = $priority;
-        $this->delay    = $delay;
+        $this->delay = $delay;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('release %d %d %d', $this->id, $this->priority, $this->delay);
     }
 
-    /**
-     * @param SocketInterface $socket
-     * @return $this
-     * @throws NotFoundException
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): self
     {
         $socket->write($this->getCommand());
 
@@ -70,10 +49,10 @@ class Release implements CommandInterface
                 return $this;
 
             case 'NOT_FOUND':
-                throw new NotFoundException("Job id '$this->id' could not be found.");
+                throw new NotFoundException("Job id '{$this->id}' could not be found.");
 
             default:
-                throw new CommandException("Release '$this->id' failed '$response'");
+                throw new CommandException("Release '{$this->id}' failed '{$response}'");
         }
     }
 }

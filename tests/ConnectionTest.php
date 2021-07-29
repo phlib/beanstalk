@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
@@ -13,36 +15,33 @@ class ConnectionTest extends TestCase
     /**
      * @var Socket|MockObject
      */
-    protected $socket;
+    protected MockObject $socket;
 
-    /**
-     * @var Connection
-     */
-    protected $beanstalk;
+    protected Connection $beanstalk;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->socket = $this->createMock(Socket::class);
         $this->beanstalk = new Connection($this->socket);
         parent::setUp();
     }
 
-    public function testImplementsInterface()
+    public function testImplementsInterface(): void
     {
         static::assertInstanceOf(ConnectionInterface::class, $this->beanstalk);
     }
 
-    public function testSocketIsSetCorrectly()
+    public function testSocketIsSetCorrectly(): void
     {
-        static::assertEquals($this->socket, $this->beanstalk->getSocket());
+        static::assertSame($this->socket, $this->beanstalk->getSocket());
     }
 
-    public function testDefaultSocketImplementation()
+    public function testDefaultSocketImplementation(): void
     {
         static::assertInstanceOf(Socket::class, $this->beanstalk->getSocket());
     }
 
-    public function testDisconnectCallsSocket()
+    public function testDisconnectCallsSocket(): void
     {
         $this->socket->expects(static::once())
             ->method('disconnect')
@@ -50,7 +49,7 @@ class ConnectionTest extends TestCase
         $this->beanstalk->disconnect();
     }
 
-    public function testDisconnectReturnsValue()
+    public function testDisconnectReturnsValue(): void
     {
         $this->socket->expects(static::any())
             ->method('disconnect')
@@ -58,7 +57,7 @@ class ConnectionTest extends TestCase
         static::assertTrue($this->beanstalk->disconnect());
     }
 
-    public function testPut()
+    public function testPut(): void
     {
         $this->socket->expects(static::atLeastOnce())
             ->method('read')
@@ -66,7 +65,7 @@ class ConnectionTest extends TestCase
         $this->beanstalk->put('foo-bar');
     }
 
-    public function testReserve()
+    public function testReserve(): void
     {
         $this->socket->expects(static::atLeastOnce())
             ->method('read')
@@ -74,71 +73,74 @@ class ConnectionTest extends TestCase
         $this->beanstalk->reserve();
     }
 
-    public function testReserveDecodesData()
+    public function testReserveDecodesData(): void
     {
-        $expectedData = ['foo' => 'bar' , 'bar' => 'baz'];
+        $expectedData = [
+            'foo' => 'bar',
+            'bar' => 'baz',
+        ];
         $expectedData = @(string)$expectedData;
         $this->socket->expects(static::atLeastOnce())
             ->method('read')
             ->willReturnOnConsecutiveCalls('RESERVED 123 456', "Array\r\n");
         $jobData = $this->beanstalk->reserve();
-        static::assertEquals($expectedData, $jobData['body']);
+        static::assertSame($expectedData, $jobData['body']);
     }
 
-    public function testDelete()
+    public function testDelete(): void
     {
         $id = 234;
-        $this->execute("delete $id", 'DELETED', 'delete', [$id]);
+        $this->execute("delete {$id}", 'DELETED', 'delete', [$id]);
     }
 
-    public function testRelease()
+    public function testRelease(): void
     {
         $id = 234;
-        $this->execute("release $id", 'RELEASED', 'release', [$id]);
+        $this->execute("release {$id}", 'RELEASED', 'release', [$id]);
     }
 
-    public function testUseTube()
+    public function testUseTube(): void
     {
         $tube = 'test-tube';
-        $this->execute("use $tube", 'USING', 'useTube', [$tube]);
+        $this->execute("use {$tube}", "USING {$tube}", 'useTube', [$tube]);
     }
 
-    public function testBury()
+    public function testBury(): void
     {
         $id = 534;
-        $this->execute("bury $id", 'BURIED', 'bury', [$id]);
+        $this->execute("bury {$id}", 'BURIED', 'bury', [$id]);
     }
 
-    public function testTouch()
+    public function testTouch(): void
     {
         $id = 567;
-        $this->execute("touch $id", 'TOUCHED', 'touch', [$id]);
+        $this->execute("touch {$id}", 'TOUCHED', 'touch', [$id]);
     }
 
-    public function testWatch()
+    public function testWatch(): void
     {
         $tube = 'test-tube';
-        $this->execute("watch $tube", "WATCHING $tube", 'watch', [$tube]);
+        $this->execute("watch {$tube}", "WATCHING {$tube}", 'watch', [$tube]);
     }
 
-    public function testWatchForExistingWatchedTube()
+    public function testWatchForExistingWatchedTube(): void
     {
         $tube = 'test-tube';
-        $this->execute("watch $tube", "WATCHING 123", 'watch', [$tube]);
+        $this->execute("watch {$tube}", 'WATCHING 123', 'watch', [$tube]);
         $this->beanstalk->watch($tube);
     }
 
-    public function testIgnore()
+    public function testIgnore(): void
     {
         $tube = 'test-tube';
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('WATCHING 123');
         $this->beanstalk->watch($tube);
-        $this->execute("ignore $tube", 'WATCHING 123', 'ignore', [$tube]);
+        $this->execute("ignore {$tube}", 'WATCHING 123', 'ignore', [$tube]);
     }
 
-    public function testIgnoreDoesNothingWhenNotWatching()
+    public function testIgnoreDoesNothingWhenNotWatching(): void
     {
         $tube = 'test-tube';
         $this->socket->expects(static::never())
@@ -146,107 +148,117 @@ class ConnectionTest extends TestCase
         $this->beanstalk->ignore($tube);
     }
 
-    public function testIgnoreDoesNothingWhenOnlyHasOneTube()
+    public function testIgnoreDoesNothingWhenOnlyHasOneTube(): void
     {
         static::assertFalse($this->beanstalk->ignore('default'));
     }
 
-    public function testPeek()
+    public function testPeek(): void
     {
         $id = 245;
-        $this->execute("peek $id", ["FOUND $id 678", '{"foo":"bar","bar":"baz"}'], 'peek', [$id]);
+        $this->execute("peek {$id}", ["FOUND {$id} 678", '{"foo":"bar","bar":"baz"}'], 'peek', [$id]);
     }
 
-    public function testPeekReady()
+    public function testPeekReady(): void
     {
-        $this->execute("peek-ready", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekReady');
+        $this->execute('peek-ready', ['FOUND 234 678', '{"foo":"bar","bar":"baz"}'], 'peekReady');
     }
 
-    public function testPeekDelayed()
+    public function testPeekDelayed(): void
     {
-        $this->execute("peek-delayed", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekDelayed');
+        $this->execute('peek-delayed', ['FOUND 234 678', '{"foo":"bar","bar":"baz"}'], 'peekDelayed');
     }
 
-    public function testPeekBuried()
+    public function testPeekBuried(): void
     {
-        $this->execute("peek-buried", ["FOUND 234 678", '{"foo":"bar","bar":"baz"}'], 'peekBuried');
+        $this->execute('peek-buried', ['FOUND 234 678', '{"foo":"bar","bar":"baz"}'], 'peekBuried');
     }
 
-    public function testPeekNotFound()
+    public function testPeekNotFound(): void
     {
         $this->expectException(NotFoundException::class);
 
         $id = 245;
-        static::assertFalse($this->execute("peek $id", 'NOT_FOUND', 'peek', [$id]));
+        static::assertFalse($this->execute("peek {$id}", 'NOT_FOUND', 'peek', [$id]));
     }
 
-    public function testPeekReadyNotFound()
+    public function testPeekReadyNotFound(): void
     {
-        static::assertFalse($this->execute("peek-ready", 'NOT_FOUND', 'peekReady'));
+        static::assertFalse($this->execute('peek-ready', 'NOT_FOUND', 'peekReady'));
     }
 
-    public function testPeekDelayedNotFound()
+    public function testPeekDelayedNotFound(): void
     {
-        static::assertFalse($this->execute("peek-delayed", 'NOT_FOUND', 'peekDelayed'));
+        static::assertFalse($this->execute('peek-delayed', 'NOT_FOUND', 'peekDelayed'));
     }
 
-    public function testPeekBuriedNotFound()
+    public function testPeekBuriedNotFound(): void
     {
-        static::assertFalse($this->execute("peek-buried", 'NOT_FOUND', 'peekBuried'));
+        static::assertFalse($this->execute('peek-buried', 'NOT_FOUND', 'peekBuried'));
     }
 
-    public function testKick()
+    public function testKick(): void
     {
         $bound = 123;
-        $this->execute("kick $bound", "KICKED $bound", 'kick', [$bound]);
+        $this->execute("kick {$bound}", "KICKED {$bound}", 'kick', [$bound]);
     }
 
-    public function testKickEmpty()
+    public function testKickEmpty(): void
     {
         $bound = 1;
-        $quantity = $this->execute("kick $bound", "KICKED 0", 'kick', [$bound]);
-        static::assertEquals(0, $quantity);
+        $quantity = $this->execute("kick {$bound}", 'KICKED 0', 'kick', [$bound]);
+        static::assertSame(0, $quantity);
     }
 
-    public function testDefaultListOfTubesWatched()
+    public function testDefaultListOfTubesWatched(): void
     {
         $expected = ['default'];
-        static::assertEquals($expected, $this->beanstalk->listTubesWatched());
+        static::assertSame($expected, $this->beanstalk->listTubesWatched());
     }
 
-    public function testDefaultTubeUsed()
+    public function testDefaultTubeUsed(): void
     {
-        static::assertEquals('default', $this->beanstalk->listTubeUsed());
+        static::assertSame('default', $this->beanstalk->listTubeUsed());
     }
 
-    public function testStats()
+    public function testStats(): void
     {
-        $yaml  = 'key1: value1';
-        $stats = ['key1' => 'value1'];
+        $yaml = 'key1: value1';
+        $stats = [
+            'key1' => 'value1',
+        ];
 
-        $actual = $this->execute('stats', ["OK 1234\r\n", "---\n$yaml\r\n"], 'stats');
-        static::assertEquals($stats, $actual);
+        $actual = $this->execute('stats', ["OK 1234\r\n", "---\n{$yaml}\r\n"], 'stats');
+        static::assertSame($stats, $actual);
     }
 
-    public function testStatsJob()
+    public function testStatsJob(): void
     {
-        $yaml  = 'key1: value1';
-        $stats = ['key1' => 'value1'];
+        $yaml = 'key1: value1';
+        $stats = [
+            'key1' => 'value1',
+        ];
 
-        $actual = $this->execute('stats-job', ["OK 1234\r\n", "---\n$yaml\r\n"], 'statsJob', [123]);
-        static::assertEquals($stats, $actual);
+        $actual = $this->execute('stats-job', ["OK 1234\r\n", "---\n{$yaml}\r\n"], 'statsJob', [123]);
+        static::assertSame($stats, $actual);
     }
 
-    public function testStatsTube()
+    public function testStatsTube(): void
     {
-        $yaml  = 'key1: value1';
-        $stats = ['key1' => 'value1'];
+        $yaml = 'key1: value1';
+        $stats = [
+            'key1' => 'value1',
+        ];
 
-        $actual = $this->execute('stats-tube', ["OK 1234\r\n", "---\n$yaml\r\n"], 'statsTube', ['test-tube']);
-        static::assertEquals($stats, $actual);
+        $actual = $this->execute('stats-tube', ["OK 1234\r\n", "---\n{$yaml}\r\n"], 'statsTube', ['test-tube']);
+        static::assertSame($stats, $actual);
     }
 
-    protected function execute($command, $response, $method, array $arguments = [])
+    /**
+     * @param mixed $response
+     * @return mixed
+     */
+    protected function execute(string $command, $response, string $method, array $arguments = [])
     {
         $this->socket->expects(static::once())
             ->method('write')
@@ -260,6 +272,6 @@ class ConnectionTest extends TestCase
                 ->method('read')
                 ->willReturn($response);
         }
-        return call_user_func_array([$this->beanstalk, $method], $arguments);
+        return $this->beanstalk->{$method}(...$arguments);
     }
 }

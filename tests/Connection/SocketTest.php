@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Connection;
 
 use Phlib\Beanstalk\Exception\SocketException;
@@ -11,19 +13,19 @@ class SocketTest extends TestCase
 {
     use PHPMock;
 
-    public function testImplementsInterface()
+    public function testImplementsInterface(): void
     {
         static::assertInstanceOf(SocketInterface::class, new Socket('localhost'));
     }
 
-    public function testGetUniqueIdentifier()
+    public function testGetUniqueIdentifier(): void
     {
         $socket1 = new Socket('localhost', 11300);
         $socket2 = new Socket('localhost', 11301);
-        static::assertNotEquals($socket1->getUniqueIdentifier(), $socket2->getUniqueIdentifier());
+        static::assertNotSame($socket1->getUniqueIdentifier(), $socket2->getUniqueIdentifier());
     }
 
-    public function testConnectOnSuccessReturnsSelf()
+    public function testConnectOnSuccessReturnsSelf(): void
     {
         $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
         $fsockopen->expects(static::any())->willReturn(true);
@@ -33,7 +35,7 @@ class SocketTest extends TestCase
         static::assertInstanceOf(Socket::class, (new Socket('host'))->connect());
     }
 
-    public function testConnectOnFailureThrowsError()
+    public function testConnectOnFailureThrowsError(): void
     {
         $this->expectException(SocketException::class);
 
@@ -52,10 +54,10 @@ class SocketTest extends TestCase
     /**
      * @doesNotPerformAssertions PHPMock assertions are not counted
      */
-    public function testConnectsWithTheCorrectDetails()
+    public function testConnectsWithTheCorrectDetails(): void
     {
-        $host    = 'someHost';
-        $port    = 145234;
+        $host = 'someHost';
+        $port = 145234;
         $timeout = 432;
 
         $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
@@ -71,10 +73,12 @@ class SocketTest extends TestCase
         $stream_set_timeout = $this->getFunctionMock(__NAMESPACE__, 'stream_set_timeout');
         $stream_set_timeout->expects(static::any())->willReturn(true);
 
-        (new Socket($host, $port, ['timeout' => $timeout]))->connect();
+        (new Socket($host, $port, [
+            'timeout' => $timeout,
+        ]))->connect();
     }
 
-    public function testDisconnectWithValidConnection()
+    public function testDisconnectWithValidConnection(): void
     {
         $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
         $fsockopen->expects(static::any())->willReturn(fopen('php://memory', 'r+'));
@@ -88,7 +92,7 @@ class SocketTest extends TestCase
         $socket->disconnect();
     }
 
-    public function testDisconnectWithNoConnection()
+    public function testDisconnectWithNoConnection(): void
     {
         $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
         $fsockopen->expects(static::any())->willReturn(true);
@@ -105,7 +109,7 @@ class SocketTest extends TestCase
     /**
      * @doesNotPerformAssertions PHPMock assertions are not counted
      */
-    public function testWriteSuccessfullyToTheConnection()
+    public function testWriteSuccessfullyToTheConnection(): void
     {
         $data = 'Some Data';
         $dataLength = 9 + strlen(Socket::EOL);
@@ -123,7 +127,7 @@ class SocketTest extends TestCase
             ->write($data);
     }
 
-    public function testWriteThrowsExceptionOnError()
+    public function testWriteThrowsExceptionOnError(): void
     {
         $this->expectException(SocketException::class);
 
@@ -135,15 +139,15 @@ class SocketTest extends TestCase
             ->write('Some Data');
     }
 
-    public function testReadSuccessfullyFromTheConnection()
+    public function testReadSuccessfullyFromTheConnection(): void
     {
         $expectedData = 'Some Data';
         $stream_get_line = $this->getFunctionMock(__NAMESPACE__, 'stream_get_line');
         $stream_get_line->expects(static::any())->willReturn($expectedData);
-        static::assertEquals($expectedData, $this->getMockSocket(['read'])->read());
+        static::assertSame($expectedData, $this->getMockSocket(['read'])->read());
     }
 
-    public function testReadSuccessfullyWithLengthParam()
+    public function testReadSuccessfullyWithLengthParam(): void
     {
         $expectedData = 'Some Data';
 
@@ -152,10 +156,10 @@ class SocketTest extends TestCase
         $fread = $this->getFunctionMock(__NAMESPACE__, 'fread');
         $fread->expects(static::any())->willReturn($expectedData);
 
-        static::assertEquals($expectedData, $this->getMockSocket(['read'])->read(9));
+        static::assertSame($expectedData, $this->getMockSocket(['read'])->read(9));
     }
 
-    public function testReadFailsWithBadData()
+    public function testReadFailsWithBadData(): void
     {
         $this->expectException(SocketException::class);
 
@@ -165,10 +169,9 @@ class SocketTest extends TestCase
     }
 
     /**
-     * @param array $mockFns
      * @return Socket|MockObject
      */
-    protected function getMockSocket(array $mockFns)
+    protected function getMockSocket(array $mockFns): Socket
     {
         $availableFns = ['connect', 'disconnect', 'read', 'write', 'getUniqueIdentifier'];
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
@@ -13,20 +15,12 @@ class ListTubeUsed implements CommandInterface
 {
     use ToStringTrait;
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
         return 'list-tube-used';
     }
 
-    /**
-     * @param SocketInterface $socket
-     * @return string
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): string
     {
         $socket->write('list-tube-used');
         $status = strtok($socket->read(), ' ');
@@ -35,7 +29,7 @@ class ListTubeUsed implements CommandInterface
                 return strtok(' ');
 
             default:
-                throw new CommandException("List tube used failed '$status'");
+                throw new CommandException("List tube used failed '{$status}'");
         }
     }
 }

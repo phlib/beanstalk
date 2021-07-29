@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
@@ -13,33 +15,19 @@ class Kick implements CommandInterface
 {
     use ToStringTrait;
 
-    /**
-     * @var integer
-     */
-    protected $bound;
+    protected int $bound;
 
-    /**
-     * @param integer $bound
-     */
-    public function __construct($bound)
+    public function __construct(int $bound)
     {
         $this->bound = $bound;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
         return sprintf('kick %d', $this->bound);
     }
 
-    /**
-     * @param SocketInterface $socket
-     * @return integer
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): int
     {
         $socket->write($this->getCommand());
         $status = strtok($socket->read(), ' ');
@@ -48,7 +36,7 @@ class Kick implements CommandInterface
                 return (int)strtok(' ');
 
             default:
-                throw new CommandException("Kick with bound '$this->bound' failed '$status'");
+                throw new CommandException("Kick with bound '{$this->bound}' failed '{$status}'");
         }
     }
 }

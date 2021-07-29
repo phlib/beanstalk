@@ -1,16 +1,18 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 class ListTubesWatchedTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
         static::assertInstanceOf(CommandInterface::class, new ListTubesWatched());
     }
 
-    public function testGetCommand()
+    public function testGetCommand(): void
     {
-        static::assertEquals("list-tubes-watched", (new ListTubesWatched())->getCommand());
+        static::assertSame('list-tubes-watched', (new ListTubesWatched())->getCommand());
     }
 }

@@ -1,12 +1,14 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Exception\CommandException;
 
 class ReserveTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
         static::assertInstanceOf(CommandInterface::class, new Reserve(123));
     }
@@ -14,12 +16,12 @@ class ReserveTest extends CommandTestCase
     /**
      * @dataProvider getCommandDataProvider
      */
-    public function testGetCommand($timeout, $command)
+    public function testGetCommand(?int $timeout, string $command): void
     {
-        static::assertEquals($command, (new Reserve($timeout))->getCommand());
+        static::assertSame($command, (new Reserve($timeout))->getCommand());
     }
 
-    public function getCommandDataProvider()
+    public function getCommandDataProvider(): array
     {
         return [
             [123, 'reserve-with-timeout 123'],
@@ -27,25 +29,27 @@ class ReserveTest extends CommandTestCase
         ];
     }
 
-    public function testSuccessfulCommand()
+    public function testSuccessfulCommand(): void
     {
-        $id       = 123;
-        $data     = 'Foo Bar';
-        $bytes    = strlen($data);
-        $response = ['id' => $id, 'body' => $data];
+        $id = 123;
+        $data = 'Foo Bar';
+        $bytes = strlen($data);
+        $response = [
+            'id' => $id,
+            'body' => $data,
+        ];
 
         $this->socket->expects(static::any())
             ->method('read')
-            ->willReturnOnConsecutiveCalls("RESERVED $id $bytes\r\n", $data . "\r\n");
+            ->willReturnOnConsecutiveCalls("RESERVED {$id} {$bytes}\r\n", $data . "\r\n");
 
-        static::assertEquals($response, (new Reserve())->process($this->socket));
+        static::assertSame($response, (new Reserve())->process($this->socket));
     }
 
     /**
-     * @param string $status
      * @dataProvider failureStatusReturnsFalseDataProvider
      */
-    public function testFailureStatusReturnsFalse($status)
+    public function testFailureStatusReturnsFalse(string $status): void
     {
         $this->socket->expects(static::any())
             ->method('read')
@@ -53,7 +57,7 @@ class ReserveTest extends CommandTestCase
         static::assertFalse((new Reserve(123))->process($this->socket));
     }
 
-    public function failureStatusReturnsFalseDataProvider()
+    public function failureStatusReturnsFalseDataProvider(): array
     {
         return [
             ['TIMED_OUT'],
@@ -61,7 +65,7 @@ class ReserveTest extends CommandTestCase
         ];
     }
 
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
         $this->expectException(CommandException::class);
 

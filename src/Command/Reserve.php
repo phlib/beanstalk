@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
@@ -13,35 +15,24 @@ class Reserve implements CommandInterface
 {
     use ToStringTrait;
 
-    /**
-     * @var integer|null
-     */
-    protected $timeout;
+    protected ?int $timeout;
 
-    /**
-     * @param integer|null $timeout
-     */
-    public function __construct($timeout = null)
+    public function __construct(?int $timeout = null)
     {
         $this->timeout = $timeout;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    public function getCommand(): string
     {
-        if (is_null($this->timeout)) {
+        if ($this->timeout === null) {
             return 'reserve';
-        } else {
-            return sprintf('reserve-with-timeout %d', $this->timeout);
         }
+
+        return sprintf('reserve-with-timeout %d', $this->timeout);
     }
 
     /**
-     * @param SocketInterface $socket
      * @return array|false
-     * @throws CommandException
      */
     public function process(SocketInterface $socket)
     {
@@ -49,18 +40,21 @@ class Reserve implements CommandInterface
         $status = strtok($socket->read(), ' ');
         switch ($status) {
             case 'RESERVED':
-                $id     = (int)strtok(' ');
-                $bytes  = (int)strtok(' ');
-                $body   = substr($socket->read($bytes + 2), 0, -2);
+                $id = (int)strtok(' ');
+                $bytes = (int)strtok(' ');
+                $body = substr($socket->read($bytes + 2), 0, -2);
 
-                return ['id' => $id, 'body' => $body];
+                return [
+                    'id' => $id,
+                    'body' => $body,
+                ];
 
             case 'DEADLINE_SOON':
             case 'TIMED_OUT':
                 return false;
 
             default:
-                throw new CommandException("Reserve failed '$status'");
+                throw new CommandException("Reserve failed '{$status}'");
         }
     }
 }

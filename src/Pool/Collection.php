@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
@@ -14,26 +16,14 @@ use Phlib\Beanstalk\Exception\RuntimeException;
  */
 class Collection implements CollectionInterface
 {
-    /**
-     * @var array
-     */
-    protected $connections;
+    protected array $connections;
 
-    /**
-     * @var SelectionStrategyInterface
-     */
-    protected $strategy;
+    protected SelectionStrategyInterface $strategy;
 
-    /**
-     * @var array
-     */
-    protected $options;
+    protected array $options;
 
     /**
      * @param ConnectionInterface[] $connections
-     * @param SelectionStrategyInterface|null $strategy
-     * @param array $options
-     * @throws InvalidArgumentException
      */
     public function __construct(array $connections, SelectionStrategyInterface $strategy = null, array $options = [])
     {
@@ -45,30 +35,26 @@ class Collection implements CollectionInterface
             $key = $connection->getName();
             $formatted[$key] = [
                 'connection' => $connection,
-                'retry_at'   => false
+                'retry_at' => false,
             ];
         }
         $this->connections = $formatted;
 
-        if (is_null($strategy)) {
+        if ($strategy === null) {
             $strategy = new RoundRobinStrategy();
         }
         $this->strategy = $strategy;
-        $this->options = $options + ['retry_delay' => 600];
+        $this->options = $options + [
+            'retry_delay' => 600,
+        ];
     }
 
-    /**
-     * @return SelectionStrategyInterface
-     */
-    public function getSelectionStrategy()
+    public function getSelectionStrategy(): SelectionStrategyInterface
     {
         return $this->strategy;
     }
 
-    /**
-     * @return \Traversable
-     */
-    public function getIterator()
+    public function getIterator(): \Traversable
     {
         $connections = [];
         foreach (array_keys($this->connections) as $key) {
@@ -81,13 +67,10 @@ class Collection implements CollectionInterface
         return new \ArrayIterator($connections);
     }
 
-    /**
-     * @inheritdoc
-     */
-    public function getConnection($key)
+    public function getConnection(string $key): ConnectionInterface
     {
         if (!array_key_exists($key, $this->connections)) {
-            throw new NotFoundException("Specified key '$key' is not in the pool.");
+            throw new NotFoundException("Specified key '{$key}' is not in the pool.");
         }
         $retryAt = $this->connections[$key]['retry_at'];
         if ($retryAt !== false && $retryAt > time()) {
@@ -98,10 +81,7 @@ class Collection implements CollectionInterface
         return $this->connections[$key]['connection'];
     }
 
-    /**
-     * @return array
-     */
-    public function getAvailableKeys()
+    public function getAvailableKeys(): array
     {
         $keys = [];
         foreach (array_keys($this->connections) as $key) {
@@ -116,14 +96,14 @@ class Collection implements CollectionInterface
     }
 
     /**
-     * @inheritdoc
+     * @return mixed
      */
-    public function sendToOne($command, array $arguments = [])
+    public function sendToOne(string $command, array $arguments = [])
     {
         $e = null;
 
         $keysAvailable = array_keys($this->connections);
-        $keysUsed      = [];
+        $keysUsed = [];
         $keysExhausted = false;
         while (!$keysExhausted && ($key = $this->strategy->pickOne($keysAvailable)) !== false) {
             try {
@@ -136,14 +116,14 @@ class Collection implements CollectionInterface
             }
 
             $keysUsed[$key] = true;
-            if (count($keysUsed) == count($keysAvailable)) {
+            if (count($keysUsed) === count($keysAvailable)) {
                 $keysExhausted = true;
             }
         }
 
         $message = "Failed to send command '{$command}' to one of the connections.";
         if ($e instanceof \Exception) {
-            $final = new RuntimeException($message, 0 , $e);
+            $final = new RuntimeException($message, 0, $e);
         } else {
             $final = new RuntimeException($message);
         }
@@ -151,16 +131,84 @@ class Collection implements CollectionInterface
     }
 
     /**
-     * @inheritdoc
+     * @return mixed
      */
-    public function sendToExact($key, $command, array $arguments = [])
+    public function sendToExact(string $key, string $command, array $arguments = [])
     {
         try {
             $connection = $this->getConnection($key);
-            $result     = call_user_func_array([$connection, $command], $arguments);
+
+            // Use switch instead of `->{$command}` to allow static analysis
+            switch ($command) {
+                case 'useTube':
+                    $result = $connection->useTube(...$arguments);
+                    break;
+                case 'put':
+                    $result = $connection->put(...$arguments);
+                    break;
+                case 'reserve':
+                    $result = $connection->reserve(...$arguments);
+                    break;
+                case 'touch':
+                    $result = $connection->touch(...$arguments);
+                    break;
+                case 'release':
+                    $result = $connection->release(...$arguments);
+                    break;
+                case 'bury':
+                    $result = $connection->bury(...$arguments);
+                    break;
+                case 'delete':
+                    $result = $connection->delete(...$arguments);
+                    break;
+                case 'watch':
+                    $result = $connection->watch(...$arguments);
+                    break;
+                case 'ignore':
+                    $result = $connection->ignore(...$arguments);
+                    break;
+                case 'peek':
+                    $result = $connection->peek(...$arguments);
+                    break;
+                case 'statsJob':
+                    $result = $connection->statsJob(...$arguments);
+                    break;
+                case 'peekReady':
+                    $result = $connection->peekReady();
+                    break;
+                case 'peekDelayed':
+                    $result = $connection->peekDelayed();
+                    break;
+                case 'peekBuried':
+                    $result = $connection->peekBuried();
+                    break;
+                case 'kick':
+                    $result = $connection->kick(...$arguments);
+                    break;
+                case 'statsTube':
+                    $result = $connection->statsTube(...$arguments);
+                    break;
+                case 'stats':
+                    $result = $connection->stats();
+                    break;
+                case 'listTubes':
+                    $result = $connection->listTubes();
+                    break;
+                case 'listTubeUsed':
+                    $result = $connection->listTubeUsed();
+                    break;
+                case 'listTubesWatched':
+                    $result = $connection->listTubesWatched();
+                    break;
+                default:
+                    throw new InvalidArgumentException("Specified command '{$command}' is not allowed.");
+            }
             $this->connections[$key]['retry_at'] = false;
 
-            return ['connection' => $connection, 'response' => $result];
+            return [
+                'connection' => $connection,
+                'response' => $result,
+            ];
         } catch (RuntimeException $e) {
             if ($this->connections[$key]['retry_at'] === false) {
                 $retryDelay = $this->options['retry_delay'];
@@ -171,10 +219,21 @@ class Collection implements CollectionInterface
     }
 
     /**
-     * @inheritdoc
+     * @param callable|null $success {
+     *     @param array $result
+     *     @return bool continue iteration to other connections
+     * }
+     * @param callable|null $failure {
+     *     @return bool continue iteration to other connections
+     * }
+     * @return mixed
      */
-    public function sendToAll($command, array $arguments = [], callable $success = null, callable $failure = null)
-    {
+    public function sendToAll(
+        string $command,
+        array $arguments = [],
+        callable $success = null,
+        callable $failure = null
+    ) {
         foreach (array_keys($this->connections) as $key) {
             try {
                 $result = $this->sendToExact($key, $command, $arguments);
@@ -183,13 +242,15 @@ class Collection implements CollectionInterface
                     throw $e;
                 }
                 // ignore
-                $result = ['response' => false];
+                $result = [
+                    'response' => false,
+                ];
             }
 
             $continue = true;
-            if ($result['response'] === false && !is_null($failure)) {
+            if ($result['response'] === false && $failure !== null) {
                 $continue = call_user_func($failure);
-            } elseif ($result['response'] !== false && !is_null($success)) {
+            } elseif ($result['response'] !== false && $success !== null) {
                 $continue = call_user_func($success, $result);
             }
 

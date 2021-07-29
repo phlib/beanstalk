@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\SocketInterface;
@@ -11,17 +13,11 @@ class CommandTestCase extends TestCase
     /**
      * @var SocketInterface|MockObject
      */
-    protected $socket;
+    protected MockObject $socket;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
         $this->socket = $this->getMockForAbstractClass(SocketInterface::class);
-    }
-
-    protected function tearDown()
-    {
-        $this->socket = null;
-        parent::tearDown();
     }
 }

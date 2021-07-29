@@ -1,59 +1,41 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Exception\CommandException;
-use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
 class PeekTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        static::assertInstanceOf(CommandInterface::class, new Peek('ready'));
+        static::assertInstanceOf(CommandInterface::class, new Peek(10));
     }
 
-    /**
-     * @param mixed $subject
-     * @param string $command
-     * @dataProvider getCommandDataProvider
-     */
-    public function testGetCommand($subject, $command)
+    public function testGetCommand(): void
     {
-        static::assertEquals($command, (new Peek($subject))->getCommand());
+        static::assertSame('peek 123', (new Peek(123))->getCommand());
     }
 
-    public function getCommandDataProvider()
+    public function testSuccessfulCommand(): void
     {
-        return [
-            ['ready', 'peek-ready'],
-            ['delayed', 'peek-delayed'],
-            ['buried', 'peek-buried'],
-            ['123', 'peek 123'],
+        $id = 123;
+        $body = 'Foo Bar';
+        $response = [
+            'id' => $id,
+            'body' => $body,
         ];
-    }
-
-    public function testWithInvalidSubject()
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        new Peek('foo-bar');
-    }
-
-    public function testSuccessfulCommand()
-    {
-        $id       = 123;
-        $body     = 'Foo Bar';
-        $response = ['id' => $id, 'body' => $body];
 
         $this->socket->expects(static::any())
             ->method('read')
-            ->willReturnOnConsecutiveCalls("FOUND $id 123\r\n", $body . "\r\n");
+            ->willReturnOnConsecutiveCalls("FOUND {$id} 54\r\n", $body . "\r\n");
 
-        static::assertEquals($response, (new Peek(10))->process($this->socket));
+        static::assertSame($response, (new Peek(10))->process($this->socket));
     }
 
-    public function testNotFoundThrowsException()
+    public function testNotFoundThrowsException(): void
     {
         $this->expectException(NotFoundException::class);
 
@@ -63,7 +45,7 @@ class PeekTest extends CommandTestCase
         (new Peek(10))->process($this->socket);
     }
 
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
         $this->expectException(CommandException::class);
 

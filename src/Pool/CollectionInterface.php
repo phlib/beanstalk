@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
@@ -10,38 +12,34 @@ use Phlib\Beanstalk\Connection\ConnectionInterface;
  */
 interface CollectionInterface extends \IteratorAggregate
 {
-    /**
-     * @return array
-     */
-    public function getAvailableKeys();
+    public function getAvailableKeys(): array;
+
+    public function getConnection(string $key): ConnectionInterface;
 
     /**
-     * @param string $key
-     * @return ConnectionInterface
-     */
-    public function getConnection($key);
-
-    /**
-     * @param $key
-     * @param $command
-     * @param array $arguments
      * @return mixed
      */
-    public function sendToExact($key, $command, array $arguments = []);
+    public function sendToExact(string $key, string $command, array $arguments = []);
 
     /**
-     * @param $command
-     * @param array $arguments
      * @return mixed
      */
-    public function sendToOne($command, array $arguments = []);
+    public function sendToOne(string $command, array $arguments = []);
 
     /**
-     * @param $command
-     * @param array $arguments
-     * @param callable $success
-     * @param callable $failure
+     * @param callable|null $success {
+     *     @param array $result
+     *     @return bool continue iteration to other connections
+     * }
+     * @param callable|null $failure {
+     *     @return bool continue iteration to other connections
+     * }
      * @return mixed
      */
-    public function sendToAll($command, array $arguments = [], callable $success = null, callable $failure = null);
+    public function sendToAll(
+        string $command,
+        array $arguments = [],
+        callable $success = null,
+        callable $failure = null
+    );
 }

@@ -107,19 +107,19 @@ class ServerStatsCommandTest extends ConsoleTestCase
 
         // Headers
         static::assertStringContainsString(
-            "Host: " . self::STATS_INFO['hostname'] . " (pid " . self::STATS_INFO['pid'] . ")",
+            'Host: ' . self::STATS_INFO['hostname'] . ' (pid ' . self::STATS_INFO['pid'] . ')',
             $output
         );
         static::assertStringContainsString(
-            "Beanstalk Version: " . self::STATS_INFO['version'],
+            'Beanstalk Version: ' . self::STATS_INFO['version'],
             $output
         );
         static::assertStringContainsString(
-            "Resources: uptime/" . self::STATS_INFO['uptime'] . ", connections/" . self::STATS_INFO['total-connections'],
+            'Resources: uptime/' . self::STATS_INFO['uptime'] . ', connections/' . self::STATS_INFO['total-connections'],
             $output
         );
         static::assertStringContainsString(
-            "Jobs: total/" . self::STATS_INFO['total-jobs'] . ", timeouts/" . self::STATS_INFO['job-timeouts'],
+            'Jobs: total/' . self::STATS_INFO['total-jobs'] . ', timeouts/' . self::STATS_INFO['job-timeouts'],
             $output
         );
 

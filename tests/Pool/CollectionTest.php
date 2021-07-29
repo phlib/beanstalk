@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\Connection;
@@ -7,36 +9,55 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 
 class CollectionTest extends TestCase
 {
+    private const SEND_COMMANDS_ALLOWED = [
+        'useTube' => ['tube', 'self'],
+        'put' => ['data', 123],
+        'reserve' => [123, 123],
+        'touch' => [123, 'self'],
+        'release' => [123, 'self'],
+        'bury' => [123, 'self'],
+        'delete' => [123, 'self'],
+        'watch' => ['tube', 'self'],
+        'ignore' => ['tube', 123],
+        'peek' => [123, ['some result']],
+        'statsJob' => [123, ['some result']],
+        'peekReady' => ['some result'],
+        'peekDelayed' => ['some result'],
+        'peekBuried' => ['some result'],
+        'kick' => [123, 123],
+        'statsTube' => ['tube', ['some result']],
+        'stats' => [['some result']],
+        'listTubes' => [['some result']],
+        'listTubeUsed' => ['some result'],
+        'listTubesWatched' => [['some result']],
+    ];
+
     /**
      * @var SelectionStrategyInterface|MockObject
      */
-    protected $strategy;
+    protected MockObject $strategy;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->strategy = $this->createMock(SelectionStrategyInterface::class);
     }
 
-    protected function tearDown()
-    {
-        $this->strategy = null;
-    }
-
-    public function testImplementsCollectionInterface()
+    public function testImplementsCollectionInterface(): void
     {
         static::assertInstanceOf(CollectionInterface::class, new Collection([], $this->strategy));
     }
 
-    public function testImplementsArrayAggregateInterface()
+    public function testImplementsArrayAggregateInterface(): void
     {
         static::assertInstanceOf(\IteratorAggregate::class, new Collection([], $this->strategy));
     }
 
-    public function testArrayAggregateReturnsConnections()
+    public function testArrayAggregateReturnsConnections(): void
     {
         $result = true;
         $collection = new Collection([$this->getMockConnection('id-123'), $this->getMockConnection('id-456')]);
@@ -46,14 +67,14 @@ class CollectionTest extends TestCase
         static::assertTrue($result);
     }
 
-    public function testArrayAggregateReturnsAllConnections()
+    public function testArrayAggregateReturnsAllConnections(): void
     {
         $count = 0;
         $collection = new Collection([$this->getMockConnection('id-123'), $this->getMockConnection('id-456')]);
         foreach ($collection as $connection) {
             $count++;
         }
-        static::assertEquals(2, $count);
+        static::assertSame(2, $count);
     }
 
     public function testArrayAggregateSkipsErroredConnections(): void
@@ -74,7 +95,7 @@ class CollectionTest extends TestCase
         foreach ($collection as $connection) {
             $count++;
         }
-        static::assertEquals(1, $count);
+        static::assertSame(1, $count);
     }
 
     public function testGetAvailableKeys(): void
@@ -112,19 +133,19 @@ class CollectionTest extends TestCase
         static::assertSame($expected, $collection->getAvailableKeys());
     }
 
-    public function testDefaultStrategyIsRoundRobin()
+    public function testDefaultStrategyIsRoundRobin(): void
     {
         $collection = new Collection([]);
         static::assertInstanceOf(RoundRobinStrategy::class, $collection->getSelectionStrategy());
     }
 
-    public function testConstructorCanSetTheStrategy()
+    public function testConstructorCanSetTheStrategy(): void
     {
         $collection = new Collection([], $this->strategy);
         static::assertSame($this->strategy, $collection->getSelectionStrategy());
     }
 
-    public function testConstructorTakesListOfValidConnections()
+    public function testConstructorTakesListOfValidConnections(): void
     {
         $serverKey = 'my-unique-key';
         $connection = $this->getMockConnection($serverKey);
@@ -132,14 +153,14 @@ class CollectionTest extends TestCase
         static::assertSame($connection, $collection->getConnection($serverKey));
     }
 
-    public function testConstructorChecksForValidConnections()
+    public function testConstructorChecksForValidConnections(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new Collection(['sdfdsf']);
     }
 
-    public function testForUnknownConnection()
+    public function testForUnknownConnection(): void
     {
         $this->expectException(NotFoundException::class);
 
@@ -147,26 +168,26 @@ class CollectionTest extends TestCase
         $collection->getConnection('foo-bar');
     }
 
-    public function testCanSendToExactConnection()
+    public function testCanSendToExactConnection(): void
     {
         $identifier = 'id-123';
-        $command    = 'stats';
+        $command = 'stats';
         $connection = $this->getMockConnection($identifier);
         $connection->expects(static::once())
             ->method($command);
         $collection = new Collection([
             $connection,
-            $this->getMockConnection('id-456')
+            $this->getMockConnection('id-456'),
         ]);
         $collection->sendToExact($identifier, $command);
     }
 
-    public function testSendToExactOnError()
+    public function testSendToExactOnError(): void
     {
         $this->expectException(RuntimeException::class);
 
         $identifier = 'id-123';
-        $command    = 'stats';
+        $command = 'stats';
         $connection = $this->getMockConnection($identifier);
         $connection->expects(static::any())
             ->method($command)
@@ -175,13 +196,83 @@ class CollectionTest extends TestCase
         $collection->sendToExact($identifier, $command);
     }
 
-    public function testGetConnectionThatHasErrored()
+    /**
+     * @dataProvider dataSendToExactCommandAllowed
+     */
+    public function testSendToExactCommandAllowed(string $command, array $placeholderArgs, Stub $returnStub): void
+    {
+        $identifier = 'id-123';
+        $connection = $this->getMockConnection($identifier);
+        $connection->expects(static::once())
+            ->method($command)
+            ->will($returnStub);
+
+        $collection = new Collection([$connection]);
+        $collection->sendToExact($identifier, $command, $placeholderArgs);
+    }
+
+    public function dataSendToExactCommandAllowed(): iterable
+    {
+        /**
+         * Allow calls to all command methods in
+         * @see Connection\ConnectionInterface
+         */
+        foreach (self::SEND_COMMANDS_ALLOWED as $command => $map) {
+            $result = array_pop($map);
+            if ($result === 'self') {
+                $stub = static::returnSelf();
+            } else {
+                $stub = static::returnValue($result);
+            }
+            yield $command => [$command, $map, $stub];
+        }
+    }
+
+    /**
+     * @dataProvider dataSendToExactMethodNotAllowed
+     */
+    public function testSendToExactMethodNotAllowed(string $command): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Specified command '{$command}' is not allowed.");
+
+        $identifier = 'id-123';
+        $connection = $this->getMockConnection($identifier);
+        $collection = new Collection([$connection]);
+
+        // Expectation must be after the construction of Collection, as that calls `getName()`
+        $connection->expects(static::never())
+            ->method($command);
+
+        $collection->sendToExact($identifier, $command);
+    }
+
+    public function dataSendToExactMethodNotAllowed(): iterable
+    {
+        /**
+         * Block calls to non-command methods on
+         * @see Connection
+         */
+        $connection = new \ReflectionClass(Connection::class);
+        foreach ($connection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
+            $methodName = $method->getName();
+            if (array_key_exists($methodName, self::SEND_COMMANDS_ALLOWED)) {
+                continue;
+            }
+            if ($methodName === '__construct') {
+                continue;
+            }
+            yield $methodName => [$methodName];
+        }
+    }
+
+    public function testGetConnectionThatHasErrored(): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Connection recently failed.');
 
         $identifier = 'id-123';
-        $command    = 'stats';
+        $command = 'stats';
         $connection = $this->getMockConnection($identifier);
         $connection->expects(static::any())
             ->method($command)
@@ -195,15 +286,17 @@ class CollectionTest extends TestCase
         $collection->getConnection($identifier);
     }
 
-    public function testGetConnectionThatHasErroredButIsDueRetry()
+    public function testGetConnectionThatHasErroredButIsDueRetry(): void
     {
         $identifier = 'id-123';
-        $command    = 'stats';
+        $command = 'stats';
         $connection = $this->getMockConnection($identifier);
         $connection->expects(static::any())
             ->method($command)
             ->willThrowException(new RuntimeException());
-        $collection = new Collection([$connection], $this->strategy, ['retry_delay' => 0]);
+        $collection = new Collection([$connection], $this->strategy, [
+            'retry_delay' => 0,
+        ]);
         try {
             $collection->sendToExact($identifier, $command);
         } catch (\Exception $e) {
@@ -212,11 +305,11 @@ class CollectionTest extends TestCase
         static::assertSame($connection, $collection->getConnection($identifier));
     }
 
-    public function testSendToAllConnections()
+    public function testSendToAllConnections(): void
     {
-        $command    = 'stats';
-        $calls      = 0;
-        $callback   = function () use (&$calls) {
+        $command = 'stats';
+        $calls = 0;
+        $callback = function () use (&$calls) {
             $calls++;
         };
 
@@ -232,12 +325,12 @@ class CollectionTest extends TestCase
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command);
-        static::assertEquals(2, $calls);
+        static::assertSame(2, $calls);
     }
 
-    public function testSendToAllIgnoreErrors()
+    public function testSendToAllIgnoreErrors(): void
     {
-        $command     = 'stats';
+        $command = 'stats';
         $connection1 = $this->getMockConnection('id-123');
         $connection1->expects(static::once())
             ->method($command);
@@ -251,9 +344,9 @@ class CollectionTest extends TestCase
         $collection->sendToAll($command);
     }
 
-    public function testSendToAllIgnoreErrorsOfNotFound()
+    public function testSendToAllIgnoreErrorsOfNotFound(): void
     {
-        $command     = 'stats';
+        $command = 'stats';
         $connection1 = $this->getMockConnection('id-123');
         $connection1->expects(static::once())
             ->method($command);
@@ -267,30 +360,53 @@ class CollectionTest extends TestCase
         $collection->sendToAll($command);
     }
 
-    public function testSendToAllCallsSuccessCallback()
+    public function testSendToAllCallsSuccessCallback(): void
     {
-        $command     = 'stats';
+        $command = 'stats';
         $connection1 = $this->getMockConnection('id-123');
-        $connection1->expects(static::any())
+        $connection1->expects(static::once())
             ->method($command);
 
         $connection2 = $this->getMockConnection('id-456');
-        $connection2->expects(static::any())
+        $connection2->expects(static::once())
             ->method($command);
 
         $called = 0;
-        $onSuccess = function () use (&$called) {
+        $onSuccess = function () use (&$called): bool {
             $called++;
+            return true;
         };
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command, [], $onSuccess);
-        static::assertEquals(2, $called);
+        static::assertSame(2, $called);
     }
 
-    public function testSendToAllCallsFailureCallback()
+    public function testSendToAllSuccessCallbackStopsIteration(): void
     {
-        $command     = 'stats';
+        $command = 'stats';
+        $connection1 = $this->getMockConnection('id-123');
+        $connection1->expects(static::once())
+            ->method($command);
+
+        $connection2 = $this->getMockConnection('id-456');
+        $connection2->expects(static::never())
+            ->method($command);
+
+        $called = 0;
+        $onSuccess = function () use (&$called): bool {
+            $called++;
+            return false;
+        };
+
+        $collection = new Collection([$connection1, $connection2]);
+        $collection->sendToAll($command, [], $onSuccess);
+        static::assertSame(1, $called);
+    }
+
+    public function testSendToAllCallsFailureCallback(): void
+    {
+        $command = 'stats';
         $connection1 = $this->getMockConnection('id-123');
         $connection1->expects(static::any())
             ->method($command)
@@ -302,18 +418,43 @@ class CollectionTest extends TestCase
             ->willThrowException(new RuntimeException());
 
         $failed = 0;
-        $onFailure = function () use (&$failed) {
+        $onFailure = function () use (&$failed): bool {
             $failed++;
+            return true;
         };
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToAll($command, [], null, $onFailure);
-        static::assertEquals(2, $failed);
+        static::assertSame(2, $failed);
     }
 
-    public function testSendToOne()
+    public function testSendToAllFailureCallbackStopsIteration(): void
     {
-        $command     = 'stats';
+        $command = 'stats';
+        $connection1 = $this->getMockConnection('id-123');
+        $connection1->expects(static::once())
+            ->method($command)
+            ->willThrowException(new RuntimeException());
+
+        $connection2 = $this->getMockConnection('id-456');
+        $connection2->expects(static::never())
+            ->method($command)
+            ->willThrowException(new RuntimeException());
+
+        $failed = 0;
+        $onFailure = function () use (&$failed): bool {
+            $failed++;
+            return false;
+        };
+
+        $collection = new Collection([$connection1, $connection2]);
+        $collection->sendToAll($command, [], null, $onFailure);
+        static::assertSame(1, $failed);
+    }
+
+    public function testSendToOne(): void
+    {
+        $command = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
         $connection1->expects(static::once())
@@ -329,11 +470,11 @@ class CollectionTest extends TestCase
         $collection->sendToOne($command);
     }
 
-    public function testSendToOneWhenAllConnectionsAreUsed()
+    public function testSendToOneWhenAllConnectionsAreUsed(): void
     {
         $this->expectException(RuntimeException::class);
 
-        $command     = 'stats';
+        $command = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
         $connection1->expects(static::any())
@@ -354,9 +495,9 @@ class CollectionTest extends TestCase
         $collection->sendToOne($command);
     }
 
-    public function testSendToOneIgnoresErrors()
+    public function testSendToOneIgnoresErrors(): void
     {
-        $command     = 'stats';
+        $command = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
         $connection1->expects(static::any())
@@ -377,11 +518,11 @@ class CollectionTest extends TestCase
         $collection->sendToOne($command);
     }
 
-    public function testSendToOneThrowsTheLastError()
+    public function testSendToOneThrowsTheLastError(): void
     {
         $this->expectException(RuntimeException::class);
 
-        $command     = 'stats';
+        $command = 'stats';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
         $connection1->expects(static::any())
@@ -404,10 +545,9 @@ class CollectionTest extends TestCase
 
     /**
      * @param mixed $identifier
-     * @param array $methods
      * @return Connection|MockObject
      */
-    public function getMockConnection($identifier, array $methods = null)
+    public function getMockConnection($identifier, array $methods = null): Connection
     {
         $builder = $this->getMockBuilder(Connection::class)
             ->disableOriginalConstructor();
