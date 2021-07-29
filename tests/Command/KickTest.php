@@ -24,7 +24,7 @@ class KickTest extends CommandTestCase
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('KICKED');
-        static::assertInternalType('int', (new Kick(10))->process($this->socket));
+        static::assertIsInt((new Kick(10))->process($this->socket));
     }
 
     public function testUnknownStatusThrowsException(): void

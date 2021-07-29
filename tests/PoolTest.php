@@ -108,7 +108,7 @@ class PoolTest extends TestCase
                 'connection' => $connection,
                 'response' => '123',
             ]);
-        static::assertContains($host, $this->pool->put('myJobData'));
+        static::assertStringContainsString($host, $this->pool->put('myJobData'));
     }
 
     public function testPutReturnsJobIdContainingTheOriginalJobId(): void
@@ -121,7 +121,7 @@ class PoolTest extends TestCase
                 'connection' => $connection,
                 'response' => $jobId,
             ]);
-        static::assertContains($jobId, $this->pool->put('myJobData'));
+        static::assertStringContainsString($jobId, $this->pool->put('myJobData'));
     }
 
     public function testPutTotalFailure(): void
@@ -253,13 +253,13 @@ class PoolTest extends TestCase
     public function testMethodsWithJobId(string $method): void
     {
         $host = 'host:456';
-        $jobId = '123';
+        $jobId = 123;
         $this->collection->expects(static::once())
             ->method('sendToExact')
             ->with(
                 static::equalTo($host),
                 static::equalTo($method),
-                static::contains($jobId)
+                static::containsIdentical($jobId)
             );
         $this->pool->{$method}("{$host}.{$jobId}");
     }
@@ -582,7 +582,7 @@ class PoolTest extends TestCase
     {
         $jobId = 123;
         $connection = $this->createMockConnection('host');
-        static::assertContains((string)$jobId, $this->pool->combineId($connection, $jobId));
+        static::assertStringContainsString((string)$jobId, $this->pool->combineId($connection, $jobId));
     }
 
     public function testCombineAndSplitReturnCorrectJob(): void
