@@ -50,8 +50,8 @@ class JobStatsCommandTest extends ConsoleTestCase
         static::assertStringContainsString("Job ID: {$jobId}", $output);
 
         // Headers
-        static::assertRegExp("/tube\s+{$stats['tube']}/", $output);
-        static::assertRegExp("/state\s+{$stats['state']}/", $output);
+        static::assertMatchesRegularExpression("/tube\s+{$stats['tube']}/", $output);
+        static::assertMatchesRegularExpression("/state\s+{$stats['state']}/", $output);
 
         // Table
         $rows = $stats;
@@ -59,7 +59,7 @@ class JobStatsCommandTest extends ConsoleTestCase
         $rows['created'] = date('Y-m-d H:i:s', time() - $stats['age']);
         $rows['scheduled'] = date('Y-m-d H:i:s', time() - $stats['age'] + $stats['delay']);
         foreach ($rows as $stat => $value) {
-            static::assertRegExp("/{$stat}[\s|]+{$value}/", $output);
+            static::assertMatchesRegularExpression("/{$stat}[\s|]+{$value}/", $output);
         }
     }
 

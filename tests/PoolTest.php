@@ -199,15 +199,18 @@ class PoolTest extends TestCase
         $this->collection->expects(static::any())
             ->method('getAvailableKeys')
             ->willReturn(['host:456', $host]);
-        $this->collection->expects(static::at(0))
+        $this->collection->expects(static::exactly(2))
             ->method('sendToExact')
-            ->willReturn(false); // <-- should ignore this one
-        $this->collection->expects(static::at(1))
-            ->method('sendToExact')
-            ->willReturn([
-                'connection' => $connection,
-                'response' => $response,
-            ]);
+            ->willReturnOnConsecutiveCalls(
+                [
+                    'connection' => $connection,
+                    'response' => false, // <-- should ignore this one
+                ],
+                [
+                    'connection' => $connection,
+                    'response' => $response,
+                ]
+            );
         static::assertSame($expected, $this->pool->reserve());
     }
 
@@ -228,15 +231,23 @@ class PoolTest extends TestCase
         $this->collection->expects(static::any())
             ->method('getAvailableKeys')
             ->willReturn(['host:456', $host]);
-        $this->collection->expects(static::at(0))
+        $invocationRule = static::exactly(2);
+        $result = [
+            'connection' => $connection,
+            'response' => $response,
+        ];
+        $this->collection->expects($invocationRule)
             ->method('sendToExact')
-            ->willThrowException(new RuntimeException()); // <-- should continue after this one
-        $this->collection->expects(static::at(1))
-            ->method('sendToExact')
-            ->willReturn([
-                'connection' => $connection,
-                'response' => $response,
-            ]);
+            ->willReturnCallback(function () use ($invocationRule, $result): array {
+                switch ($invocationRule->getInvocationCount()) {
+                    case 1:
+                        throw new RuntimeException();
+                    case 2:
+                        return $result;
+                    default:
+                        throw new \InvalidArgumentException('Unexpected invocation');
+                }
+            });
         static::assertSame($expected, $this->pool->reserve());
     }
 
@@ -486,20 +497,23 @@ class PoolTest extends TestCase
     public function testKick(array $kickValues, int $kickAmount, int $expected): void
     {
         $connection = $this->createMockConnection('host:123');
-        $at = 0;
-        foreach ($kickValues as $index => $kickValue) {
-            if ($kickValue === 0) {
-                continue;
-            }
-            $connection->expects(static::at($at++))
-                ->method('kick')
-                ->willReturnCallback(function ($quantity) use ($kickValue) {
-                    return $quantity < $kickValue ? $quantity : $kickValue;
-                });
-        }
+
+        $nonZeroKicks = array_values(array_filter($kickValues));
+        $invocationRule = static::exactly(count($nonZeroKicks));
+        $connection->expects($invocationRule)
+            ->method('kick')
+            ->willReturnCallback(function ($quantity) use ($invocationRule, $nonZeroKicks) {
+                $index = $invocationRule->getInvocationCount() - 1;
+                if (!isset($nonZeroKicks[$index])) {
+                    throw new \InvalidArgumentException('Unexpected invocation');
+                }
+                $kickValue = $nonZeroKicks[$index];
+                return $quantity < $kickValue ? $quantity : $kickValue;
+            });
 
         $this->collection->expects(static::any())
             ->method('sendToAll')
+            ->with('statsTube')
             ->willReturnCallback(function ($command, $arguments, $success, $failure) use ($kickValues, $connection) {
                 foreach ($kickValues as $count) {
                     $response = [
