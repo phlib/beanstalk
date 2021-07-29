@@ -24,7 +24,7 @@ class IgnoreTest extends CommandTestCase
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('WATCHING');
-        static::assertInternalType('int', (new Ignore('test-tube'))->process($this->socket));
+        static::assertIsInt((new Ignore('test-tube'))->process($this->socket));
     }
 
     public function testNotFoundThrowsException(): void

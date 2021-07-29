@@ -1,6 +1,3 @@
-.idea
-vendor
-report
-config*.php
-composer.lock
-phpunit.xml
+/vendor
+/composer.lock
+/.phpunit.result.cache

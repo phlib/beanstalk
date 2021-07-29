@@ -126,7 +126,7 @@ class ServerStatsCommandTest extends ConsoleTestCase
         // Table
         $rows = array_merge(self::STATS_BINLOG, self::STATS_COMMAND, self::STATS_CURRENT);
         foreach ($rows as $stat => $value) {
-            static::assertRegExp("/{$stat}\s+{$value}/", $output);
+            static::assertMatchesRegularExpression("/{$stat}\s+{$value}/", $output);
         }
     }
 

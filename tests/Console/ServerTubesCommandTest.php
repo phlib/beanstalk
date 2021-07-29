@@ -68,12 +68,12 @@ class ServerTubesCommandTest extends ConsoleTestCase
         // Headers
         $headers = StatsService::TUBE_HEADER_MAPPING;
         $pattern = '/' . implode('[\s|]+', $headers) . '/';
-        static::assertRegExp($pattern, $output);
+        static::assertMatchesRegularExpression($pattern, $output);
 
         // Table
         foreach (self::STATS_TUBES as $row) {
             $pattern = '/' . implode('[\s|]+', $row) . '/';
-            static::assertRegExp($pattern, $output);
+            static::assertMatchesRegularExpression($pattern, $output);
         }
     }
 

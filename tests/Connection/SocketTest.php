@@ -51,9 +51,6 @@ class SocketTest extends TestCase
         (new Socket('host'))->connect();
     }
 
-    /**
-     * @doesNotPerformAssertions PHPMock assertions are not counted
-     */
     public function testConnectsWithTheCorrectDetails(): void
     {
         $host = 'someHost';
@@ -106,9 +103,6 @@ class SocketTest extends TestCase
         $socket->disconnect();
     }
 
-    /**
-     * @doesNotPerformAssertions PHPMock assertions are not counted
-     */
     public function testWriteSuccessfullyToTheConnection(): void
     {
         $data = 'Some Data';

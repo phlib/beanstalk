@@ -59,7 +59,7 @@ class TubeStatsCommandTest extends ConsoleTestCase
 
         // Table
         foreach (self::STATS_TUBE as $stat => $value) {
-            static::assertRegExp("/{$stat}[\s|]+{$value}/", $output);
+            static::assertMatchesRegularExpression("/{$stat}[\s|]+{$value}/", $output);
         }
     }
 
