@@ -18,9 +18,9 @@
         }
     ],
     "require": {
-        "php": "^7.4",
+        "php": "^7.4|^8.0",
         "symfony/console": "^5",
-        "phlib/console-configuration": "^1.0.3"
+        "phlib/console-configuration": "^2"
     },
     "require-dev": {
         "phpunit/phpunit": "^9",
