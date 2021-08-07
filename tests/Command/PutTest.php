@@ -29,6 +29,22 @@ class PutTest extends CommandTestCase
         new Put('data', 4294967296, 123, 456);
     }
 
+    public function testWithInvalidDelay(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        // Delay must be integer between 0 and 4,294,967,295
+        new Put('data', 123, 4294967296, 456);
+    }
+
+    public function testWithInvalidTtr(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        // TTR must be integer between 0 and 4,294,967,295
+        new Put('data', 123, 456, 4294967296);
+    }
+
     public function testSuccessfulCommand(): void
     {
         $id = 123;
