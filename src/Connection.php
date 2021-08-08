@@ -78,10 +78,7 @@ class Connection implements ConnectionInterface
             ->process($this->getSocket());
     }
 
-    /**
-     * @return array|false
-     */
-    public function reserve(?int $timeout = null)
+    public function reserve(?int $timeout = null): ?array
     {
         $jobData = (new Command\Reserve($timeout))
             ->process($this->getSocket());
@@ -144,14 +141,11 @@ class Connection implements ConnectionInterface
         return $this;
     }
 
-    /**
-     * @return int|false
-     */
-    public function ignore(string $tube)
+    public function ignore(string $tube): ?int
     {
         if (isset($this->watching[$tube])) {
             if (count($this->watching) === 1) {
-                return false;
+                return null;
             }
 
             (new Command\Ignore($tube))
@@ -172,48 +166,33 @@ class Connection implements ConnectionInterface
         return $jobData;
     }
 
-    /**
-     * @return array|false
-     */
-    public function peekReady()
+    public function peekReady(): ?array
     {
         return $this->peekStatus(Command\PeekStatus::READY);
     }
 
-    /**
-     * @return array|false
-     */
-    public function peekDelayed()
+    public function peekDelayed(): ?array
     {
         return $this->peekStatus(Command\PeekStatus::DELAYED);
     }
 
-    /**
-     * @return array|false
-     */
-    public function peekBuried()
+    public function peekBuried(): ?array
     {
         return $this->peekStatus(Command\PeekStatus::BURIED);
     }
 
-    /**
-     * @return array|false
-     */
-    protected function peekStatus(string $status)
+    protected function peekStatus(string $status): ?array
     {
         try {
             $jobData = (new Command\PeekStatus($status))
                 ->process($this->getSocket());
             return $jobData;
         } catch (NotFoundException $e) {
-            return false;
+            return null;
         }
     }
 
-    /**
-     * @return array|false
-     */
-    public function stats()
+    public function stats(): array
     {
         return (new Command\Stats())
             ->process($this->getSocket());
@@ -228,10 +207,7 @@ class Connection implements ConnectionInterface
             ->process($this->getSocket());
     }
 
-    /**
-     * @return array|false
-     */
-    public function statsTube(string $tube)
+    public function statsTube(string $tube): ?array
     {
         return (new Command\StatsTube($tube))
             ->process($this->getSocket());

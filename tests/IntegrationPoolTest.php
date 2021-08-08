@@ -74,7 +74,7 @@ class IntegrationPoolTest extends TestCase
     {
         $this->setupTube('integration-test');
         // make sure it's empty
-        $this->beanstalk->peekReady();
+        static::assertNull($this->beanstalk->peekReady());
 
         $data = 'This is my data';
         $id = $this->beanstalk->put($data);
@@ -86,7 +86,7 @@ class IntegrationPoolTest extends TestCase
         $this->beanstalk->touch($jobData['id']);
         $this->beanstalk->delete($jobData['id']);
 
-        static::assertFalse($this->beanstalk->peekReady());
+        static::assertNull($this->beanstalk->peekReady());
     }
 
     public function testBuriedJobProcess(): void

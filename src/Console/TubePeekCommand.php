@@ -49,7 +49,7 @@ class TubePeekCommand extends AbstractCommand
                 throw new InvalidArgumentException("Specified status '{$status}' is not valid.");
         }
 
-        if ($job === false) {
+        if ($job === null) {
             $output->writeln("No jobs found in '{$status}' status.");
         } else {
             $this->displayJob($job, $output);

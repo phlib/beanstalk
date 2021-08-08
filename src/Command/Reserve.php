@@ -31,10 +31,7 @@ class Reserve implements CommandInterface
         return sprintf('reserve-with-timeout %d', $this->timeout);
     }
 
-    /**
-     * @return array|false
-     */
-    public function process(SocketInterface $socket)
+    public function process(SocketInterface $socket): ?array
     {
         $socket->write($this->getCommand());
         $status = strtok($socket->read(), ' ');
@@ -51,7 +48,7 @@ class Reserve implements CommandInterface
 
             case 'DEADLINE_SOON':
             case 'TIMED_OUT':
-                return false;
+                return null;
 
             default:
                 throw new CommandException("Reserve failed '{$status}'");

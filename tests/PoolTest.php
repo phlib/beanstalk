@@ -78,7 +78,7 @@ class PoolTest extends TestCase
     public function testIgnoreDoesNotAllowLessThanOneWatching(): void
     {
         // 'default' tube is already being watched
-        static::assertFalse($this->pool->ignore('default'));
+        static::assertNull($this->pool->ignore('default'));
     }
 
     public function testIgnore(): void
@@ -153,7 +153,7 @@ class PoolTest extends TestCase
             ->with(static::anything(), 'reserve', [0])
             ->willReturn([
                 'connection' => $connection,
-                'response' => false,
+                'response' => null,
             ]);
         $startTime = time();
         $this->pool->reserve(2);
@@ -212,7 +212,7 @@ class PoolTest extends TestCase
             ->willReturnOnConsecutiveCalls(
                 [
                     'connection' => $connection,
-                    'response' => false, // <-- should ignore this one
+                    'response' => null, // <-- should ignore this one
                 ],
                 [
                     'connection' => $connection,
@@ -348,9 +348,9 @@ class PoolTest extends TestCase
             ->with('peekReady', [])
             ->willReturn([
                 'connection' => null,
-                'response' => false,
+                'response' => null,
             ]);
-        static::assertFalse($this->pool->peekReady());
+        static::assertNull($this->pool->peekReady());
     }
 
     public function testPeekDelayed(): void
@@ -386,9 +386,9 @@ class PoolTest extends TestCase
             ->with('peekDelayed', [])
             ->willReturn([
                 'connection' => null,
-                'response' => false,
+                'response' => null,
             ]);
-        static::assertFalse($this->pool->peekDelayed());
+        static::assertNull($this->pool->peekDelayed());
     }
 
     public function testPeekBuried(): void
@@ -423,7 +423,7 @@ class PoolTest extends TestCase
             ->method('sendToOne')
             ->with('peekBuried', [])
             ->willThrowException(new RuntimeException());
-        static::assertFalse($this->pool->peekBuried());
+        static::assertNull($this->pool->peekBuried());
     }
 
     public function testStats(): void
