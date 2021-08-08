@@ -454,11 +454,17 @@ class CollectionTest extends TestCase
 
     public function testSendToOne(): void
     {
-        $command = 'stats';
+        $command = 'peekReady';
+        $response = [
+            'id' => 123,
+            'body' => 'jobData',
+        ];
+
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
         $connection1->expects(static::once())
-            ->method($command);
+            ->method($command)
+            ->willReturn($response);
 
         $connection2 = $this->getMockConnection('id-456');
 
@@ -474,7 +480,7 @@ class CollectionTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
 
-        $command = 'stats';
+        $command = 'peekReady';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
         $connection1->expects(static::any())
@@ -497,7 +503,12 @@ class CollectionTest extends TestCase
 
     public function testSendToOneIgnoresErrors(): void
     {
-        $command = 'stats';
+        $command = 'peekReady';
+        $response = [
+            'id' => 123,
+            'body' => 'jobData',
+        ];
+
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
         $connection1->expects(static::any())
@@ -508,7 +519,7 @@ class CollectionTest extends TestCase
         $connection2 = $this->getMockConnection($identifier2);
         $connection2->expects(static::once())
             ->method($command)
-            ->willReturn(234);
+            ->willReturn($response);
 
         $this->strategy->expects(static::any())
             ->method('pickOne')
@@ -522,7 +533,7 @@ class CollectionTest extends TestCase
     {
         $this->expectException(RuntimeException::class);
 
-        $command = 'stats';
+        $command = 'peekReady';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
         $connection1->expects(static::any())
