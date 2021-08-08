@@ -226,14 +226,13 @@ class Collection implements CollectionInterface
      * @param callable|null $failure {
      *     @return bool continue iteration to other connections
      * }
-     * @return mixed
      */
     public function sendToAll(
         string $command,
         array $arguments = [],
         callable $success = null,
         callable $failure = null
-    ) {
+    ): void {
         foreach (array_keys($this->connections) as $key) {
             try {
                 $result = $this->sendToExact($key, $command, $arguments);

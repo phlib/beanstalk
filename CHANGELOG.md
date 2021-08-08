@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   where possible. Some methods return mixed type so docblocks are still used.
 - Add type definitions docblocks for `Collection::sendToAll()` callbacks.
   There is no change to functionality, but this better explains how these work.
+- `put()` and `release()` validate the delay and TTR parameters for integers
+  in a valid range.
 ### Fixed
 - `Pool::ignore()` incorrectly updated its own cache of watched tubes, meaning
   multiple calls may have had unexpected results.
@@ -25,6 +27,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - **BC break**: Replace union false return types with nullable types. For
   example, a method that previously hinted `array|false` is now typed `?array`, 
   and will return `null` for the same state it previously returned `false`.
+- **BC break**: `ValidateTrait::validatePriority()` no longer returns a value.
 - Order of stats in `server:stats` CLI command to match order from Beanstalkd.
 ### Removed
 - **BC break**: Removed support for PHP versions <= v7.3 as they are no longer

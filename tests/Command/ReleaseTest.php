@@ -28,6 +28,14 @@ class ReleaseTest extends CommandTestCase
         new Release(123, 4294967296, 456);
     }
 
+    public function testWithInvalidDelay(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        // Delay must be integer between 0 and 4,294,967,295
+        new Release(123, 456, 4294967296);
+    }
+
     public function testSuccessfulCommand(): void
     {
         $this->socket->expects(static::any())

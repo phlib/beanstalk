@@ -34,12 +34,11 @@ interface CollectionInterface extends \IteratorAggregate
      * @param callable|null $failure {
      *     @return bool continue iteration to other connections
      * }
-     * @return mixed
      */
     public function sendToAll(
         string $command,
         array $arguments = [],
         callable $success = null,
         callable $failure = null
-    );
+    ): void;
 }

@@ -24,7 +24,10 @@ class ValidateTraitTest extends TestCase
 
     public function testValidPriority(): void
     {
-        static::assertTrue($this->validate->validatePriority(123));
+        // No exceptions are thrown
+        $this->expectNotToPerformAssertions();
+
+        $this->validate->validatePriority(123);
     }
 
     /**
@@ -47,6 +50,44 @@ class ValidateTraitTest extends TestCase
             'decimal' => [12.43, \TypeError::class],
             'over max' => [4294967296, InvalidArgumentException::class],
         ];
+    }
+
+    public function testValidDelay(): void
+    {
+        // No exceptions are thrown
+        $this->expectNotToPerformAssertions();
+
+        $this->validate->validateDelay(123);
+    }
+
+    /**
+     * @param mixed $delay
+     * @dataProvider invalidPriorityDataProvider
+     */
+    public function testInvalidDelay($delay, string $exception): void
+    {
+        $this->expectException($exception);
+
+        $this->validate->validateDelay($delay);
+    }
+
+    public function testValidTtr(): void
+    {
+        // No exceptions are thrown
+        $this->expectNotToPerformAssertions();
+
+        $this->validate->validateTtr(123);
+    }
+
+    /**
+     * @param mixed $ttr
+     * @dataProvider invalidPriorityDataProvider
+     */
+    public function testInvalidTtr($ttr, string $exception): void
+    {
+        $this->expectException($exception);
+
+        $this->validate->validateTtr($ttr);
     }
 
     public function testValidTubeName(): void

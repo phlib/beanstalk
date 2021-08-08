@@ -20,7 +20,11 @@ interface ConnectionInterface
 
     public const MAX_TUBE_LENGTH = 200;
 
-    public const MAX_PRIORITY = 4294967295; // 2^32
+    public const MAX_PRIORITY = 4_294_967_295; // 2^32 - 1
+
+    public const MAX_DELAY = 4_294_967_295; // 2^32 - 1
+
+    public const MAX_TTR = 4_294_967_295; // 2^32 - 1
 
     public function getName(): string;
 
