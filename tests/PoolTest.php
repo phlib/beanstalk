@@ -70,7 +70,8 @@ class PoolTest extends TestCase
     {
         $tube = 'test-tube';
         $this->collection->expects(static::once())
-            ->method('sendToAll');
+            ->method('sendToAll', [])
+            ->with('useTube', [$tube]);
         $this->pool->useTube($tube);
     }
 
@@ -91,6 +92,7 @@ class PoolTest extends TestCase
         $connection = $this->createMock(Connection::class);
         $this->collection->expects(static::once())
             ->method('sendToOne')
+            ->with('put', ['myJobData'])
             ->willReturn([
                 'connection' => $connection,
                 'response' => '123',
@@ -104,6 +106,7 @@ class PoolTest extends TestCase
         $connection = $this->createMockConnection($host);
         $this->collection->expects(static::any())
             ->method('sendToOne')
+            ->with('put', ['myJobData'])
             ->willReturn([
                 'connection' => $connection,
                 'response' => '123',
@@ -117,6 +120,7 @@ class PoolTest extends TestCase
         $connection = $this->createMockConnection('host:123');
         $this->collection->expects(static::any())
             ->method('sendToOne')
+            ->with('put', ['myJobData'])
             ->willReturn([
                 'connection' => $connection,
                 'response' => $jobId,
@@ -130,6 +134,7 @@ class PoolTest extends TestCase
 
         $this->collection->expects(static::any())
             ->method('sendToOne')
+            ->with('put', ['myJobData'])
             ->willThrowException(new RuntimeException());
         $this->pool->put('myJobData');
     }
@@ -145,6 +150,7 @@ class PoolTest extends TestCase
             ->willReturn(['host:123', 'host:456']);
         $this->collection->expects(static::any())
             ->method('sendToExact')
+            ->with(static::anything(), 'reserve', [0])
             ->willReturn([
                 'connection' => $connection,
                 'response' => false,
@@ -175,6 +181,7 @@ class PoolTest extends TestCase
             ->willReturn([$host]);
         $this->collection->expects(static::any())
             ->method('sendToExact')
+            ->with(static::anything(), 'reserve', [0])
             ->willReturn([
                 'connection' => $connection,
                 'response' => $response,
@@ -201,6 +208,7 @@ class PoolTest extends TestCase
             ->willReturn(['host:456', $host]);
         $this->collection->expects(static::exactly(2))
             ->method('sendToExact')
+            ->with(static::anything(), 'reserve', [0])
             ->willReturnOnConsecutiveCalls(
                 [
                     'connection' => $connection,
@@ -238,6 +246,7 @@ class PoolTest extends TestCase
         ];
         $this->collection->expects($invocationRule)
             ->method('sendToExact')
+            ->with(static::anything(), 'reserve', [0])
             ->willReturnCallback(function () use ($invocationRule, $result): array {
                 switch ($invocationRule->getInvocationCount()) {
                     case 1:
@@ -297,6 +306,7 @@ class PoolTest extends TestCase
 
         $this->collection->expects(static::any())
             ->method('sendToExact')
+            ->with(static::anything(), 'peek', [$jobId])
             ->willReturn([
                 'connection' => $connection,
                 'response' => $response,
@@ -322,6 +332,7 @@ class PoolTest extends TestCase
 
         $this->collection->expects(static::any())
             ->method('sendToOne')
+            ->with('peekReady', [])
             ->willReturn([
                 'connection' => $connection,
                 'response' => $response,
@@ -334,6 +345,7 @@ class PoolTest extends TestCase
     {
         $this->collection->expects(static::any())
             ->method('sendToOne')
+            ->with('peekReady', [])
             ->willReturn([
                 'connection' => null,
                 'response' => false,
@@ -358,6 +370,7 @@ class PoolTest extends TestCase
 
         $this->collection->expects(static::any())
             ->method('sendToOne')
+            ->with('peekDelayed', [])
             ->willReturn([
                 'connection' => $connection,
                 'response' => $response,
@@ -370,6 +383,7 @@ class PoolTest extends TestCase
     {
         $this->collection->expects(static::any())
             ->method('sendToOne')
+            ->with('peekDelayed', [])
             ->willReturn([
                 'connection' => null,
                 'response' => false,
@@ -394,6 +408,7 @@ class PoolTest extends TestCase
 
         $this->collection->expects(static::any())
             ->method('sendToOne')
+            ->with('peekBuried', [])
             ->willReturn([
                 'connection' => $connection,
                 'response' => $response,
@@ -406,6 +421,7 @@ class PoolTest extends TestCase
     {
         $this->collection->expects(static::any())
             ->method('sendToOne')
+            ->with('peekBuried', [])
             ->willThrowException(new RuntimeException());
         static::assertFalse($this->pool->peekBuried());
     }
@@ -421,6 +437,7 @@ class PoolTest extends TestCase
         ];
         $this->collection->expects(static::any())
             ->method('sendToAll')
+            ->with('stats', [])
             ->willReturnCallback(function ($command, $arguments, $success, $failure) use ($response, $noOfServers) {
                 for ($i = 0; $i < $noOfServers; $i++) {
                     call_user_func($success, [
@@ -456,6 +473,7 @@ class PoolTest extends TestCase
 
         $this->collection->expects(static::any())
             ->method('sendToExact')
+            ->with(static::anything(), 'statsJob', [$jobId])
             ->willReturn([
                 'connection' => $connection,
                 'response' => $response,
@@ -465,6 +483,7 @@ class PoolTest extends TestCase
 
     public function testStatsTube(): void
     {
+        $tube = 'test-tube';
         $noOfServers = 3;
         $ready = 2;
         $other = 8;
@@ -474,6 +493,7 @@ class PoolTest extends TestCase
         ];
         $this->collection->expects(static::any())
             ->method('sendToAll')
+            ->with('statsTube', [$tube])
             ->willReturnCallback(function ($command, $arguments, $success, $failure) use ($response, $noOfServers) {
                 for ($i = 0; $i < $noOfServers; $i++) {
                     call_user_func($success, [
@@ -487,7 +507,7 @@ class PoolTest extends TestCase
                 'current-jobs-ready' => ($ready * $noOfServers),
                 'some-other' => ($other * $noOfServers),
             ],
-            $this->pool->statsTube('test-tube')
+            $this->pool->statsTube($tube)
         );
     }
 
@@ -547,6 +567,7 @@ class PoolTest extends TestCase
 
         $this->collection->expects(static::any())
             ->method('sendToAll')
+            ->with('listTubes', [])
             ->willReturnCallback(function ($command, $args, $success, $failure) use ($expected) {
                 $success([
                     'connection' => null,
