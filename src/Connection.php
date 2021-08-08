@@ -7,6 +7,7 @@ namespace Phlib\Beanstalk;
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\NotFoundException;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 /**
  * Class Connection
@@ -90,6 +91,7 @@ class Connection implements ConnectionInterface
      */
     public function delete($id): self
     {
+        $id = $this->filterJobId($id);
         (new Command\Delete($id))
             ->process($this->getSocket());
         return $this;
@@ -103,6 +105,7 @@ class Connection implements ConnectionInterface
         int $priority = ConnectionInterface::DEFAULT_PRIORITY,
         int $delay = ConnectionInterface::DEFAULT_DELAY
     ): self {
+        $id = $this->filterJobId($id);
         (new Command\Release($id, $priority, $delay))
             ->process($this->getSocket());
         return $this;
@@ -113,6 +116,7 @@ class Connection implements ConnectionInterface
      */
     public function bury($id, int $priority = ConnectionInterface::DEFAULT_PRIORITY): self
     {
+        $id = $this->filterJobId($id);
         (new Command\Bury($id, $priority))
             ->process($this->getSocket());
         return $this;
@@ -123,6 +127,7 @@ class Connection implements ConnectionInterface
      */
     public function touch($id): self
     {
+        $id = $this->filterJobId($id);
         (new Command\Touch($id))
             ->process($this->getSocket());
         return $this;
@@ -161,6 +166,7 @@ class Connection implements ConnectionInterface
      */
     public function peek($id): array
     {
+        $id = $this->filterJobId($id);
         $jobData = (new Command\Peek($id))
             ->process($this->getSocket());
         return $jobData;
@@ -203,6 +209,7 @@ class Connection implements ConnectionInterface
      */
     public function statsJob($id): array
     {
+        $id = $this->filterJobId($id);
         return (new Command\StatsJob($id))
             ->process($this->getSocket());
     }
@@ -233,5 +240,25 @@ class Connection implements ConnectionInterface
     public function listTubesWatched(): array
     {
         return array_keys($this->watching);
+    }
+
+    /**
+     * @param string|int
+     */
+    private function filterJobId($id): int
+    {
+        if (is_int($id)) {
+            return $id;
+        }
+
+        if (!is_string($id)) {
+            throw new InvalidArgumentException('Job ID must be integer');
+        }
+
+        if ((string)(int)$id !== $id) {
+            throw new InvalidArgumentException('Job ID must be integer');
+        }
+
+        return (int)$id;
     }
 }

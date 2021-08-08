@@ -6,6 +6,7 @@ namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
@@ -55,6 +56,41 @@ class ConnectionTest extends TestCase
             ->method('disconnect')
             ->willReturn(true);
         static::assertTrue($this->beanstalk->disconnect());
+    }
+
+    /**
+     * @dataProvider dataFilterId
+     * @param mixed $id
+     */
+    public function testFilterId(string $command, $id): void
+    {
+        // No need to test valid values, as the Command classes only accept strict integers
+        // Only need to verify that unexpected values are rejected
+        $this->expectException(InvalidArgumentException::class);
+
+        $this->beanstalk->{$command}($id);
+    }
+
+    public function dataFilterId(): iterable
+    {
+        $dataTypes = [
+            'array' => [123],
+            'object' => (object)[123],
+            'cast-mismatch' => '123abc',
+        ];
+        $commands = [
+            'touch',
+            'release',
+            'bury',
+            'delete',
+            'peek',
+            'statsJob',
+        ];
+        foreach ($dataTypes as $name => $value) {
+            foreach ($commands as $command) {
+                yield $command . '-' . $name => [$command, $value];
+            }
+        }
     }
 
     public function testPut(): void

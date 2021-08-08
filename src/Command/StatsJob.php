@@ -13,15 +13,9 @@ class StatsJob implements CommandInterface
     use StatsTrait;
     use ToStringTrait;
 
-    /**
-     * @var string|int
-     */
-    protected $id;
+    protected int $id;
 
-    /**
-     * @param int|string $id
-     */
-    public function __construct($id)
+    public function __construct(int $id)
     {
         $this->id = $id;
     }

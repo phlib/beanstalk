@@ -16,15 +16,9 @@ class Delete implements CommandInterface
 {
     use ToStringTrait;
 
-    /**
-     * @var string|int
-     */
-    protected $id;
+    protected int $id;
 
-    /**
-     * @param string|int $id
-     */
-    public function __construct($id)
+    public function __construct(int $id)
     {
         $this->id = $id;
     }

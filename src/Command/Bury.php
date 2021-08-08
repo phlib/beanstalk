@@ -18,17 +18,11 @@ class Bury implements CommandInterface
     use ValidateTrait;
     use ToStringTrait;
 
-    /**
-     * @var string|int
-     */
-    protected $id;
+    protected int $id;
 
     protected int $priority;
 
-    /**
-     * @param string|int $id
-     */
-    public function __construct($id, int $priority)
+    public function __construct(int $id, int $priority)
     {
         $this->validatePriority($priority);
 
