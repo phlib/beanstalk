@@ -27,6 +27,7 @@ class Release implements CommandInterface
     public function __construct(int $id, int $priority, int $delay)
     {
         $this->validatePriority($priority);
+        $this->validateDelay($delay);
 
         $this->id = $id;
         $this->priority = $priority;

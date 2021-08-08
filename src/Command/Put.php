@@ -29,6 +29,8 @@ class Put implements CommandInterface
     {
         $this->validateJobData($data);
         $this->validatePriority($priority);
+        $this->validateDelay($delay);
+        $this->validateTtr($ttr);
 
         $this->data = (string)$data;
         $this->priority = $priority;
