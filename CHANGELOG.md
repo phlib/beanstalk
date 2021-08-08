@@ -24,6 +24,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - **BC break**: Restrict `Collection::send*` methods to only accept commands
   defined in `ConnectionInterface`, rather than allowing any method to be called
   on the connection.
+- **BC break**: Replace union false return types with nullable types. For
+  example, a method that previously hinted `array|false` is now typed `?array`, 
+  and will return `null` for the same state it previously returned `false`.
 - **BC break**: `ValidateTrait::validatePriority()` no longer returns a value.
 - Order of stats in `server:stats` CLI command to match order from Beanstalkd.
 ### Removed

@@ -150,7 +150,7 @@ class ConnectionTest extends TestCase
 
     public function testIgnoreDoesNothingWhenOnlyHasOneTube(): void
     {
-        static::assertFalse($this->beanstalk->ignore('default'));
+        static::assertNull($this->beanstalk->ignore('default'));
     }
 
     public function testPeek(): void
@@ -184,17 +184,17 @@ class ConnectionTest extends TestCase
 
     public function testPeekReadyNotFound(): void
     {
-        static::assertFalse($this->execute('peek-ready', 'NOT_FOUND', 'peekReady'));
+        static::assertNull($this->execute('peek-ready', 'NOT_FOUND', 'peekReady'));
     }
 
     public function testPeekDelayedNotFound(): void
     {
-        static::assertFalse($this->execute('peek-delayed', 'NOT_FOUND', 'peekDelayed'));
+        static::assertNull($this->execute('peek-delayed', 'NOT_FOUND', 'peekDelayed'));
     }
 
     public function testPeekBuriedNotFound(): void
     {
-        static::assertFalse($this->execute('peek-buried', 'NOT_FOUND', 'peekBuried'));
+        static::assertNull($this->execute('peek-buried', 'NOT_FOUND', 'peekBuried'));
     }
 
     public function testKick(): void

@@ -54,7 +54,7 @@ class ReserveTest extends CommandTestCase
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn($status);
-        static::assertFalse((new Reserve(123))->process($this->socket));
+        static::assertNull((new Reserve(123))->process($this->socket));
     }
 
     public function failureStatusReturnsFalseDataProvider(): array

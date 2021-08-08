@@ -158,7 +158,7 @@ class TubePeekCommandTest extends ConsoleTestCase
 
         $this->connection->expects(static::once())
             ->method('peekBuried')
-            ->willReturn(false);
+            ->willReturn(null);
 
         $this->commandTester->execute([
             'command' => $this->command->getName(),

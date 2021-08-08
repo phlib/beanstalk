@@ -42,10 +42,7 @@ interface ConnectionInterface
         int $ttr = self::DEFAULT_TTR
     );
 
-    /**
-     * @return array|false
-     */
-    public function reserve(?int $timeout = null);
+    public function reserve(?int $timeout = null): ?array;
 
     /**
      * @param string|int $id
@@ -70,9 +67,9 @@ interface ConnectionInterface
     public function watch(string $tube): self;
 
     /**
-     * @return int|false Number of tubes being watched or false
+     * @return int|null Number of tubes being watched or null when last tube cannot be ignored
      */
-    public function ignore(string $tube);
+    public function ignore(string $tube): ?int;
 
     /**
      * @param string|int $id
@@ -84,32 +81,17 @@ interface ConnectionInterface
      */
     public function statsJob($id): array;
 
-    /**
-     * @return array|false
-     */
-    public function peekReady();
+    public function peekReady(): ?array;
 
-    /**
-     * @return array|false
-     */
-    public function peekDelayed();
+    public function peekDelayed(): ?array;
 
-    /**
-     * @return array|false
-     */
-    public function peekBuried();
+    public function peekBuried(): ?array;
 
     public function kick(int $quantity): int;
 
-    /**
-     * @return array|false
-     */
-    public function statsTube(string $tube);
+    public function statsTube(string $tube): ?array;
 
-    /**
-     * @return array|false
-     */
-    public function stats();
+    public function stats(): ?array;
 
     public function listTubes(): array;
 

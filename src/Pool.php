@@ -64,10 +64,7 @@ class Pool implements ConnectionInterface
         return $this->combineId($result['connection'], (int)$result['response']);
     }
 
-    /**
-     * @return array|false
-     */
-    public function reserve(?int $timeout = null)
+    public function reserve(?int $timeout = null): ?array
     {
         $startTime = time();
         do {
@@ -77,7 +74,7 @@ class Pool implements ConnectionInterface
             foreach ($keys as $key) {
                 try {
                     $result = $this->collection->sendToExact($key, 'reserve', [0]);
-                    if ($result['response'] === false) {
+                    if ($result['response'] === null) {
                         continue;
                     }
 
@@ -91,7 +88,7 @@ class Pool implements ConnectionInterface
             usleep(25 * 1000);
         } while (time() - $startTime < $timeout);
 
-        return false;
+        return null;
     }
 
     /**
@@ -143,14 +140,11 @@ class Pool implements ConnectionInterface
         return $this;
     }
 
-    /**
-     * @return int|false
-     */
-    public function ignore(string $tube)
+    public function ignore(string $tube): ?int
     {
         if (isset($this->watching[$tube])) {
             if (count($this->watching) === 1) {
-                return false;
+                return null;
             }
             $this->collection->sendToAll('ignore', [$tube]);
             unset($this->watching[$tube]);
@@ -170,39 +164,27 @@ class Pool implements ConnectionInterface
         return $job;
     }
 
-    /**
-     * @return array|false
-     */
-    public function peekReady()
+    public function peekReady(): ?array
     {
         return $this->peekStatus('peekReady');
     }
 
-    /**
-     * @return array|false
-     */
-    public function peekDelayed()
+    public function peekDelayed(): ?array
     {
         return $this->peekStatus('peekDelayed');
     }
 
-    /**
-     * @return array|false
-     */
-    public function peekBuried()
+    public function peekBuried(): ?array
     {
         return $this->peekStatus('peekBuried');
     }
 
-    /**
-     * @return array|false
-     */
-    protected function peekStatus(string $command)
+    protected function peekStatus(string $command): ?array
     {
         try {
             $result = $this->collection->sendToOne($command, []);
         } catch (RuntimeException $e) {
-            return false;
+            return null;
         }
         if (isset($result['response']) && is_array($result['response']) && isset($result['response']['id'])) {
             $result['response']['id'] = $this->combineId($result['connection'], (int)$result['response']['id']);
@@ -234,10 +216,7 @@ class Pool implements ConnectionInterface
         return $kicked;
     }
 
-    /**
-     * @return array|false
-     */
-    public function stats()
+    public function stats(): ?array
     {
         $stats = [];
         $onSuccess = function (array $result) use (&$stats): bool {
@@ -250,7 +229,7 @@ class Pool implements ConnectionInterface
         $this->collection->sendToAll('stats', [], $onSuccess);
 
         if (!is_array($stats) || empty($stats)) {
-            return false;
+            return null;
         }
         return $stats;
     }
@@ -267,10 +246,7 @@ class Pool implements ConnectionInterface
         return $job;
     }
 
-    /**
-     * @return array|false
-     */
-    public function statsTube(string $tube)
+    public function statsTube(string $tube): ?array
     {
         $stats = [];
         $onSuccess = function (array $result) use (&$stats): bool {
@@ -283,7 +259,7 @@ class Pool implements ConnectionInterface
         $this->collection->sendToAll('statsTube', [$tube], $onSuccess);
 
         if (!is_array($stats) || empty($stats)) {
-            return false;
+            return null;
         }
         return $stats;
     }

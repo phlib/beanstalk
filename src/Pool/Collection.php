@@ -108,7 +108,7 @@ class Collection implements CollectionInterface
         while (!$keysExhausted && ($key = $this->strategy->pickOne($keysAvailable)) !== false) {
             try {
                 $result = $this->sendToExact($key, $command, $arguments);
-                if ($result['response'] !== false) {
+                if ($result['response'] !== null) {
                     return $result;
                 }
             } catch (RuntimeException $e) {
@@ -242,14 +242,14 @@ class Collection implements CollectionInterface
                 }
                 // ignore
                 $result = [
-                    'response' => false,
+                    'response' => null,
                 ];
             }
 
             $continue = true;
-            if ($result['response'] === false && $failure !== null) {
+            if ($result['response'] === null && $failure !== null) {
                 $continue = call_user_func($failure);
-            } elseif ($result['response'] !== false && $success !== null) {
+            } elseif ($result['response'] !== null && $success !== null) {
                 $continue = call_user_func($success, $result);
             }
 
