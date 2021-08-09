@@ -558,19 +558,12 @@ class CollectionTest extends TestCase
     }
 
     /**
-     * @param mixed $identifier
      * @return Connection|MockObject
      */
-    public function getMockConnection($identifier, array $methods = null): Connection
+    public function getMockConnection(string $identifier): Connection
     {
-        $builder = $this->getMockBuilder(Connection::class)
-            ->disableOriginalConstructor();
-        if ($methods) {
-            $builder->setMethods($methods);
-        }
-        $connection = $builder->getMock();
-        $connection->expects(static::any())
-            ->method('getName')
+        $connection = $this->createMock(Connection::class);
+        $connection->method('getName')
             ->willReturn($identifier);
         return $connection;
     }

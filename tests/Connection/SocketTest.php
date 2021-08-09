@@ -165,13 +165,11 @@ class SocketTest extends TestCase
     /**
      * @return Socket|MockObject
      */
-    protected function getMockSocket(array $mockFns): Socket
+    protected function getMockSocket(array $originalMethods): Socket
     {
         $availableFns = ['connect', 'disconnect', 'read', 'write', 'getUniqueIdentifier'];
+        $mockedMethods = array_diff($availableFns, $originalMethods);
 
-        return $this->getMockBuilder(Socket::class)
-            ->disableOriginalConstructor()
-            ->setMethods(array_diff($availableFns, $mockFns))
-            ->getMock();
+        return $this->createPartialMock(Socket::class, $mockedMethods);
     }
 }

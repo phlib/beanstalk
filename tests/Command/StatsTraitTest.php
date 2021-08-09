@@ -116,12 +116,16 @@ class StatsTraitTest extends CommandTestCase
     /**
      * @return StatsTrait|MockObject
      */
-    public function getMockStat(array $mockFns): MockObject
+    public function getMockStat(array $originalMethods): MockObject
     {
-        $availableFns = ['process', 'decode', 'getCommand'];
+        $availableFns = ['process', 'decode'];
+        $mockedMethods = array_diff($availableFns, $originalMethods);
+
         $mock = $this->getMockBuilder(StatsTrait::class)
-            ->setMethods(array_diff($availableFns, $mockFns))
+            ->onlyMethods($mockedMethods)
+            ->addMethods(['getCommand'])
             ->getMockForTrait();
+
         $mock->method('getCommand')
             ->willReturn('stats');
 
