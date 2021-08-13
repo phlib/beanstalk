@@ -13,14 +13,14 @@ use Phlib\Beanstalk\Exception\CommandException;
  */
 class Kick implements CommandInterface
 {
-    protected int $bound;
+    private int $bound;
 
     public function __construct(int $bound)
     {
         $this->bound = $bound;
     }
 
-    public function getCommand(): string
+    private function getCommand(): string
     {
         return sprintf('kick %d', $this->bound);
     }

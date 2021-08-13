@@ -16,13 +16,13 @@ class Put implements CommandInterface
 {
     use ValidateTrait;
 
-    protected string $data;
+    private string $data;
 
-    protected int $priority;
+    private int $priority;
 
-    protected int $delay;
+    private int $delay;
 
-    protected int $ttr;
+    private int $ttr;
 
     public function __construct(string $data, int $priority, int $delay, int $ttr)
     {
@@ -37,7 +37,7 @@ class Put implements CommandInterface
         $this->ttr = $ttr;
     }
 
-    public function getCommand(): string
+    private function getCommand(): string
     {
         $bytesSent = strlen($this->data);
         return sprintf('put %d %d %d %d', $this->priority, $this->delay, $this->ttr, $bytesSent);

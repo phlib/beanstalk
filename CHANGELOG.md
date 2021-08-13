@@ -29,6 +29,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   and will return `null` for the same state it previously returned `false`.
 - **BC break**: `ValidateTrait::validatePriority()` no longer returns a value.
 - Order of stats in `server:stats` CLI command to match order from Beanstalkd.
+- **BC break**: Reduce visibility of internal methods and properties. These
+  members are not part of the public API. No impact to standard use of this
+  package. If an implementation has a use case which needs to override these
+  members, please submit a pull request explaining the change.
 ### Removed
 - **BC break**: Removed support for PHP versions <= v7.3 as they are no longer
   [actively supported](https://php.net/supported-versions.php) by the PHP project.

@@ -23,7 +23,7 @@ class PeekStatus extends Peek
         self::BURIED,
     ];
 
-    protected string $status;
+    private string $status;
 
     public function __construct(string $status)
     {
@@ -33,7 +33,7 @@ class PeekStatus extends Peek
         $this->status = $status;
     }
 
-    public function getCommand(): string
+    protected function getCommand(): string
     {
         return sprintf('peek-%s', $this->status);
     }

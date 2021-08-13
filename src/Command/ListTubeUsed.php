@@ -13,7 +13,7 @@ use Phlib\Beanstalk\Exception\CommandException;
  */
 class ListTubeUsed implements CommandInterface
 {
-    public function getCommand(): string
+    private function getCommand(): string
     {
         return 'list-tube-used';
     }

@@ -12,7 +12,7 @@ class ListTubes implements CommandInterface
 {
     use StatsTrait;
 
-    public function getCommand(): string
+    private function getCommand(): string
     {
         return 'list-tubes';
     }

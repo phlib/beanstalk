@@ -15,11 +15,11 @@ use Symfony\Component\Console\Command\Command;
  */
 abstract class AbstractCommand extends Command
 {
-    protected ConnectionInterface $beanstalk;
+    private ConnectionInterface $beanstalk;
 
     private StatsService $statsService;
 
-    public function getBeanstalk(): ConnectionInterface
+    protected function getBeanstalk(): ConnectionInterface
     {
         if (!isset($this->beanstalk)) {
             $config = $this->getHelper('configuration')->fetch();

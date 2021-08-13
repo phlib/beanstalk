@@ -18,16 +18,16 @@ class Socket implements SocketInterface
 
     private const READ_LENGTH = 4096;
 
-    protected string $host;
+    private string $host;
 
-    protected int $port;
+    private int $port;
 
-    protected array $options;
+    private array $options;
 
     /**
      * @var resource
      */
-    protected $connection;
+    private $connection;
 
     public function __construct(string $host, int $port = self::DEFAULT_PORT, array $options = [])
     {

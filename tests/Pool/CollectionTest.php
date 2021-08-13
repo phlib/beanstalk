@@ -560,7 +560,7 @@ class CollectionTest extends TestCase
     /**
      * @return Connection|MockObject
      */
-    public function getMockConnection(string $identifier): Connection
+    private function getMockConnection(string $identifier): Connection
     {
         $connection = $this->createMock(Connection::class);
         $connection->method('getName')

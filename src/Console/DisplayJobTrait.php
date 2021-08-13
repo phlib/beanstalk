@@ -9,7 +9,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 trait DisplayJobTrait
 {
-    protected function displayJob(array $job, OutputInterface $output): void
+    private function displayJob(array $job, OutputInterface $output): void
     {
         /** @var FormatterHelper $formatter */
         $formatter = $this->getHelper('formatter');

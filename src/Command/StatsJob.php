@@ -12,14 +12,14 @@ class StatsJob implements CommandInterface
 {
     use StatsTrait;
 
-    protected int $id;
+    private int $id;
 
     public function __construct(int $id)
     {
         $this->id = $id;
     }
 
-    public function getCommand(): string
+    private function getCommand(): string
     {
         return sprintf('stats-job %d', $this->id);
     }

@@ -12,7 +12,7 @@ class Stats implements CommandInterface
 {
     use StatsTrait;
 
-    public function getCommand(): string
+    private function getCommand(): string
     {
         return 'stats';
     }
