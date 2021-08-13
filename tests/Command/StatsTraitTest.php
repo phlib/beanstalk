@@ -10,23 +10,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 class StatsTraitTest extends CommandTestCase
 {
-    public function testProcessCompletesOnSuccess(): void
-    {
-        $stat = $this->getMockStat(['process']);
-        $testString = 'my test data';
-        $expectedData = [$testString];
-
-        $this->socket->expects(static::any())
-            ->method('read')
-            ->willReturn("OK {$testString}");
-
-        $stat->expects(static::any())
-            ->method('decode')
-            ->willReturn([$testString]);
-
-        static::assertSame($expectedData, $stat->process($this->socket));
-    }
-
     public function testWhenStatusNotFound(): void
     {
         $this->expectException(NotFoundException::class);
@@ -34,7 +17,7 @@ class StatsTraitTest extends CommandTestCase
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_FOUND');
-        $this->getMockStat(['process'])
+        $this->getMockStat()
             ->process($this->socket);
     }
 
@@ -45,7 +28,7 @@ class StatsTraitTest extends CommandTestCase
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_STATUS data');
-        $this->getMockStat(['process'])
+        $this->getMockStat()
             ->process($this->socket);
     }
 
@@ -57,7 +40,7 @@ class StatsTraitTest extends CommandTestCase
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturnOnConsecutiveCalls("OK 1234\r\n", "---\n{$yaml}\r\n");
-        $stat = $this->getMockStat(['process', 'decode']);
+        $stat = $this->getMockStat();
         static::assertSame($expectedOutput, $stat->process($this->socket));
     }
 
@@ -116,13 +99,9 @@ class StatsTraitTest extends CommandTestCase
     /**
      * @return StatsTrait|MockObject
      */
-    public function getMockStat(array $originalMethods): MockObject
+    private function getMockStat(): MockObject
     {
-        $availableFns = ['process', 'decode'];
-        $mockedMethods = array_diff($availableFns, $originalMethods);
-
         $mock = $this->getMockBuilder(StatsTrait::class)
-            ->onlyMethods($mockedMethods)
             ->addMethods(['getCommand'])
             ->getMockForTrait();
 
