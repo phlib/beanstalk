@@ -22,7 +22,7 @@ class FactoryTest extends TestCase
      */
     public function testCreateFromArray($expectedClass, $config): void
     {
-        static::assertInstanceOf(ConnectionInterface::class, Factory::create('localhost'));
+        static::assertInstanceOf($expectedClass, Factory::createFromArray($config));
     }
 
     public function createFromArrayDataProvider(): array
