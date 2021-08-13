@@ -10,7 +10,7 @@ use Phlib\Beanstalk\Exception\NotFoundException;
 
 class PeekStatusTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
         static::assertInstanceOf(CommandInterface::class, new PeekStatus('ready'));
     }
@@ -20,12 +20,12 @@ class PeekStatusTest extends CommandTestCase
      * @param string $command
      * @dataProvider getCommandDataProvider
      */
-    public function testGetCommand($subject, $command)
+    public function testGetCommand($subject, $command): void
     {
         static::assertSame($command, (new PeekStatus($subject))->getCommand());
     }
 
-    public function getCommandDataProvider()
+    public function getCommandDataProvider(): array
     {
         return [
             ['ready', 'peek-ready'],
@@ -34,14 +34,14 @@ class PeekStatusTest extends CommandTestCase
         ];
     }
 
-    public function testWithInvalidSubject()
+    public function testWithInvalidSubject(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
         new PeekStatus('foo-bar');
     }
 
-    public function testSuccessfulCommand()
+    public function testSuccessfulCommand(): void
     {
         $id = 123;
         $body = 'Foo Bar';
@@ -57,7 +57,7 @@ class PeekStatusTest extends CommandTestCase
         static::assertSame($response, (new PeekStatus(PeekStatus::BURIED))->process($this->socket));
     }
 
-    public function testNotFoundThrowsException()
+    public function testNotFoundThrowsException(): void
     {
         $this->expectException(NotFoundException::class);
 
@@ -67,7 +67,7 @@ class PeekStatusTest extends CommandTestCase
         (new PeekStatus(PeekStatus::BURIED))->process($this->socket);
     }
 
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
         $this->expectException(CommandException::class);
 
