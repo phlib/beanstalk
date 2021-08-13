@@ -11,9 +11,18 @@ class StatsJobTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new StatsJob(123));
     }
 
-    public function testGetCommand(): void
+    public function testCommandSyntax(): void
     {
-        $id = 123;
-        static::assertSame("stats-job {$id}", (new StatsJob($id))->getCommand());
+        $id = rand();
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("stats-job {$id}");
+
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturn('OK 123');
+
+        (new StatsJob($id))->process($this->socket);
     }
 }

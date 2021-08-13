@@ -14,25 +14,24 @@ class PeekTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new Peek(10));
     }
 
-    public function testGetCommand(): void
-    {
-        static::assertSame('peek 123', (new Peek(123))->getCommand());
-    }
-
     public function testSuccessfulCommand(): void
     {
-        $id = 123;
+        $id = rand();
         $body = 'Foo Bar';
         $response = [
             'id' => $id,
             'body' => $body,
         ];
 
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("peek {$id}");
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturnOnConsecutiveCalls("FOUND {$id} 54\r\n", $body . "\r\n");
 
-        static::assertSame($response, (new Peek(10))->process($this->socket));
+        static::assertSame($response, (new Peek($id))->process($this->socket));
     }
 
     public function testNotFoundThrowsException(): void

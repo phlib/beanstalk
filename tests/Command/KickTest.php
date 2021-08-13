@@ -13,18 +13,18 @@ class KickTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new Kick(10));
     }
 
-    public function testGetCommand(): void
-    {
-        $bound = 10;
-        static::assertSame("kick {$bound}", (new Kick($bound))->getCommand());
-    }
-
     public function testSuccessfulCommand(): void
     {
+        $bound = rand(1, 100);
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("kick {$bound}");
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('KICKED');
-        static::assertIsInt((new Kick(10))->process($this->socket));
+        static::assertIsInt((new Kick($bound))->process($this->socket));
     }
 
     public function testUnknownStatusThrowsException(): void

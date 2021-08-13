@@ -13,10 +13,19 @@ class StatsTubeTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new StatsTube('test-tube'));
     }
 
-    public function testGetCommand(): void
+    public function testCommandSyntax(): void
     {
-        $tube = 'test-tube';
-        static::assertSame("stats-tube {$tube}", (new StatsTube($tube))->getCommand());
+        $tube = sha1(uniqid());
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("stats-tube {$tube}");
+
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturn('OK 123');
+
+        (new StatsTube($tube))->process($this->socket);
     }
 
     public function testTubeIsValidated(): void

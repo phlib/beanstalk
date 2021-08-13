@@ -11,8 +11,16 @@ class StatsTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new Stats());
     }
 
-    public function testGetCommand(): void
+    public function testCommandSyntax(): void
     {
-        static::assertSame('stats', (new Stats())->getCommand());
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with('stats');
+
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturn('OK 123');
+
+        (new Stats())->process($this->socket);
     }
 }

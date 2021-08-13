@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
+use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
@@ -13,11 +14,6 @@ class ReleaseTest extends CommandTestCase
     public function testImplementsCommand(): void
     {
         static::assertInstanceOf(CommandInterface::class, new Release(123, 456, 789));
-    }
-
-    public function testGetCommand(): void
-    {
-        static::assertSame('release 123 456 789', (new Release(123, 456, 789))->getCommand());
     }
 
     public function testWithInvalidPriority(): void
@@ -38,11 +34,19 @@ class ReleaseTest extends CommandTestCase
 
     public function testSuccessfulCommand(): void
     {
+        $id = rand();
+        $priority = rand(1, ConnectionInterface::MAX_PRIORITY);
+        $delay = rand(0, ConnectionInterface::MAX_DELAY);
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("release {$id} {$priority} {$delay}");
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('RELEASED');
 
-        $release = new Release(123, 456, 789);
+        $release = new Release($id, $priority, $delay);
         static::assertInstanceOf(Release::class, $release->process($this->socket));
     }
 

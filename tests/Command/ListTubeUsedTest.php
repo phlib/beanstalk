@@ -13,14 +13,14 @@ class ListTubeUsedTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new ListTubeUsed());
     }
 
-    public function testGetCommand(): void
-    {
-        static::assertSame('list-tube-used', (new ListTubeUsed())->getCommand());
-    }
-
     public function testSuccessfulCommand(): void
     {
-        $tube = 'test-tube';
+        $tube = sha1(uniqid());
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with('list-tube-used');
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("USING {$tube}");

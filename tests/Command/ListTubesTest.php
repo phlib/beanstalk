@@ -11,8 +11,16 @@ class ListTubesTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new ListTubes());
     }
 
-    public function testGetCommand(): void
+    public function testCommandSyntax(): void
     {
-        static::assertSame('list-tubes', (new ListTubes())->getCommand());
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with('list-tubes');
+
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturn('OK 123');
+
+        (new ListTubes())->process($this->socket);
     }
 }

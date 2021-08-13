@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
+use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
@@ -14,18 +15,18 @@ class DeleteTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new Delete(123));
     }
 
-    public function testGetCommand(): void
-    {
-        $id = 123;
-        static::assertSame("delete {$id}", (new Delete($id))->getCommand());
-    }
-
     public function testSuccessfulCommand(): void
     {
+        $id = rand();
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("delete {$id}");
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('DELETED');
-        static::assertInstanceOf(Delete::class, (new Delete(123))->process($this->socket));
+        static::assertInstanceOf(Delete::class, (new Delete($id))->process($this->socket));
     }
 
     public function testNotFoundThrowsException(): void
