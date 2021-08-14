@@ -16,7 +16,6 @@ use Phlib\Beanstalk\ValidateTrait;
 class Release implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
     protected int $id;
 

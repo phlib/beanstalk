@@ -14,8 +14,6 @@ use Phlib\Beanstalk\Exception\NotFoundException;
  */
 class Peek implements CommandInterface
 {
-    use ToStringTrait;
-
     protected int $jobId;
 
     public function __construct(int $jobId)

@@ -32,6 +32,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 - **BC break**: Removed support for PHP versions <= v7.3 as they are no longer
   [actively supported](https://php.net/supported-versions.php) by the PHP project.
+- **BC break**: Removed cast Command classes as string to reveal raw command.
 
 ## [1.0.15] - 2019-12-10
 ### Added

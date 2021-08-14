@@ -15,7 +15,6 @@ use Phlib\Beanstalk\ValidateTrait;
 class Ignore implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
     protected string $tube;
 

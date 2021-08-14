@@ -14,7 +14,6 @@ class StatsTube implements CommandInterface
 {
     use StatsTrait;
     use ValidateTrait;
-    use ToStringTrait;
 
     protected string $tube;
 

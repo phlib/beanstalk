@@ -15,7 +15,6 @@ use Phlib\Beanstalk\ValidateTrait;
 class UseTube implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
     protected string $tube;
 

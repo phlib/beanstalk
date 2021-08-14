@@ -18,9 +18,4 @@ interface CommandInterface
      * @return mixed
      */
     public function process(SocketInterface $socket);
-
-    /**
-     * @return string
-     */
-    public function __toString();
 }

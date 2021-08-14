@@ -14,8 +14,6 @@ use Phlib\Beanstalk\Exception\NotFoundException;
  */
 class Touch implements CommandInterface
 {
-    use ToStringTrait;
-
     protected int $id;
 
     public function __construct(int $id)

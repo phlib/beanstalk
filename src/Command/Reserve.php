@@ -13,8 +13,6 @@ use Phlib\Beanstalk\Exception\CommandException;
  */
 class Reserve implements CommandInterface
 {
-    use ToStringTrait;
-
     protected ?int $timeout;
 
     public function __construct(?int $timeout = null)

@@ -13,8 +13,6 @@ use Phlib\Beanstalk\Exception\CommandException;
  */
 class Kick implements CommandInterface
 {
-    use ToStringTrait;
-
     protected int $bound;
 
     public function __construct(int $bound)

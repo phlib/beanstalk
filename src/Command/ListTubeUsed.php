@@ -13,8 +13,6 @@ use Phlib\Beanstalk\Exception\CommandException;
  */
 class ListTubeUsed implements CommandInterface
 {
-    use ToStringTrait;
-
     public function getCommand(): string
     {
         return 'list-tube-used';

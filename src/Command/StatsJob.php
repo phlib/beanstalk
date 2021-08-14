@@ -11,7 +11,6 @@ namespace Phlib\Beanstalk\Command;
 class StatsJob implements CommandInterface
 {
     use StatsTrait;
-    use ToStringTrait;
 
     protected int $id;
 

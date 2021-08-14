@@ -11,8 +11,6 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
  */
 class PeekStatus extends Peek
 {
-    use ToStringTrait;
-
     public const READY = 'ready';
 
     public const DELAYED = 'delayed';
