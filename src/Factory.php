@@ -72,7 +72,7 @@ class Factory
         return new $class();
     }
 
-    protected static function normalizeArgs(array $serverArgs): array
+    private static function normalizeArgs(array $serverArgs): array
     {
         return $serverArgs + [
             'host' => null,

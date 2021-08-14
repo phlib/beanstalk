@@ -32,16 +32,6 @@ class ConnectionTest extends TestCase
         static::assertInstanceOf(ConnectionInterface::class, $this->beanstalk);
     }
 
-    public function testSocketIsSetCorrectly(): void
-    {
-        static::assertSame($this->socket, $this->beanstalk->getSocket());
-    }
-
-    public function testDefaultSocketImplementation(): void
-    {
-        static::assertInstanceOf(Socket::class, $this->beanstalk->getSocket());
-    }
-
     public function testDisconnectCallsSocket(): void
     {
         $this->socket->expects(static::once())

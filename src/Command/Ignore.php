@@ -15,9 +15,8 @@ use Phlib\Beanstalk\ValidateTrait;
 class Ignore implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
-    protected string $tube;
+    private string $tube;
 
     public function __construct(string $tube)
     {
@@ -25,7 +24,7 @@ class Ignore implements CommandInterface
         $this->tube = $tube;
     }
 
-    public function getCommand(): string
+    private function getCommand(): string
     {
         return sprintf('ignore %s', $this->tube);
     }

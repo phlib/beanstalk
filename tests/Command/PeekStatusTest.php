@@ -15,25 +15,6 @@ class PeekStatusTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new PeekStatus('ready'));
     }
 
-    /**
-     * @param mixed $subject
-     * @param string $command
-     * @dataProvider getCommandDataProvider
-     */
-    public function testGetCommand($subject, $command): void
-    {
-        static::assertSame($command, (new PeekStatus($subject))->getCommand());
-    }
-
-    public function getCommandDataProvider(): array
-    {
-        return [
-            ['ready', 'peek-ready'],
-            ['delayed', 'peek-delayed'],
-            ['buried', 'peek-buried'],
-        ];
-    }
-
     public function testWithInvalidSubject(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -41,7 +22,12 @@ class PeekStatusTest extends CommandTestCase
         new PeekStatus('foo-bar');
     }
 
-    public function testSuccessfulCommand(): void
+    /**
+     * @param mixed $subject
+     * @param string $command
+     * @dataProvider commandDataProvider
+     */
+    public function testSuccessfulCommand($subject, $command): void
     {
         $id = 123;
         $body = 'Foo Bar';
@@ -50,11 +36,24 @@ class PeekStatusTest extends CommandTestCase
             'body' => $body,
         ];
 
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with($command);
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturnOnConsecutiveCalls("FOUND {$id} 54\r\n", $body . "\r\n");
 
-        static::assertSame($response, (new PeekStatus(PeekStatus::BURIED))->process($this->socket));
+        static::assertSame($response, (new PeekStatus($subject))->process($this->socket));
+    }
+
+    public function commandDataProvider(): array
+    {
+        return [
+            ['ready', 'peek-ready'],
+            ['delayed', 'peek-delayed'],
+            ['buried', 'peek-buried'],
+        ];
     }
 
     public function testNotFoundThrowsException(): void

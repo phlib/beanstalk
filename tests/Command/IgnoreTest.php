@@ -13,18 +13,18 @@ class IgnoreTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new Ignore('test-tube'));
     }
 
-    public function testGetCommand(): void
-    {
-        $tube = 'test-tube';
-        static::assertSame("ignore {$tube}", (new Ignore($tube))->getCommand());
-    }
-
     public function testSuccessfulCommand(): void
     {
+        $tube = sha1(uniqid());
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("ignore {$tube}");
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('WATCHING');
-        static::assertIsInt((new Ignore('test-tube'))->process($this->socket));
+        static::assertIsInt((new Ignore($tube))->process($this->socket));
     }
 
     public function testNotFoundThrowsException(): void

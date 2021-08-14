@@ -12,15 +12,9 @@ use Phlib\Beanstalk\Connection\SocketInterface;
  */
 interface CommandInterface
 {
-    public function getCommand(): string;
-
     /**
+     * @internal This method is not part of the backward-compatibility promise.
      * @return mixed
      */
     public function process(SocketInterface $socket);
-
-    /**
-     * @return string
-     */
-    public function __toString();
 }

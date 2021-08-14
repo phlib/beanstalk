@@ -123,7 +123,7 @@ class IntegrationTest extends TestCase
         static::assertSame($length, strlen($jobData['body']));
     }
 
-    public function setupTube($tube): void
+    private function setupTube($tube): void
     {
         $this->beanstalk
             ->useTube($tube)

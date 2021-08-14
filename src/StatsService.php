@@ -86,10 +86,7 @@ class StatsService
 
     private ConnectionInterface $beanstalk;
 
-    /**
-     * @var array
-     */
-    protected $stats;
+    private array $stats;
 
     public function __construct(ConnectionInterface $beanstalk)
     {
@@ -108,10 +105,7 @@ class StatsService
         return $stats;
     }
 
-    /**
-     * @param $filter
-     */
-    protected function filterServerKeys($filter): array
+    private function filterServerKeys(int $filter): array
     {
         $serverKeys = self::SERVER_KEYS;
         if ($filter !== self::SERVER_ALL) {
@@ -166,17 +160,14 @@ class StatsService
         return $tubeStats;
     }
 
-    /**
-     * @param $data
-     */
-    protected function filterTheseKeys(array $keys, $data): array
+    private function filterTheseKeys(array $keys, array $data): array
     {
         return array_intersect_key($data, array_flip($keys));
     }
 
-    protected function getStats(): array
+    private function getStats(): array
     {
-        if (!$this->stats) {
+        if (!isset($this->stats)) {
             $this->stats = $this->beanstalk->stats();
         }
         return $this->stats;

@@ -14,16 +14,14 @@ use Phlib\Beanstalk\Exception\NotFoundException;
  */
 class Peek implements CommandInterface
 {
-    use ToStringTrait;
-
-    protected int $jobId;
+    private int $jobId;
 
     public function __construct(int $jobId)
     {
         $this->jobId = $jobId;
     }
 
-    public function getCommand(): string
+    protected function getCommand(): string
     {
         return sprintf('peek %u', $this->jobId);
     }

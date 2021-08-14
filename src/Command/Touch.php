@@ -14,16 +14,14 @@ use Phlib\Beanstalk\Exception\NotFoundException;
  */
 class Touch implements CommandInterface
 {
-    use ToStringTrait;
-
-    protected int $id;
+    private int $id;
 
     public function __construct(int $id)
     {
         $this->id = $id;
     }
 
-    public function getCommand(): string
+    private function getCommand(): string
     {
         return sprintf('touch %d', $this->id);
     }

@@ -15,9 +15,8 @@ use Phlib\Beanstalk\ValidateTrait;
 class Watch implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
-    protected string $tube;
+    private string $tube;
 
     public function __construct(string $tube)
     {
@@ -25,7 +24,7 @@ class Watch implements CommandInterface
         $this->tube = $tube;
     }
 
-    public function getCommand(): string
+    private function getCommand(): string
     {
         return sprintf('watch %s', $this->tube);
     }

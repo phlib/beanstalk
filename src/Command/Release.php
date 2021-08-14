@@ -16,13 +16,12 @@ use Phlib\Beanstalk\ValidateTrait;
 class Release implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
-    protected int $id;
+    private int $id;
 
-    protected int $priority;
+    private int $priority;
 
-    protected int $delay;
+    private int $delay;
 
     public function __construct(int $id, int $priority, int $delay)
     {
@@ -34,7 +33,7 @@ class Release implements CommandInterface
         $this->delay = $delay;
     }
 
-    public function getCommand(): string
+    private function getCommand(): string
     {
         return sprintf('release %d %d %d', $this->id, $this->priority, $this->delay);
     }

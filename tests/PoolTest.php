@@ -89,15 +89,24 @@ class PoolTest extends TestCase
 
     public function testPutSuccess(): void
     {
+        $jobId = rand();
+        $connectionName = '127.0.0.1:11300';
+
         $connection = $this->createMock(Connection::class);
+        $connection->method('getName')
+            ->willReturn($connectionName);
         $this->collection->expects(static::once())
             ->method('sendToOne')
             ->with('put', ['myJobData'])
             ->willReturn([
                 'connection' => $connection,
-                'response' => '123',
+                'response' => $jobId,
             ]);
-        $this->pool->put('myJobData');
+
+        $combinedId = $this->pool->put('myJobData');
+
+        $expectedId = $connectionName . '.' . $jobId;
+        static::assertSame($expectedId, $combinedId);
     }
 
     public function testPutReturnsJobIdContainingTheServerIdentifier(): void
@@ -604,40 +613,6 @@ class PoolTest extends TestCase
     {
         $this->pool->watch('test');
         static::assertSame(['default', 'test'], $this->pool->listTubesWatched());
-    }
-
-    public function testCombineIdIsNotTheJobId(): void
-    {
-        $jobId = 123;
-        $connection = $this->createMockConnection('host');
-        static::assertNotSame($jobId, $this->pool->combineId($connection, $jobId));
-    }
-
-    public function testCombineIdContainsJob(): void
-    {
-        $jobId = 123;
-        $connection = $this->createMockConnection('host');
-        static::assertStringContainsString((string)$jobId, $this->pool->combineId($connection, $jobId));
-    }
-
-    public function testCombineAndSplitReturnCorrectJob(): void
-    {
-        $jobId = 234;
-        $connection = $this->createMockConnection('127.0.0.1');
-
-        $poolId = $this->pool->combineId($connection, $jobId);
-        [$actualHost, $actualJobId] = $this->pool->splitId($poolId);
-        static::assertSame($jobId, $actualJobId);
-    }
-
-    public function testCombineAndSplitReturnCorrectHost(): void
-    {
-        $host = '127.0.0.1';
-        $connection = $this->createMockConnection($host);
-
-        $poolId = $this->pool->combineId($connection, 123);
-        [$actualHost, ] = $this->pool->splitId($poolId);
-        static::assertSame($host, $actualHost);
     }
 
     /**

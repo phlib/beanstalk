@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
+use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
@@ -12,13 +13,6 @@ class PutTest extends CommandTestCase
     public function testImplementsCommand(): void
     {
         static::assertInstanceOf(CommandInterface::class, new Put('data', 1, 0, 60));
-    }
-
-    public function testGetCommand(): void
-    {
-        $data = 'data';
-        $bytes = strlen($data);
-        static::assertSame("put 123 456 789 {$bytes}", (new Put($data, 123, 456, 789))->getCommand());
     }
 
     public function testWithInvalidPriority(): void
@@ -47,12 +41,25 @@ class PutTest extends CommandTestCase
 
     public function testSuccessfulCommand(): void
     {
-        $id = 123;
+        $id = rand();
+        $priority = rand(1, ConnectionInterface::MAX_PRIORITY);
+        $delay = rand(0, ConnectionInterface::MAX_DELAY);
+        $ttr = rand(0, ConnectionInterface::MAX_TTR);
+        $data = sha1(uniqid());
+        $bytes = strlen($data);
+
+        $this->socket->expects(static::exactly(2))
+            ->method('write')
+            ->withConsecutive(
+                ["put {$priority} {$delay} {$ttr} {$bytes}"],
+                [$data],
+            );
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("INSERTED {$id}");
 
-        static::assertSame($id, (new Put('data', 123, 456, 789))->process($this->socket));
+        static::assertSame($id, (new Put($data, $priority, $delay, $ttr))->process($this->socket));
     }
 
     public function testErrorThrowsException(): void

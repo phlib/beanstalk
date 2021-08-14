@@ -11,11 +11,11 @@ use Phlib\Beanstalk\Pool\CollectionInterface;
 
 class Pool implements ConnectionInterface
 {
-    protected CollectionInterface $collection;
+    private CollectionInterface $collection;
 
-    protected string $using = Connection::DEFAULT_TUBE;
+    private string $using = Connection::DEFAULT_TUBE;
 
-    protected array $watching = [
+    private array $watching = [
         Connection::DEFAULT_TUBE => true,
     ];
 
@@ -179,7 +179,7 @@ class Pool implements ConnectionInterface
         return $this->peekStatus('peekBuried');
     }
 
-    protected function peekStatus(string $command): ?array
+    private function peekStatus(string $command): ?array
     {
         try {
             $result = $this->collection->sendToOne($command, []);
@@ -264,7 +264,7 @@ class Pool implements ConnectionInterface
         return $stats;
     }
 
-    protected function statsCombine(array $cumulative, array $stats): array
+    private function statsCombine(array $cumulative, array $stats): array
     {
         $list = ['pid', 'version', 'hostname', 'name', 'uptime', 'binlog-current-index'];
         $maximum = ['timeouts', 'binlog-max-size', 'binlog-oldest-index'];
@@ -313,7 +313,7 @@ class Pool implements ConnectionInterface
         return array_keys($this->watching);
     }
 
-    public function combineId(ConnectionInterface $connection, int $id): string
+    private function combineId(ConnectionInterface $connection, int $id): string
     {
         if (!is_numeric($id)) {
             throw new InvalidArgumentException('Specified job id must be a number.');
@@ -321,7 +321,7 @@ class Pool implements ConnectionInterface
         return "{$connection->getName()}.{$id}";
     }
 
-    public function splitId(string $id): array
+    private function splitId(string $id): array
     {
         if (strpos($id, '.') === false) {
             throw new InvalidArgumentException('Job ID is not in expected pool format.');

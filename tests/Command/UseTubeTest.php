@@ -14,12 +14,6 @@ class UseTubeTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new UseTube('test-tube'));
     }
 
-    public function testGetCommand(): void
-    {
-        $tube = 'test-tube';
-        static::assertSame("use {$tube}", (new UseTube($tube))->getCommand());
-    }
-
     public function testTubeIsValidated(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -29,7 +23,12 @@ class UseTubeTest extends CommandTestCase
 
     public function testSuccessfulCommand(): void
     {
-        $tube = 'test-tube';
+        $tube = sha1(uniqid());
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("use {$tube}");
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn("USING {$tube}");

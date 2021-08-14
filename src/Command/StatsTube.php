@@ -14,9 +14,8 @@ class StatsTube implements CommandInterface
 {
     use StatsTrait;
     use ValidateTrait;
-    use ToStringTrait;
 
-    protected string $tube;
+    private string $tube;
 
     public function __construct(string $tube)
     {
@@ -24,7 +23,7 @@ class StatsTube implements CommandInterface
         $this->tube = $tube;
     }
 
-    public function getCommand(): string
+    private function getCommand(): string
     {
         return sprintf('stats-tube %s', $this->tube);
     }

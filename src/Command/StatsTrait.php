@@ -34,7 +34,7 @@ trait StatsTrait
     /**
      * Decodes the YAML string into an array of data.
      */
-    protected function decode(string $response): array
+    private function decode(string $response): array
     {
         $lines = array_slice(explode("\n", trim($response)), 1);
 

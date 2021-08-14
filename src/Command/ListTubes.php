@@ -11,9 +11,8 @@ namespace Phlib\Beanstalk\Command;
 class ListTubes implements CommandInterface
 {
     use StatsTrait;
-    use ToStringTrait;
 
-    public function getCommand(): string
+    private function getCommand(): string
     {
         return 'list-tubes';
     }

@@ -14,12 +14,6 @@ class WatchTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new Watch('test-tube'));
     }
 
-    public function testGetCommand(): void
-    {
-        $tube = 'test-tube';
-        static::assertSame("watch {$tube}", (new Watch($tube))->getCommand());
-    }
-
     public function testTubeIsValidated(): void
     {
         $this->expectException(InvalidArgumentException::class);
@@ -29,7 +23,12 @@ class WatchTest extends CommandTestCase
 
     public function testSuccessfulCommand(): void
     {
-        $tube = 'test-tube';
+        $tube = sha1(uniqid());
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("watch {$tube}");
+
         $watchingCount = 12;
         $this->socket->expects(static::any())
             ->method('read')

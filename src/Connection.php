@@ -17,13 +17,13 @@ class Connection implements ConnectionInterface
 {
     public const DEFAULT_TUBE = 'default';
 
-    protected string $name;
+    private string $name;
 
-    protected SocketInterface $socket;
+    private SocketInterface $socket;
 
-    protected string $using = self::DEFAULT_TUBE;
+    private string $using = self::DEFAULT_TUBE;
 
-    protected array $watching = [
+    private array $watching = [
         self::DEFAULT_TUBE => true,
     ];
 
@@ -33,12 +33,12 @@ class Connection implements ConnectionInterface
         $this->name = $socket->getUniqueIdentifier();
     }
 
-    public function getSocket(): SocketInterface
+    private function getSocket(): SocketInterface
     {
         return $this->socket;
     }
 
-    public function setSocket(SocketInterface $socket): self
+    private function setSocket(SocketInterface $socket): self
     {
         $this->socket = $socket;
         return $this;
@@ -52,12 +52,6 @@ class Connection implements ConnectionInterface
     public function getName(): string
     {
         return $this->name;
-    }
-
-    public function setName(string $value): self
-    {
-        $this->name = $value;
-        return $this;
     }
 
     public function useTube(string $tube): self
@@ -187,7 +181,7 @@ class Connection implements ConnectionInterface
         return $this->peekStatus(Command\PeekStatus::BURIED);
     }
 
-    protected function peekStatus(string $status): ?array
+    private function peekStatus(string $status): ?array
     {
         try {
             $jobData = (new Command\PeekStatus($status))

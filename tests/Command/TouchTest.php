@@ -14,15 +14,14 @@ class TouchTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new Touch(123));
     }
 
-    public function testGetCommand(): void
-    {
-        $id = 234;
-        static::assertSame("touch {$id}", (new Touch($id))->getCommand());
-    }
-
     public function testSuccessfulCommand(): void
     {
-        $id = 123;
+        $id = rand();
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("touch {$id}");
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('TOUCHED');

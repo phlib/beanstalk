@@ -16,11 +16,10 @@ use Phlib\Beanstalk\ValidateTrait;
 class Bury implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
-    protected int $id;
+    private int $id;
 
-    protected int $priority;
+    private int $priority;
 
     public function __construct(int $id, int $priority)
     {
@@ -30,7 +29,7 @@ class Bury implements CommandInterface
         $this->priority = $priority;
     }
 
-    public function getCommand(): string
+    private function getCommand(): string
     {
         return sprintf('bury %d %d', $this->id, $this->priority);
     }

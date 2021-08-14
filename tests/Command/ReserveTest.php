@@ -14,22 +14,9 @@ class ReserveTest extends CommandTestCase
     }
 
     /**
-     * @dataProvider getCommandDataProvider
+     * @dataProvider commandDataProvider
      */
-    public function testGetCommand(?int $timeout, string $command): void
-    {
-        static::assertSame($command, (new Reserve($timeout))->getCommand());
-    }
-
-    public function getCommandDataProvider(): array
-    {
-        return [
-            [123, 'reserve-with-timeout 123'],
-            [null, 'reserve'],
-        ];
-    }
-
-    public function testSuccessfulCommand(): void
+    public function testSuccessfulCommand(?int $timeout, string $command): void
     {
         $id = 123;
         $data = 'Foo Bar';
@@ -39,11 +26,23 @@ class ReserveTest extends CommandTestCase
             'body' => $data,
         ];
 
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with($command);
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturnOnConsecutiveCalls("RESERVED {$id} {$bytes}\r\n", $data . "\r\n");
 
-        static::assertSame($response, (new Reserve())->process($this->socket));
+        static::assertSame($response, (new Reserve($timeout))->process($this->socket));
+    }
+
+    public function commandDataProvider(): array
+    {
+        return [
+            [123, 'reserve-with-timeout 123'],
+            [null, 'reserve'],
+        ];
     }
 
     /**

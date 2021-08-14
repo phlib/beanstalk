@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
+use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
@@ -14,19 +15,19 @@ class BuryTest extends CommandTestCase
         static::assertInstanceOf(CommandInterface::class, new Bury(123, 123));
     }
 
-    public function testGetCommand(): void
-    {
-        $id = 123;
-        $priority = 1;
-        static::assertSame("bury {$id} {$priority}", (new Bury($id, $priority))->getCommand());
-    }
-
     public function testSuccessfulCommand(): void
     {
+        $id = rand();
+        $priority = rand(1, ConnectionInterface::MAX_PRIORITY);
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("bury {$id} {$priority}");
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('BURIED');
-        static::assertInstanceOf(Bury::class, (new Bury(123, 123))->process($this->socket));
+        static::assertInstanceOf(Bury::class, (new Bury($id, $priority))->process($this->socket));
     }
 
     public function testNotFoundThrowsException(): void
