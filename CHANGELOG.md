@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [2.0.1] - 2021-08-14
 ### Added
 - Add specific support for PHP v8
 - Type declarations have been added to all method parameters and return types
@@ -37,6 +39,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - **BC break**: Removed support for PHP versions <= v7.3 as they are no longer
   [actively supported](https://php.net/supported-versions.php) by the PHP project.
 - **BC break**: Removed cast Command classes as string to reveal raw command.
+
+## [2.0.0] - 2021-07-29
+
+*Release deleted to allow for further changes requiring BC breaks.*
 
 ## [1.0.15] - 2019-12-10
 ### Added
