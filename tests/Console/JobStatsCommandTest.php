@@ -45,6 +45,7 @@ class JobStatsCommandTest extends ConsoleTestCase
             'command' => $this->command->getName(),
             'job-id' => $jobId,
         ]);
+        $currentTime = time(); // Time at execution
 
         $output = $this->commandTester->getDisplay();
         static::assertStringContainsString("Job ID: {$jobId}", $output);
@@ -56,8 +57,8 @@ class JobStatsCommandTest extends ConsoleTestCase
         // Table
         $rows = $stats;
         unset($rows['id'], $rows['tube'], $rows['state']);
-        $rows['created'] = date('Y-m-d H:i:s', time() - $stats['age']);
-        $rows['scheduled'] = date('Y-m-d H:i:s', time() - $stats['age'] + $stats['delay']);
+        $rows['created'] = date('Y-m-d H:i:s', $currentTime - $stats['age']);
+        $rows['scheduled'] = date('Y-m-d H:i:s', $currentTime - $stats['age'] + $stats['delay']);
         foreach ($rows as $stat => $value) {
             static::assertMatchesRegularExpression("/{$stat}[\s|]+{$value}/", $output);
         }
