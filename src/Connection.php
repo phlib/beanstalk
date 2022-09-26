@@ -6,8 +6,8 @@ namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\SocketInterface;
-use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
  * Class Connection
