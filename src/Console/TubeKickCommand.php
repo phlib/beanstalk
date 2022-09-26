@@ -22,7 +22,7 @@ class TubeKickCommand extends AbstractCommand
     {
         $quantity = $this->getBeanstalk()
             ->useTube($input->getArgument('tube'))
-            ->kick($input->getArgument('quantity'));
+            ->kick((int)$input->getArgument('quantity'));
         $output->writeln("Successfully kicked {$quantity} jobs.");
 
         return 0;
