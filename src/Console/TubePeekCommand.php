@@ -20,6 +20,8 @@ class TubePeekCommand extends AbstractCommand
             ->setDescription('Look at a job in the job based on status.')
             ->addArgument('tube', InputArgument::REQUIRED, 'The tube name.')
             ->addOption('status', 's', InputOption::VALUE_OPTIONAL, 'The tube status. Value can be ready, delayed or buried.', 'buried');
+
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

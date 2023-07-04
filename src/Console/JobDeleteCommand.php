@@ -15,6 +15,8 @@ class JobDeleteCommand extends AbstractCommand
         $this->setName('job:delete')
             ->setDescription('Delete specific job.')
             ->addArgument('job-id', InputArgument::REQUIRED, 'The ID of the job.');
+
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

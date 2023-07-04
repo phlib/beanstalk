@@ -19,6 +19,8 @@ class TubeStatsCommand extends AbstractStatsCommand
             ->setDescription('Display stats for the specified tube.')
             ->addArgument('tube', InputArgument::REQUIRED, 'Name of the tube.')
             ->addOption('stat', 's', InputOption::VALUE_REQUIRED, 'Output a specific statistic.');
+
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
