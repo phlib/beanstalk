@@ -58,9 +58,11 @@ $beanstalk->delete($job['id']);
 |`timeout`|*Integer*|`60`|The connection timeout.|
 
 ## Factory
-The factory allows for easy setup of the objects. This especially useful when creating a pool of beanstalk servers. The
-following example lists the various ways it can be used. The configuration examples in the command line section are 
-created using the factory.
+The factory allows for easy setup of the objects.
+This especially useful when creating a pool of beanstalk servers.
+The following example lists the various ways it can be used.
+The configuration examples in the command line section are created
+using the factory.
 
 ```php
 use Phlib\Beanstalk\Factory;
@@ -84,8 +86,8 @@ $beanstalk = Factory::createFromArray([
 ```
 
 ## Pool
-The pool allows for work to be pushed to and retrieved from multiple servers. The pool implements the connection 
-interface.
+The pool allows for work to be pushed to and retrieved from multiple servers.
+The pool implements the connection interface.
 
 ```php
 use Phlib\Beanstalk\Connection;
@@ -115,18 +117,21 @@ $pool->put(array('my' => 'jobData3')); // <- sent to server 3
 ./vendor/bin/beanstalk
 ```
 
-Running the script will provide you with a list of options. Most are self explanatory. By default no configuration is 
-required, the script will default to localhost.
+Running the script will provide you with a list of options.
+Most are self-explanatory.
+By default no configuration is required, the script will default to localhost.
 
 ### Command Line Configuration
 
 There are 2 ways of specifying a configuration.
 
-1. Create a file called beanstalk-config.php either in ```/app/root``` or ```/app/root/config```.
-2. Create a file with a name of your choosing and specify it using the command option ```-c /path/to/my/config.php```
+1. Create a file called *beanstalk-config.php* either in
+   ```/app/root/``` or ```/app/root/config/```.
+2. Create a file with a name of your choosing and specify it
+   using the command option ```-c /path/to/my/config.php```.
 
-The file must return an array containing the beanstalk configuration. This configuration will be passed to the Factory
-to create an instance.
+The file must return an array containing the beanstalk configuration.
+This configuration will be passed to the Factory to create an instance.
 
 ```php
 return [

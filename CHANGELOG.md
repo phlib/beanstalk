@@ -1,7 +1,7 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
-The format is based on [Keep a Changelog](http://keepachangelog.com/) 
+The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
@@ -31,7 +31,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   defined in `ConnectionInterface`, rather than allowing any method to be called
   on the connection.
 - **BC break**: Replace union false return types with nullable types. For
-  example, a method that previously hinted `array|false` is now typed `?array`, 
+  example, a method that previously hinted `array|false` is now typed `?array`,
   and will return `null` for the same state it previously returned `false`.
 - **BC break**: `ValidateTrait::validatePriority()` no longer returns a value.
 - Order of stats in `server:stats` CLI command to match order from Beanstalkd.
