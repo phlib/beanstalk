@@ -15,7 +15,7 @@ class FactoryTest extends TestCase
     public function testCreate(): void
     {
         $factory = new Factory();
-        static::assertInstanceOf(ConnectionInterface::class, $factory->createBC('localhost'));
+        static::assertInstanceOf(ConnectionInterface::class, $factory->create('localhost'));
     }
 
     /**
@@ -24,7 +24,7 @@ class FactoryTest extends TestCase
     public function testCreateFromArray($expectedClass, $config): void
     {
         $factory = new Factory();
-        static::assertInstanceOf($expectedClass, $factory->createFromArrayBC($config));
+        static::assertInstanceOf($expectedClass, $factory->createFromArray($config));
     }
 
     public function createFromArrayDataProvider(): array
@@ -77,7 +77,7 @@ class FactoryTest extends TestCase
 
         $factory = new Factory();
         /** @var Pool $pool */
-        $pool = $factory->createFromArrayBC($poolConfig);
+        $pool = $factory->createFromArray($poolConfig);
 
         /** @var Pool\Collection $collection */
         $collection = $pool->getCollection();
@@ -106,7 +106,7 @@ class FactoryTest extends TestCase
         ];
 
         $factory = new Factory();
-        $factory->createFromArrayBC($poolConfig);
+        $factory->createFromArray($poolConfig);
     }
 
     public function testCreateFromArrayFailsWhenEmpty(): void
@@ -114,7 +114,7 @@ class FactoryTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         $factory = new Factory();
-        $factory->createFromArrayBC([]);
+        $factory->createFromArray([]);
     }
 
     public function testCreateConnections(): void
@@ -125,7 +125,7 @@ class FactoryTest extends TestCase
         ];
 
         $factory = new Factory();
-        $connections = $factory->createConnectionsBC([$config, $config, $config]);
+        $connections = $factory->createConnections([$config, $config, $config]);
         foreach ($connections as $connection) {
             $result = $result && $connection instanceof Connection;
         }

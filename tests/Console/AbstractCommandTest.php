@@ -30,7 +30,7 @@ class AbstractCommandTest extends ConsoleTestCase
          * to be able to check the passed value for $config
          */
         $this->factory->expects(static::once())
-            ->method('createFromArrayBC')
+            ->method('createFromArray')
             ->with($expectedConnectionConfig)
             ->willReturn($this->connection);
 
@@ -62,7 +62,7 @@ class AbstractCommandTest extends ConsoleTestCase
          * to be able to check the passed value for $config
          */
         $this->factory->expects(static::once())
-            ->method('createFromArrayBC')
+            ->method('createFromArray')
             ->with($expectedConnectionConfig)
             ->willReturn($this->connection);
 

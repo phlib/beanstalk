@@ -62,7 +62,7 @@ abstract class AbstractCommand extends Command
             $config = $this->getHelper('configuration')->fetch();
         }
 
-        $this->beanstalk = $this->factory->createFromArrayBC($config);
+        $this->beanstalk = $this->factory->createFromArray($config);
     }
 
     final protected function getBeanstalk(): ConnectionInterface
