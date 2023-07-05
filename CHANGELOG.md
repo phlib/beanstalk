@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [2.1.0] - 2023-07-05
 ### Added
 - Add options to the CLI command to specify a host and port.
   Useful for testing without the need to create a config file.
