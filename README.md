@@ -1,6 +1,6 @@
 # phlib/beanstalk
 
-[![Code Checks](https://img.shields.io/github/workflow/status/phlib/beanstalk/CodeChecks?logo=github)](https://github.com/phlib/beanstalk/actions/workflows/code-checks.yml)
+[![Code Checks](https://img.shields.io/github/actions/workflow/status/phlib/beanstalk/code-checks.yml?logo=github)](https://github.com/phlib/beanstalk/actions/workflows/code-checks.yml)
 [![Codecov](https://img.shields.io/codecov/c/github/phlib/beanstalk.svg?logo=codecov)](https://codecov.io/gh/phlib/beanstalk)
 [![Latest Stable Version](https://img.shields.io/packagist/v/phlib/beanstalk.svg?logo=packagist)](https://packagist.org/packages/phlib/beanstalk)
 [![Total Downloads](https://img.shields.io/packagist/dt/phlib/beanstalk.svg?logo=packagist)](https://packagist.org/packages/phlib/beanstalk)
