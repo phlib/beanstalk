@@ -14,7 +14,8 @@ class FactoryTest extends TestCase
 {
     public function testCreate(): void
     {
-        static::assertInstanceOf(ConnectionInterface::class, Factory::create('localhost'));
+        $factory = new Factory();
+        static::assertInstanceOf(ConnectionInterface::class, $factory->createBC('localhost'));
     }
 
     /**
@@ -22,7 +23,8 @@ class FactoryTest extends TestCase
      */
     public function testCreateFromArray($expectedClass, $config): void
     {
-        static::assertInstanceOf($expectedClass, Factory::createFromArray($config));
+        $factory = new Factory();
+        static::assertInstanceOf($expectedClass, $factory->createFromArrayBC($config));
     }
 
     public function createFromArrayDataProvider(): array
@@ -72,11 +74,13 @@ class FactoryTest extends TestCase
             'servers' => [$hostConfig, $hostConfig],
             'strategyClass' => $strategyClass,
         ];
-        $pool = Factory::createFromArray($poolConfig);
-        /* @var $pool Pool */
 
+        $factory = new Factory();
+        /** @var Pool $pool */
+        $pool = $factory->createFromArrayBC($poolConfig);
+
+        /** @var Pool\Collection $collection */
         $collection = $pool->getCollection();
-        /* @var $collection Pool\Collection */
 
         static::assertInstanceOf($strategyClass, $collection->getSelectionStrategy());
     }
@@ -100,14 +104,17 @@ class FactoryTest extends TestCase
             'servers' => [$hostConfig, $hostConfig],
             'strategyClass' => '\Some\RandomClass\ThatDoesnt\Exist',
         ];
-        Factory::createFromArray($poolConfig);
+
+        $factory = new Factory();
+        $factory->createFromArrayBC($poolConfig);
     }
 
     public function testCreateFromArrayFailsWhenEmpty(): void
     {
         $this->expectException(InvalidArgumentException::class);
 
-        Factory::createFromArray([]);
+        $factory = new Factory();
+        $factory->createFromArrayBC([]);
     }
 
     public function testCreateConnections(): void
@@ -117,7 +124,8 @@ class FactoryTest extends TestCase
             'host' => 'locahost',
         ];
 
-        $connections = Factory::createConnections([$config, $config, $config]);
+        $factory = new Factory();
+        $connections = $factory->createConnectionsBC([$config, $config, $config]);
         foreach ($connections as $connection) {
             $result = $result && $connection instanceof Connection;
         }
