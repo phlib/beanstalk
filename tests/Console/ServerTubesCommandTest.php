@@ -45,12 +45,10 @@ class ServerTubesCommandTest extends ConsoleTestCase
 
     protected function setUpCommand(): AbstractCommand
     {
-        $command = new ServerTubesCommand($this->factory);
-
         $this->statsService = $this->createMock(StatsService::class);
-        $command->setStatsService($this->statsService);
+        $statsServiceFactory = fn () => $this->statsService;
 
-        return $command;
+        return new ServerTubesCommand($this->factory, $statsServiceFactory);
     }
 
     public function testTubeStats(): void

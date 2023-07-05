@@ -12,7 +12,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ServerStatsCommand extends AbstractCommand
+class ServerStatsCommand extends AbstractStatsCommand
 {
     protected function configure(): void
     {

@@ -13,6 +13,7 @@ foreach ($autoloadFiles as $autoloadFile) {
 }
 
 // use
+use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Console\ServerStatsCommand;
 use Phlib\Beanstalk\Console\ServerTubesCommand;
 use Phlib\Beanstalk\Console\JobStatsCommand;
@@ -22,22 +23,24 @@ use Phlib\Beanstalk\Console\TubePeekCommand;
 use Phlib\Beanstalk\Console\TubeKickCommand;
 use Phlib\Beanstalk\Console\TubeStatsCommand;
 use Phlib\Beanstalk\Factory;
+use Phlib\Beanstalk\StatsService;
 use Phlib\ConsoleConfiguration\Helper\ConfigurationHelper;
 use Symfony\Component\Console\Application;
 
 $factory = new Factory();
+$statsServiceFactory = fn (ConnectionInterface $beanstalk) => new StatsService($beanstalk);
 
 // lets go!
 $application = new Application('beanstalk');
 $application->addCommands([
-    new ServerStatsCommand($factory),
-    new ServerTubesCommand($factory),
+    new ServerStatsCommand($factory, $statsServiceFactory),
+    new ServerTubesCommand($factory, $statsServiceFactory),
     new JobStatsCommand($factory),
     new JobPeekCommand($factory),
     new JobDeleteCommand($factory),
     new TubePeekCommand($factory),
     new TubeKickCommand($factory),
-    new TubeStatsCommand($factory),
+    new TubeStatsCommand($factory, $statsServiceFactory),
 ]);
 
 ConfigurationHelper::initHelper(

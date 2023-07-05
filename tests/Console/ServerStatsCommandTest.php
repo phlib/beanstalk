@@ -77,12 +77,10 @@ class ServerStatsCommandTest extends ConsoleTestCase
 
     protected function setUpCommand(): AbstractCommand
     {
-        $command = new ServerStatsCommand($this->factory);
-
         $this->statsService = $this->createMock(StatsService::class);
-        $command->setStatsService($this->statsService);
+        $statsServiceFactory = fn () => $this->statsService;
 
-        return $command;
+        return new ServerStatsCommand($this->factory, $statsServiceFactory);
     }
 
     public function testAllStats(): void

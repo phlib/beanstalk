@@ -6,8 +6,9 @@ namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Factory;
-use Phlib\Beanstalk\StatsService;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\OutputInterface;
 
 /**
  * Class AbstractCommand
@@ -19,8 +20,6 @@ abstract class AbstractCommand extends Command
 
     private ConnectionInterface $beanstalk;
 
-    private StatsService $statsService;
-
     public function __construct(Factory $factory)
     {
         $this->factory = $factory;
@@ -28,34 +27,20 @@ abstract class AbstractCommand extends Command
         parent::__construct();
     }
 
-    protected function getBeanstalk(): ConnectionInterface
+    protected function initialize(InputInterface $input, OutputInterface $output): void
     {
-        if (!isset($this->beanstalk)) {
-            $config = [];
-            // Helper will not be defined in unit tests
-            if ($this->getHelperSet()->has('configuration')) {
-                $config = $this->getHelper('configuration')->fetch();
-            }
-            $this->beanstalk = $this->factory->createFromArrayBC($config);
+        $config = [];
+        // Helper will not be defined in unit tests
+        if ($this->getHelperSet()->has('configuration')) {
+            $config = $this->getHelper('configuration')->fetch();
         }
+        $this->beanstalk = $this->factory->createFromArrayBC($config);
 
+        parent::initialize($input, $output);
+    }
+
+    final protected function getBeanstalk(): ConnectionInterface
+    {
         return $this->beanstalk;
-    }
-
-    protected function getStatsService(): StatsService
-    {
-        if (!isset($this->statsService)) {
-            $this->statsService = new StatsService($this->getBeanstalk());
-        }
-
-        return $this->statsService;
-    }
-
-    /**
-     * @internal This method is not part of the backward-compatibility promise. Used for DI in unit tests.
-     */
-    public function setStatsService(StatsService $statsService): void
-    {
-        $this->statsService = $statsService;
     }
 }
