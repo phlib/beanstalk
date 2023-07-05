@@ -16,6 +16,8 @@ class TubeKickCommand extends AbstractCommand
             ->setDescription('Kick a number of delayed or buried jobs in the tube.')
             ->addArgument('tube', InputArgument::REQUIRED, 'The tube name.')
             ->addArgument('quantity', InputArgument::REQUIRED, 'The number of jobs to kick.');
+
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

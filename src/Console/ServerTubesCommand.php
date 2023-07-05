@@ -17,6 +17,8 @@ class ServerTubesCommand extends AbstractStatsCommand
         $this->setName('server:tubes')
             ->setDescription('List all tubes known to the server(s).')
             ->addOption('watch', null, null, 'Watch server values by refreshing stats every second');
+
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

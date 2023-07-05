@@ -19,6 +19,8 @@ class ServerStatsCommand extends AbstractStatsCommand
         $this->setName('server:stats')
             ->setDescription('Get a list of details about the beanstalk server(s).')
             ->addOption('stat', 's', InputOption::VALUE_REQUIRED, 'Output a specific statistic.');
+
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

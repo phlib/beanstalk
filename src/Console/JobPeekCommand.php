@@ -17,6 +17,8 @@ class JobPeekCommand extends AbstractCommand
         $this->setName('job:peek')
             ->setDescription('View information about a specific job.')
             ->addArgument('job-id', InputArgument::REQUIRED, 'The ID of the job.');
+
+        parent::configure();
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
