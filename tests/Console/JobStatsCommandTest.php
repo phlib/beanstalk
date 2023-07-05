@@ -8,11 +8,9 @@ use Phlib\Beanstalk\Exception\NotFoundException;
 
 class JobStatsCommandTest extends ConsoleTestCase
 {
-    protected function setUp(): void
+    protected function setUpCommand(): AbstractCommand
     {
-        $this->command = new JobStatsCommand();
-
-        parent::setUp();
+        return new JobStatsCommand($this->factory);
     }
 
     public function testJobStats(): void

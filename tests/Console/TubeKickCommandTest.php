@@ -6,11 +6,9 @@ namespace Phlib\Beanstalk\Console;
 
 class TubeKickCommandTest extends ConsoleTestCase
 {
-    protected function setUp(): void
+    protected function setUpCommand(): AbstractCommand
     {
-        $this->command = new TubeKickCommand();
-
-        parent::setUp();
+        return new TubeKickCommand($this->factory);
     }
 
     public function testTubeKick(): void

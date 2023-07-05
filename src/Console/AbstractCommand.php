@@ -15,26 +15,31 @@ use Symfony\Component\Console\Command\Command;
  */
 abstract class AbstractCommand extends Command
 {
+    private Factory $factory;
+
     private ConnectionInterface $beanstalk;
 
     private StatsService $statsService;
 
+    public function __construct(Factory $factory)
+    {
+        $this->factory = $factory;
+
+        parent::__construct();
+    }
+
     protected function getBeanstalk(): ConnectionInterface
     {
         if (!isset($this->beanstalk)) {
-            $config = $this->getHelper('configuration')->fetch();
-            $this->beanstalk = Factory::createFromArray($config);
+            $config = [];
+            // Helper will not be defined in unit tests
+            if ($this->getHelperSet()->has('configuration')) {
+                $config = $this->getHelper('configuration')->fetch();
+            }
+            $this->beanstalk = $this->factory->createFromArrayBC($config);
         }
 
         return $this->beanstalk;
-    }
-
-    /**
-     * @internal This method is not part of the backward-compatibility promise. Used for DI in unit tests.
-     */
-    public function setBeanstalk(ConnectionInterface $beanstalk): void
-    {
-        $this->beanstalk = $beanstalk;
     }
 
     protected function getStatsService(): StatsService

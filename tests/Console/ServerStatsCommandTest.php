@@ -75,14 +75,14 @@ class ServerStatsCommandTest extends ConsoleTestCase
      */
     private MockObject $statsService;
 
-    protected function setUp(): void
+    protected function setUpCommand(): AbstractCommand
     {
-        $this->command = new ServerStatsCommand();
-
-        parent::setUp();
+        $command = new ServerStatsCommand($this->factory);
 
         $this->statsService = $this->createMock(StatsService::class);
-        $this->command->setStatsService($this->statsService);
+        $command->setStatsService($this->statsService);
+
+        return $command;
     }
 
     public function testAllStats(): void

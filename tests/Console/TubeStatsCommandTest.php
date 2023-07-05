@@ -31,14 +31,14 @@ class TubeStatsCommandTest extends ConsoleTestCase
      */
     private MockObject $statsService;
 
-    protected function setUp(): void
+    protected function setUpCommand(): AbstractCommand
     {
-        $this->command = new TubeStatsCommand();
-
-        parent::setUp();
+        $command = new TubeStatsCommand($this->factory);
 
         $this->statsService = $this->createMock(StatsService::class);
-        $this->command->setStatsService($this->statsService);
+        $command->setStatsService($this->statsService);
+
+        return $command;
     }
 
     public function testAllStats(): void
