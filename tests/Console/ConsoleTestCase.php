@@ -5,30 +5,40 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\Connection;
+use Phlib\Beanstalk\Factory;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
 
-class ConsoleTestCase extends TestCase
+abstract class ConsoleTestCase extends TestCase
 {
     protected AbstractCommand $command;
 
     protected CommandTester $commandTester;
 
     /**
+     * @var Factory|MockObject
+     */
+    protected Factory $factory;
+
+    /**
      * @var Connection|MockObject
      */
     protected MockObject $connection;
 
-    protected function setUp(): void
+    final protected function setUp(): void
     {
         $this->connection = $this->createMock(Connection::class);
         $this->connection->expects(static::any())
             ->method('getName')
             ->willReturn(sha1(uniqid()));
 
-        $this->command->setBeanstalk($this->connection);
+        $this->factory = $this->createMock(Factory::class);
+        $this->factory->method('createFromArrayBC')
+            ->willReturn($this->connection);
+
+        $this->command = $this->setUpCommand();
 
         $application = new Application();
         $application->add($this->command);
@@ -37,4 +47,6 @@ class ConsoleTestCase extends TestCase
 
         parent::setUp();
     }
+
+    abstract protected function setUpCommand(): AbstractCommand;
 }

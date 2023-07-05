@@ -8,11 +8,9 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 class TubePeekCommandTest extends ConsoleTestCase
 {
-    protected function setUp(): void
+    protected function setUpCommand(): AbstractCommand
     {
-        $this->command = new TubePeekCommand();
-
-        parent::setUp();
+        return new TubePeekCommand($this->factory);
     }
 
     public function testTubePeekDefault(): void

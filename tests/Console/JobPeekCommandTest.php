@@ -8,11 +8,9 @@ use Phlib\Beanstalk\Exception\NotFoundException;
 
 class JobPeekCommandTest extends ConsoleTestCase
 {
-    protected function setUp(): void
+    protected function setUpCommand(): AbstractCommand
     {
-        $this->command = new JobPeekCommand();
-
-        parent::setUp();
+        return new JobPeekCommand($this->factory);
     }
 
     public function testPeekJob(): void

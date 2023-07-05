@@ -5,6 +5,9 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+### Deprecated
+- Factory methods will become instance-based with the same name,
+  in the next major version.
 
 ## [2.0.2] - 2022-09-26
 ### Fixed

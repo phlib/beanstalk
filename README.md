@@ -65,22 +65,24 @@ The configuration examples in the command line section are created
 using the factory.
 
 ```php
-use Phlib\Beanstalk\Factory;
+$factory = new \Phlib\Beanstalk\Factory();
 
-$beanstalk = Factory::create('localhost');
+$beanstalk = $factory->create('localhost');
 
-$beanstalk = Factory::createFromArray(['host' => 'localhost']);
-
-$beanstalk = Factory::createFromArray([
-    'server' => ['host' => 'localhost']
+$beanstalk = $factory->createFromArray([
+    'host' => 'localhost',
 ]);
 
-$beanstalk = Factory::createFromArray([
+$beanstalk = $factory->createFromArray([
+    'server' => ['host' => 'localhost'],
+]);
+
+$beanstalk = $factory->createFromArray([
     'servers' => [
         ['host' => '10.0.0.1'],
         ['host' => '10.0.0.2'],
-        ['host' => '10.0.0.3']
-    ]
+        ['host' => '10.0.0.3'],
+    ],
 ]);
 
 ```

@@ -8,11 +8,9 @@ use Phlib\Beanstalk\Exception\NotFoundException;
 
 class JobDeleteCommandTest extends ConsoleTestCase
 {
-    protected function setUp(): void
+    protected function setUpCommand(): AbstractCommand
     {
-        $this->command = new JobDeleteCommand();
-
-        parent::setUp();
+        return new JobDeleteCommand($this->factory);
     }
 
     public function testDeleteJob(): void

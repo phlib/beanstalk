@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class ServerTubesCommand extends AbstractCommand
+class ServerTubesCommand extends AbstractStatsCommand
 {
     protected function configure(): void
     {
