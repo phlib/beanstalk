@@ -533,12 +533,11 @@ class PoolTest extends TestCase
     public function kickDataProvider(): array
     {
         return [
-            [[1, 2, 4], 100, 7],
-            [[1, 0, 4], 100, 5],
-            [[0, 0, 0], 100, 0],
-            [[33, 33], 100, 66],
-            [[33, 33, 33], 100, 99],
-            [[40, 40, 40], 100, 100],
+            'moreThanBuried' => [[1, 2, 4], 100, 7],
+            'moreThanBuriedWithZero' => [[1, 0, 4], 100, 5],
+            'zeroBuried' => [[0, 0, 0], 100, 0],
+            'moreBuriedThanKicked' => [[40, 40, 40], 100, 100],
+            'moreBuriedInFirstThanKicked' => [[120, 40, 40], 100, 100],
         ];
     }
 
