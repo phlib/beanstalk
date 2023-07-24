@@ -45,7 +45,7 @@ class TubeStatsCommand extends AbstractStatsCommand
         return 0;
     }
 
-    protected function displayTable(array $stats, OutputInterface $output): void
+    private function displayTable(array $stats, OutputInterface $output): void
     {
         $table = new Table($output);
         $table->setHeaders(['Statistic', 'Total']);
@@ -60,7 +60,7 @@ class TubeStatsCommand extends AbstractStatsCommand
         $table->render();
     }
 
-    protected function displayStat(array $stats, string $stat, OutputInterface $output): void
+    private function displayStat(array $stats, string $stat, OutputInterface $output): void
     {
         if (!isset($stats[$stat])) {
             throw new InvalidArgumentException("Specified statistic '{$stat}' is not valid.");

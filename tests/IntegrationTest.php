@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
  */
 class IntegrationTest extends TestCase
 {
-    protected Connection $beanstalk;
+    private Connection $beanstalk;
 
     protected function setUp(): void
     {

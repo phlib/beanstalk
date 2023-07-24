@@ -14,7 +14,7 @@ class ValidateTraitTest extends TestCase
     /**
      * @var ValidateTrait|MockObject
      */
-    protected MockObject $validate;
+    private MockObject $validate;
 
     protected function setUp(): void
     {

@@ -39,7 +39,7 @@ class ServerStatsCommand extends AbstractStatsCommand
         return 0;
     }
 
-    protected function outputDetectedConfig(OutputInterface $output): void
+    private function outputDetectedConfig(OutputInterface $output): void
     {
         if (!$output->isVerbose()) {
             return;
@@ -52,7 +52,7 @@ class ServerStatsCommand extends AbstractStatsCommand
         $output->writeln('Configuration: ' . $configPath);
     }
 
-    protected function outputInfo(StatsService $stats, OutputInterface $output): void
+    private function outputInfo(StatsService $stats, OutputInterface $output): void
     {
         $info = $stats->getServerInfo();
 
@@ -73,7 +73,7 @@ class ServerStatsCommand extends AbstractStatsCommand
         $output->writeln($block);
     }
 
-    protected function outputStats(StatsService $stats, OutputInterface $output): void
+    private function outputStats(StatsService $stats, OutputInterface $output): void
     {
         $binlog = $stats->getServerStats(StatsService::SERVER_BINLOG);
         $command = $stats->getServerStats(StatsService::SERVER_COMMAND);
@@ -107,7 +107,7 @@ class ServerStatsCommand extends AbstractStatsCommand
         $table->render();
     }
 
-    protected function outputStat(StatsService $service, string $stat, OutputInterface $output): void
+    private function outputStat(StatsService $service, string $stat, OutputInterface $output): void
     {
         $stats = $service->getServerStats(StatsService::SERVER_ALL) + $service->getServerInfo();
         if (!isset($stats[$stat])) {

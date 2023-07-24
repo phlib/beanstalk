@@ -13,7 +13,7 @@ use PHPUnit\Framework\TestCase;
  */
 class IntegrationPoolTest extends TestCase
 {
-    protected Pool $beanstalk;
+    private Pool $beanstalk;
 
     protected function setUp(): void
     {

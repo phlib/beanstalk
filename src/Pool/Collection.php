@@ -16,11 +16,11 @@ use Phlib\Beanstalk\Exception\RuntimeException;
  */
 class Collection implements CollectionInterface
 {
-    protected array $connections;
+    private array $connections;
 
-    protected SelectionStrategyInterface $strategy;
+    private SelectionStrategyInterface $strategy;
 
-    protected array $options;
+    private array $options;
 
     /**
      * @param ConnectionInterface[] $connections
