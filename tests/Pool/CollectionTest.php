@@ -40,7 +40,7 @@ class CollectionTest extends TestCase
     /**
      * @var SelectionStrategyInterface|MockObject
      */
-    protected MockObject $strategy;
+    private SelectionStrategyInterface $strategy;
 
     protected function setUp(): void
     {

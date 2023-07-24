@@ -12,12 +12,12 @@ use PHPUnit\Framework\TestCase;
 
 class PoolTest extends TestCase
 {
-    protected Pool $pool;
+    private Pool $pool;
 
     /**
      * @var Collection|MockObject
      */
-    protected MockObject $collection;
+    private Collection $collection;
 
     protected function setUp(): void
     {
@@ -589,7 +589,7 @@ class PoolTest extends TestCase
     /**
      * @return Connection|MockObject
      */
-    protected function createMockConnection(string $host): Connection
+    private function createMockConnection(string $host): Connection
     {
         $connection = $this->createMock(Connection::class);
         $connection->expects(static::any())

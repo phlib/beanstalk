@@ -142,7 +142,7 @@ class StatsServiceTest extends TestCase
     /**
      * @var Connection|MockObject
      */
-    private MockObject $connection;
+    private Connection $connection;
 
     private StatsService $statsService;
 

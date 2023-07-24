@@ -12,7 +12,7 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
  */
 class RoundRobinStrategy implements SelectionStrategyInterface
 {
-    protected int $index = -1;
+    private int $index = -1;
 
     /**
      * @param string[] $collection

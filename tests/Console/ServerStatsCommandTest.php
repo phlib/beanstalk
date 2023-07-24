@@ -73,7 +73,7 @@ class ServerStatsCommandTest extends ConsoleTestCase
     /**
      * @var StatsService|MockObject
      */
-    private MockObject $statsService;
+    private StatsService $statsService;
 
     protected function setUpCommand(): AbstractCommand
     {

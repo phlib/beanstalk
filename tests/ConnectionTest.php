@@ -16,9 +16,9 @@ class ConnectionTest extends TestCase
     /**
      * @var Socket|MockObject
      */
-    protected MockObject $socket;
+    private Socket $socket;
 
-    protected Connection $beanstalk;
+    private Connection $beanstalk;
 
     protected function setUp(): void
     {
@@ -284,7 +284,7 @@ class ConnectionTest extends TestCase
      * @param mixed $response
      * @return mixed
      */
-    protected function execute(string $command, $response, string $method, array $arguments = [])
+    private function execute(string $command, $response, string $method, array $arguments = [])
     {
         $this->socket->expects(static::once())
             ->method('write')

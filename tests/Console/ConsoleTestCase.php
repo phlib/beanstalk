@@ -25,7 +25,7 @@ abstract class ConsoleTestCase extends TestCase
     /**
      * @var Connection|MockObject
      */
-    protected MockObject $connection;
+    protected Connection $connection;
 
     final protected function setUp(): void
     {

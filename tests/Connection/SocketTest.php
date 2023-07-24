@@ -165,7 +165,7 @@ class SocketTest extends TestCase
     /**
      * @return Socket|MockObject
      */
-    protected function getMockSocket(array $originalMethods): Socket
+    private function getMockSocket(array $originalMethods): Socket
     {
         $availableFns = ['connect', 'disconnect', 'read', 'write', 'getUniqueIdentifier'];
         $mockedMethods = array_diff($availableFns, $originalMethods);
