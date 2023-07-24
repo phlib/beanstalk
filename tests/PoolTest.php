@@ -17,7 +17,7 @@ class PoolTest extends TestCase
     /**
      * @var Collection|MockObject
      */
-    private MockObject $collection;
+    private Collection $collection;
 
     protected function setUp(): void
     {

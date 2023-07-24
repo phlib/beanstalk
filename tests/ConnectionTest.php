@@ -16,7 +16,7 @@ class ConnectionTest extends TestCase
     /**
      * @var Socket|MockObject
      */
-    private MockObject $socket;
+    private Socket $socket;
 
     private Connection $beanstalk;
 

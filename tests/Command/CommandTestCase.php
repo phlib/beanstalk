@@ -13,7 +13,7 @@ class CommandTestCase extends TestCase
     /**
      * @var SocketInterface|MockObject
      */
-    protected MockObject $socket;
+    protected SocketInterface $socket;
 
     protected function setUp(): void
     {
