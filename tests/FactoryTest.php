@@ -21,7 +21,7 @@ class FactoryTest extends TestCase
     /**
      * @dataProvider createFromArrayDataProvider
      */
-    public function testCreateFromArray($expectedClass, $config): void
+    public function testCreateFromArray(string $expectedClass, array $config): void
     {
         $factory = new Factory();
         static::assertInstanceOf($expectedClass, $factory->createFromArray($config));
@@ -36,24 +36,24 @@ class FactoryTest extends TestCase
         ];
 
         return [
-            [
+            'local' => [
                 $connectionClass,
                 $defaultHost,
             ],
-            [
+            'localWithPort' => [
                 $connectionClass,
                 [
                     'host' => 'localhost',
                     'port' => 123456,
                 ],
             ],
-            [
+            'localArray' => [
                 $connectionClass,
                 [
                     'server' => $defaultHost,
                 ],
             ],
-            [
+            'pool' => [
                 $poolClass,
                 [
                     'servers' => [$defaultHost, $defaultHost],

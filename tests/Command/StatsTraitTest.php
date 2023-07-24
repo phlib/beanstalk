@@ -47,45 +47,45 @@ class StatsTraitTest extends CommandTestCase
     public function yamlFormatIsDecodedDataProvider(): array
     {
         return [
-            [
+            'indexed' => [
                 '- value',
                 [
                     0 => 'value',
                 ],
             ],
-            [
+            'multiIndexed' => [
                 "- value1\r\n- value2",
                 [
                     0 => 'value1',
                     1 => 'value2',
                 ],
             ],
-            [
+            'indexedInteger' => [
                 '- 321',
                 [
                     0 => 321,
                 ],
             ],
-            [
+            'keyValue' => [
                 'key1: value1',
                 [
                     'key1' => 'value1',
                 ],
             ],
-            [
+            'multiKeyValue' => [
                 "key1: value1\r\nkey2: value2",
                 [
                     'key1' => 'value1',
                     'key2' => 'value2',
                 ],
             ],
-            [
+            'keyIntValue' => [
                 'key1: 123',
                 [
                     'key1' => 123,
                 ],
             ],
-            [
+            'assocValues' => [
                 "key1: value1\r\nkey2: \r\nkey3: value3",
                 [
                     'key1' => 'value1',

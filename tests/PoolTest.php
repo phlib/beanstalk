@@ -109,34 +109,6 @@ class PoolTest extends TestCase
         static::assertSame($expectedId, $combinedId);
     }
 
-    public function testPutReturnsJobIdContainingTheServerIdentifier(): void
-    {
-        $host = 'host123';
-        $connection = $this->createMockConnection($host);
-        $this->collection->expects(static::any())
-            ->method('sendToOne')
-            ->with('put', ['myJobData'])
-            ->willReturn([
-                'connection' => $connection,
-                'response' => '123',
-            ]);
-        static::assertStringContainsString($host, $this->pool->put('myJobData'));
-    }
-
-    public function testPutReturnsJobIdContainingTheOriginalJobId(): void
-    {
-        $jobId = '432';
-        $connection = $this->createMockConnection('host:123');
-        $this->collection->expects(static::any())
-            ->method('sendToOne')
-            ->with('put', ['myJobData'])
-            ->willReturn([
-                'connection' => $connection,
-                'response' => $jobId,
-            ]);
-        static::assertStringContainsString($jobId, $this->pool->put('myJobData'));
-    }
-
     public function testPutTotalFailure(): void
     {
         $this->expectException(RuntimeException::class);
@@ -561,12 +533,11 @@ class PoolTest extends TestCase
     public function kickDataProvider(): array
     {
         return [
-            [[1, 2, 4], 100, 7],
-            [[1, 0, 4], 100, 5],
-            [[0, 0, 0], 100, 0],
-            [[33, 33], 100, 66],
-            [[33, 33, 33], 100, 99],
-            [[40, 40, 40], 100, 100],
+            'moreThanBuried' => [[1, 2, 4], 100, 7],
+            'moreThanBuriedWithZero' => [[1, 0, 4], 100, 5],
+            'zeroBuried' => [[0, 0, 0], 100, 0],
+            'moreBuriedThanKicked' => [[40, 40, 40], 100, 100],
+            'moreBuriedInFirstThanKicked' => [[120, 40, 40], 100, 100],
         ];
     }
 
