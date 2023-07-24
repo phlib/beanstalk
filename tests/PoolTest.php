@@ -109,34 +109,6 @@ class PoolTest extends TestCase
         static::assertSame($expectedId, $combinedId);
     }
 
-    public function testPutReturnsJobIdContainingTheServerIdentifier(): void
-    {
-        $host = 'host123';
-        $connection = $this->createMockConnection($host);
-        $this->collection->expects(static::any())
-            ->method('sendToOne')
-            ->with('put', ['myJobData'])
-            ->willReturn([
-                'connection' => $connection,
-                'response' => '123',
-            ]);
-        static::assertStringContainsString($host, $this->pool->put('myJobData'));
-    }
-
-    public function testPutReturnsJobIdContainingTheOriginalJobId(): void
-    {
-        $jobId = '432';
-        $connection = $this->createMockConnection('host:123');
-        $this->collection->expects(static::any())
-            ->method('sendToOne')
-            ->with('put', ['myJobData'])
-            ->willReturn([
-                'connection' => $connection,
-                'response' => $jobId,
-            ]);
-        static::assertStringContainsString($jobId, $this->pool->put('myJobData'));
-    }
-
     public function testPutTotalFailure(): void
     {
         $this->expectException(RuntimeException::class);
