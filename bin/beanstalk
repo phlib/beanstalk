@@ -14,13 +14,13 @@ foreach ($autoloadFiles as $autoloadFile) {
 
 // use
 use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\Console\JobDeleteCommand;
+use Phlib\Beanstalk\Console\JobPeekCommand;
+use Phlib\Beanstalk\Console\JobStatsCommand;
 use Phlib\Beanstalk\Console\ServerStatsCommand;
 use Phlib\Beanstalk\Console\ServerTubesCommand;
-use Phlib\Beanstalk\Console\JobStatsCommand;
-use Phlib\Beanstalk\Console\JobPeekCommand;
-use Phlib\Beanstalk\Console\JobDeleteCommand;
-use Phlib\Beanstalk\Console\TubePeekCommand;
 use Phlib\Beanstalk\Console\TubeKickCommand;
+use Phlib\Beanstalk\Console\TubePeekCommand;
 use Phlib\Beanstalk\Console\TubeStatsCommand;
 use Phlib\Beanstalk\Factory;
 use Phlib\Beanstalk\StatsService;
@@ -45,7 +45,7 @@ $application->addCommands([
 
 ConfigurationHelper::initHelper(
     $application,
-    ['host'     => 'localhost'],
+    ['host' => 'localhost'],
     ['filename' => 'beanstalk-config.php']
 );
 
