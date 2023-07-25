@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\Exception\BuriedException;
 use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\DrainingException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 class PutTest extends CommandTestCase
@@ -68,8 +70,36 @@ class PutTest extends CommandTestCase
 
         $this->socket->expects(static::any())
             ->method('read')
+            ->willReturn('JOB_TOO_BIG');
+        (new Put('data', 123, 456, 789))->process($this->socket);
+    }
+
+    public function testDrainingStatusThrowsException(): void
+    {
+        $this->expectException(DrainingException::class);
+
+        $this->socket->expects(static::any())
+            ->method('read')
             ->willReturn('DRAINING');
         (new Put('data', 123, 456, 789))->process($this->socket);
+    }
+
+    public function testBuriedStatusThrowsException(): void
+    {
+        $this->expectException(BuriedException::class);
+
+        $jobId = rand();
+
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturn('BURIED ' . $jobId);
+
+        try {
+            (new Put('data', 123, 456, 789))->process($this->socket);
+        } catch (BuriedException $e) {
+            self::assertSame($jobId, $e->getJobId());
+            throw $e;
+        }
     }
 
     public function testUnknownStatusThrowsException(): void
