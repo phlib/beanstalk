@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   Pass the same parameters directly to `Connection`.
 - **BC break**: Move core `ConnectionInterface` up to package root namespace.
 - **BC break**: Deprecated static Factory methods are now instance-based.
+- **BC break**: Move `ValidateTrait` and `StatsService` out of root namespace.
+  No impact to standard use of this package.
 ### Removed
 - **BC break**: Remove `Socket::getUniqueIdentifier()` and `Socket::connect()`
   only needed internally. No impact to standard use of this package.
