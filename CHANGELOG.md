@@ -19,9 +19,10 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - **BC break**: Deprecated static Factory methods are now instance-based.
 ### Removed
 - **BC break**: Remove `Socket::getUniqueIdentifier()` and `Socket::connect()`
-  only needed internally.
+  only needed internally. No impact to standard use of this package.
 - **BC break**: Remove `SocketInterface`. The details of a connection's
   socket are only for internal implementation.
+  No impact to standard use of this package.
 
 ## [2.1.0] - 2023-07-05
 ### Added
