@@ -44,11 +44,6 @@ class Connection implements ConnectionInterface
         $this->name = $this->socket->getUniqueIdentifier();
     }
 
-    private function getSocket(): SocketInterface
-    {
-        return $this->socket;
-    }
-
     public function disconnect(): bool
     {
         return $this->socket->disconnect();
@@ -62,7 +57,7 @@ class Connection implements ConnectionInterface
     public function useTube(string $tube): self
     {
         (new Command\UseTube($tube))
-            ->process($this->getSocket());
+            ->process($this->socket);
         $this->using = $tube;
         return $this;
     }
@@ -74,13 +69,13 @@ class Connection implements ConnectionInterface
         int $ttr = ConnectionInterface::DEFAULT_TTR
     ): int {
         return (new Command\Put($data, $priority, $delay, $ttr))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     public function reserve(?int $timeout = null): ?array
     {
         $jobData = (new Command\Reserve($timeout))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $jobData;
     }
 
@@ -91,7 +86,7 @@ class Connection implements ConnectionInterface
     {
         $id = $this->filterJobId($id);
         (new Command\Delete($id))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $this;
     }
 
@@ -105,7 +100,7 @@ class Connection implements ConnectionInterface
     ): self {
         $id = $this->filterJobId($id);
         (new Command\Release($id, $priority, $delay))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $this;
     }
 
@@ -116,7 +111,7 @@ class Connection implements ConnectionInterface
     {
         $id = $this->filterJobId($id);
         (new Command\Bury($id, $priority))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $this;
     }
 
@@ -127,7 +122,7 @@ class Connection implements ConnectionInterface
     {
         $id = $this->filterJobId($id);
         (new Command\Touch($id))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $this;
     }
 
@@ -138,7 +133,7 @@ class Connection implements ConnectionInterface
         }
 
         (new Command\Watch($tube))
-            ->process($this->getSocket());
+            ->process($this->socket);
         $this->watching[$tube] = true;
 
         return $this;
@@ -152,7 +147,7 @@ class Connection implements ConnectionInterface
             }
 
             (new Command\Ignore($tube))
-                ->process($this->getSocket());
+                ->process($this->socket);
             unset($this->watching[$tube]);
         }
 
@@ -166,7 +161,7 @@ class Connection implements ConnectionInterface
     {
         $id = $this->filterJobId($id);
         return (new Command\Peek($id))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     public function peekReady(): ?array
@@ -188,7 +183,7 @@ class Connection implements ConnectionInterface
     {
         try {
             return (new Command\PeekStatus($status))
-                ->process($this->getSocket());
+                ->process($this->socket);
         } catch (NotFoundException $e) {
             return null;
         }
@@ -197,7 +192,7 @@ class Connection implements ConnectionInterface
     public function stats(): array
     {
         return (new Command\Stats())
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     /**
@@ -207,25 +202,25 @@ class Connection implements ConnectionInterface
     {
         $id = $this->filterJobId($id);
         return (new Command\StatsJob($id))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     public function statsTube(string $tube): array
     {
         return (new Command\StatsTube($tube))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     public function kick(int $quantity): int
     {
         return (new Command\Kick($quantity))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     public function listTubes(): array
     {
         return (new Command\ListTubes())
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     public function listTubeUsed(): string
