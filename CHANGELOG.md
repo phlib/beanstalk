@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   Pass the same parameters directly to `Connection`.
 - **BC break**: Move core `ConnectionInterface` up to package root namespace.
 - **BC break**: Deprecated static Factory methods are now instance-based.
+### Removed
+- **BC break**: Remove `SocketInterface::getUniqueIdentifier()` only needed
+  internally.
 
 ## [2.1.0] - 2023-07-05
 ### Added

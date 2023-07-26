@@ -9,8 +9,6 @@ namespace Phlib\Beanstalk\Connection;
  */
 interface SocketInterface
 {
-    public function getUniqueIdentifier(): string;
-
     public function write(string $data): self;
 
     public function read(int $length = null): string;

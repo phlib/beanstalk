@@ -18,13 +18,6 @@ class SocketTest extends TestCase
         static::assertInstanceOf(SocketInterface::class, new Socket('localhost'));
     }
 
-    public function testGetUniqueIdentifier(): void
-    {
-        $socket1 = new Socket('localhost', 11300);
-        $socket2 = new Socket('localhost', 11301);
-        static::assertNotSame($socket1->getUniqueIdentifier(), $socket2->getUniqueIdentifier());
-    }
-
     public function testConnectOnSuccessReturnsSelf(): void
     {
         $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
@@ -167,7 +160,7 @@ class SocketTest extends TestCase
      */
     private function getMockSocket(array $originalMethods): Socket
     {
-        $availableFns = ['connect', 'disconnect', 'read', 'write', 'getUniqueIdentifier'];
+        $availableFns = ['connect', 'disconnect', 'read', 'write'];
         $mockedMethods = array_diff($availableFns, $originalMethods);
 
         return $this->createPartialMock(Socket::class, $mockedMethods);

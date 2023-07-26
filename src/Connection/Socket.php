@@ -42,11 +42,6 @@ class Socket implements SocketInterface
         $this->disconnect();
     }
 
-    public function getUniqueIdentifier(): string
-    {
-        return "{$this->host}:{$this->port}";
-    }
-
     public function connect(): self
     {
         if (!$this->connection) {

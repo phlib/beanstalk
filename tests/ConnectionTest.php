@@ -36,6 +36,22 @@ class ConnectionTest extends TestCase
         static::assertInstanceOf(ConnectionInterface::class, $this->beanstalk);
     }
 
+    public function testGetName(): void
+    {
+        $hostname = sha1(uniqid('hostname'));
+        $port = rand(10000, 15000);
+
+        $connection = new Connection(
+            $hostname,
+            $port,
+            [],
+            fn () => $this->socket,
+        );
+
+        $expected = $hostname . ':' . $port;
+        static::assertSame($expected, $connection->getName());
+    }
+
     public function testDisconnectCallsSocket(): void
     {
         $this->socket->expects(static::once())

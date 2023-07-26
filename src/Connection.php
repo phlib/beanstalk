@@ -41,7 +41,7 @@ class Connection implements ConnectionInterface
             $this->socket = new Socket($host, $port, $options);
         }
 
-        $this->name = $this->socket->getUniqueIdentifier();
+        $this->name = $host . ':' . $port;
     }
 
     public function disconnect(): bool
