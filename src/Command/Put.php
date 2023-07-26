@@ -11,8 +11,7 @@ use Phlib\Beanstalk\Exception\DrainingException;
 use Phlib\Beanstalk\ValidateTrait;
 
 /**
- * Class Put
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Put implements CommandInterface
 {

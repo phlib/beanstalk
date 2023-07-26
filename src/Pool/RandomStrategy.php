@@ -7,8 +7,7 @@ namespace Phlib\Beanstalk\Pool;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 /**
- * Class RandomStrategy
- * @package Phlib\Beanstalk\Pool
+ * @package Phlib\Beanstalk
  */
 class RandomStrategy implements SelectionStrategyInterface
 {

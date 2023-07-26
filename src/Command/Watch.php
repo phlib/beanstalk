@@ -9,8 +9,7 @@ use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\ValidateTrait;
 
 /**
- * Class Watch
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Watch implements CommandInterface
 {

@@ -6,6 +6,9 @@ namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 
+/**
+ * @package Phlib\Beanstalk
+ */
 class StatsService
 {
     public const SERVER_BINLOG = 1;

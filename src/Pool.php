@@ -9,6 +9,9 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool\CollectionInterface;
 
+/**
+ * @package Phlib\Beanstalk
+ */
 class Pool implements ConnectionInterface
 {
     private CollectionInterface $collection;

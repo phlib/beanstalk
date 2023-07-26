@@ -13,8 +13,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
- * Class AbstractCommand
- * @package Phlib\Beanstalk\Console
+ * @package Phlib\Beanstalk
  */
 abstract class AbstractCommand extends Command
 {

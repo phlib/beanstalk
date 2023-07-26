@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk\Command;
 
 /**
- * Class Stats
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Stats implements CommandInterface
 {

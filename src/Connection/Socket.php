@@ -7,7 +7,6 @@ namespace Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Exception;
 
 /**
- * Class Socket
  * @package Phlib\Beanstalk
  */
 class Socket implements SocketInterface

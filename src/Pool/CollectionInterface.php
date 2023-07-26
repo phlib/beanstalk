@@ -7,8 +7,7 @@ namespace Phlib\Beanstalk\Pool;
 use Phlib\Beanstalk\Connection\ConnectionInterface;
 
 /**
- * Interface CollectionInterface
- * @package Phlib\Beanstalk\Pool
+ * @package Phlib\Beanstalk
  */
 interface CollectionInterface extends \IteratorAggregate
 {

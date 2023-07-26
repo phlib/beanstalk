@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk\Command;
 
 /**
- * Class StatsJob
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class StatsJob implements CommandInterface
 {

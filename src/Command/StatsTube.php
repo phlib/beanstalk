@@ -7,8 +7,7 @@ namespace Phlib\Beanstalk\Command;
 use Phlib\Beanstalk\ValidateTrait;
 
 /**
- * Class StatsTube
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class StatsTube implements CommandInterface
 {

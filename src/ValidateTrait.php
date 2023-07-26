@@ -8,7 +8,6 @@ use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 /**
- * Class ValidateTrait
  * @package Phlib\Beanstalk
  */
 trait ValidateTrait
