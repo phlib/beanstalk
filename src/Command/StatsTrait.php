@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
@@ -13,7 +13,7 @@ use Phlib\Beanstalk\Exception\NotFoundException;
  */
 trait StatsTrait
 {
-    public function process(SocketInterface $socket): array
+    public function process(Socket $socket): array
     {
         $socket->write($this->getCommand());
         $status = strtok($socket->read(), ' ');

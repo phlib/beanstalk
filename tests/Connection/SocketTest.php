@@ -12,11 +12,6 @@ class SocketTest extends TestCase
 {
     use PHPMock;
 
-    public function testImplementsInterface(): void
-    {
-        static::assertInstanceOf(SocketInterface::class, new Socket('localhost'));
-    }
-
     public function testConnectOnFailureThrowsError(): void
     {
         $this->expectException(SocketException::class);

@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ### Removed
 - **BC break**: Remove `Socket::getUniqueIdentifier()` and `Socket::connect()`
   only needed internally.
+- **BC break**: Remove `SocketInterface`. The details of a connection's
+  socket are only for internal implementation.
 
 ## [2.1.0] - 2023-07-05
 ### Added

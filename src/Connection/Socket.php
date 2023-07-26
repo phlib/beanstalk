@@ -8,8 +8,9 @@ use Phlib\Beanstalk\Exception;
 
 /**
  * @package Phlib\Beanstalk
+ * @internal This class is not part of the backward-compatibility promise.
  */
-class Socket implements SocketInterface
+class Socket
 {
     public const DEFAULT_PORT = 11300;
 
