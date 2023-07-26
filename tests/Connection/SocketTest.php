@@ -6,7 +6,6 @@ namespace Phlib\Beanstalk\Connection;
 
 use Phlib\Beanstalk\Exception\SocketException;
 use phpmock\phpunit\PHPMock;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class SocketTest extends TestCase
@@ -16,16 +15,6 @@ class SocketTest extends TestCase
     public function testImplementsInterface(): void
     {
         static::assertInstanceOf(SocketInterface::class, new Socket('localhost'));
-    }
-
-    public function testConnectOnSuccessReturnsSelf(): void
-    {
-        $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
-        $fsockopen->expects(static::any())->willReturn(true);
-        $stream_set_timeout = $this->getFunctionMock(__NAMESPACE__, 'stream_set_timeout');
-        $stream_set_timeout->expects(static::any())->willReturn(true);
-
-        static::assertInstanceOf(Socket::class, (new Socket('host'))->connect());
     }
 
     public function testConnectOnFailureThrowsError(): void
@@ -41,7 +30,7 @@ class SocketTest extends TestCase
         $stream_set_timeout = $this->getFunctionMock(__NAMESPACE__, 'stream_set_timeout');
         $stream_set_timeout->expects(static::any())->willReturn(true);
 
-        (new Socket('host'))->connect();
+        (new Socket('host'))->read();
     }
 
     public function testConnectsWithTheCorrectDetails(): void
@@ -63,9 +52,13 @@ class SocketTest extends TestCase
         $stream_set_timeout = $this->getFunctionMock(__NAMESPACE__, 'stream_set_timeout');
         $stream_set_timeout->expects(static::any())->willReturn(true);
 
+        // Add functional read after valid connection
+        $stream_get_line = $this->getFunctionMock(__NAMESPACE__, 'stream_get_line');
+        $stream_get_line->expects(static::any())->willReturn('');
+
         (new Socket($host, $port, [
             'timeout' => $timeout,
-        ]))->connect();
+        ]))->read();
     }
 
     public function testDisconnectWithValidConnection(): void
@@ -74,11 +67,17 @@ class SocketTest extends TestCase
         $fsockopen->expects(static::any())->willReturn(fopen('php://memory', 'r+'));
         $stream_set_timeout = $this->getFunctionMock(__NAMESPACE__, 'stream_set_timeout');
         $stream_set_timeout->expects(static::any())->willReturn(true);
-        $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fclose');
-        $fsockopen->expects(static::once())->willReturn(true); // <- test here
+
+        // Add functional read after valid connection
+        $stream_get_line = $this->getFunctionMock(__NAMESPACE__, 'stream_get_line');
+        $stream_get_line->expects(static::any())->willReturn('');
+
+        // Check the resource is closed
+        $fclose = $this->getFunctionMock(__NAMESPACE__, 'fclose');
+        $fclose->expects(static::once())->willReturn(true); // <- test here
 
         $socket = new Socket('host');
-        $socket->connect();
+        $socket->read();
         $socket->disconnect();
     }
 
@@ -88,11 +87,17 @@ class SocketTest extends TestCase
         $fsockopen->expects(static::any())->willReturn(true);
         $stream_set_timeout = $this->getFunctionMock(__NAMESPACE__, 'stream_set_timeout');
         $stream_set_timeout->expects(static::any())->willReturn(true);
-        $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fclose');
-        $fsockopen->expects(static::never()); // <- test here
+
+        // Add functional read to avoid error and allow testing disconnect()
+        $stream_get_line = $this->getFunctionMock(__NAMESPACE__, 'stream_get_line');
+        $stream_get_line->expects(static::any())->willReturn('');
+
+        // No attempt to close, as open didn't return a valid resource
+        $fclose = $this->getFunctionMock(__NAMESPACE__, 'fclose');
+        $fclose->expects(static::never());
 
         $socket = new Socket('host');
-        $socket->connect();
+        $socket->read();
         $socket->disconnect();
     }
 
@@ -110,7 +115,7 @@ class SocketTest extends TestCase
             )
             ->willReturn($dataLength);
 
-        $this->getMockSocket(['write'])
+        $this->getTestSocket()
             ->write($data);
     }
 
@@ -122,7 +127,7 @@ class SocketTest extends TestCase
         $fwrite->expects(static::any())
             ->willReturn(0);
 
-        $this->getMockSocket(['write'])
+        $this->getTestSocket()
             ->write('Some Data');
     }
 
@@ -131,7 +136,7 @@ class SocketTest extends TestCase
         $expectedData = 'Some Data';
         $stream_get_line = $this->getFunctionMock(__NAMESPACE__, 'stream_get_line');
         $stream_get_line->expects(static::any())->willReturn($expectedData);
-        static::assertSame($expectedData, $this->getMockSocket(['read'])->read());
+        static::assertSame($expectedData, $this->getTestSocket()->read());
     }
 
     public function testReadSuccessfullyWithLengthParam(): void
@@ -143,7 +148,7 @@ class SocketTest extends TestCase
         $fread = $this->getFunctionMock(__NAMESPACE__, 'fread');
         $fread->expects(static::any())->willReturn($expectedData);
 
-        static::assertSame($expectedData, $this->getMockSocket(['read'])->read(9));
+        static::assertSame($expectedData, $this->getTestSocket()->read(9));
     }
 
     public function testReadFailsWithBadData(): void
@@ -152,17 +157,19 @@ class SocketTest extends TestCase
 
         $stream_get_line = $this->getFunctionMock(__NAMESPACE__, 'stream_get_line');
         $stream_get_line->expects(static::any())->willReturn(false);
-        $this->getMockSocket(['read'])->read();
+        $this->getTestSocket()->read();
     }
 
-    /**
-     * @return Socket|MockObject
-     */
-    private function getMockSocket(array $originalMethods): Socket
+    private function getTestSocket(): Socket
     {
-        $availableFns = ['connect', 'disconnect', 'read', 'write'];
-        $mockedMethods = array_diff($availableFns, $originalMethods);
+        $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
+        $fsockopen->expects(static::any())
+            ->willReturn(fopen('php://memory', 'r+'));
 
-        return $this->createPartialMock(Socket::class, $mockedMethods);
+        $stream_set_timeout = $this->getFunctionMock(__NAMESPACE__, 'stream_set_timeout');
+        $stream_set_timeout->expects(static::any())
+            ->willReturn(true);
+
+        return new Socket('host');
     }
 }

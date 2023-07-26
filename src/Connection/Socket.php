@@ -42,7 +42,7 @@ class Socket implements SocketInterface
         $this->disconnect();
     }
 
-    public function connect(): self
+    private function connect(): void
     {
         if (!$this->connection) {
             $errNum = $errStr = null;
@@ -62,8 +62,6 @@ class Socket implements SocketInterface
             // remove timeout on the stream, allows blocking reserve
             stream_set_timeout($this->connection, -1, 0);
         }
-
-        return $this;
     }
 
     public function write(string $data): self
