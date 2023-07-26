@@ -155,6 +155,18 @@ class SocketTest extends TestCase
         $this->getTestSocket()->read();
     }
 
+    public function testReadFailsWithBadDataWithLengthParam(): void
+    {
+        $this->expectException(SocketException::class);
+
+        $feof = $this->getFunctionMock(__NAMESPACE__, 'feof');
+        $feof->expects(static::any())->willReturn(false);
+        $fread = $this->getFunctionMock(__NAMESPACE__, 'fread');
+        $fread->expects(static::any())->willReturn(false);
+
+        $this->getTestSocket()->read(9);
+    }
+
     private function getTestSocket(): Socket
     {
         $fsockopen = $this->getFunctionMock(__NAMESPACE__, 'fsockopen');
