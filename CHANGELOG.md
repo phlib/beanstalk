@@ -13,7 +13,15 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   mode and cannot accept new jobs.
   Previously this threw `CommandException` which the new exception extends.
 ### Changed
+- **BC break**: Constructor for `Connection` no longer needs a `Socket`.
+  Pass the same parameters directly to `Connection`.
+- **BC break**: Move core `ConnectionInterface` up to package root namespace.
 - **BC break**: Deprecated static Factory methods are now instance-based.
+### Removed
+- **BC break**: Remove `Socket::getUniqueIdentifier()` and `Socket::connect()`
+  only needed internally.
+- **BC break**: Remove `SocketInterface`. The details of a connection's
+  socket are only for internal implementation.
 
 ## [2.1.0] - 2023-07-05
 ### Added

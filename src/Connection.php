@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
@@ -18,7 +17,7 @@ class Connection implements ConnectionInterface
 
     private string $name;
 
-    private SocketInterface $socket;
+    private Socket $socket;
 
     private string $using = self::DEFAULT_TUBE;
 
@@ -26,21 +25,22 @@ class Connection implements ConnectionInterface
         self::DEFAULT_TUBE => true,
     ];
 
-    public function __construct(SocketInterface $socket)
-    {
-        $this->setSocket($socket);
-        $this->name = $socket->getUniqueIdentifier();
-    }
+    /**
+     * @param \Closure|null $createSocket This parameter is not part of the BC promise. Used for unit test DI.
+     */
+    public function __construct(
+        string $host,
+        int $port = Socket::DEFAULT_PORT,
+        array $options = [],
+        \Closure $createSocket = null
+    ) {
+        if (isset($createSocket)) {
+            $this->socket = $createSocket($host, $port, $options);
+        } else {
+            $this->socket = new Socket($host, $port, $options);
+        }
 
-    private function getSocket(): SocketInterface
-    {
-        return $this->socket;
-    }
-
-    private function setSocket(SocketInterface $socket): self
-    {
-        $this->socket = $socket;
-        return $this;
+        $this->name = $host . ':' . $port;
     }
 
     public function disconnect(): bool
@@ -56,7 +56,7 @@ class Connection implements ConnectionInterface
     public function useTube(string $tube): self
     {
         (new Command\UseTube($tube))
-            ->process($this->getSocket());
+            ->process($this->socket);
         $this->using = $tube;
         return $this;
     }
@@ -68,13 +68,13 @@ class Connection implements ConnectionInterface
         int $ttr = ConnectionInterface::DEFAULT_TTR
     ): int {
         return (new Command\Put($data, $priority, $delay, $ttr))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     public function reserve(?int $timeout = null): ?array
     {
         $jobData = (new Command\Reserve($timeout))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $jobData;
     }
 
@@ -85,7 +85,7 @@ class Connection implements ConnectionInterface
     {
         $id = $this->filterJobId($id);
         (new Command\Delete($id))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $this;
     }
 
@@ -99,7 +99,7 @@ class Connection implements ConnectionInterface
     ): self {
         $id = $this->filterJobId($id);
         (new Command\Release($id, $priority, $delay))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $this;
     }
 
@@ -110,7 +110,7 @@ class Connection implements ConnectionInterface
     {
         $id = $this->filterJobId($id);
         (new Command\Bury($id, $priority))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $this;
     }
 
@@ -121,7 +121,7 @@ class Connection implements ConnectionInterface
     {
         $id = $this->filterJobId($id);
         (new Command\Touch($id))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $this;
     }
 
@@ -132,7 +132,7 @@ class Connection implements ConnectionInterface
         }
 
         (new Command\Watch($tube))
-            ->process($this->getSocket());
+            ->process($this->socket);
         $this->watching[$tube] = true;
 
         return $this;
@@ -146,7 +146,7 @@ class Connection implements ConnectionInterface
             }
 
             (new Command\Ignore($tube))
-                ->process($this->getSocket());
+                ->process($this->socket);
             unset($this->watching[$tube]);
         }
 
@@ -160,7 +160,7 @@ class Connection implements ConnectionInterface
     {
         $id = $this->filterJobId($id);
         return (new Command\Peek($id))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     public function peekReady(): ?array
@@ -182,7 +182,7 @@ class Connection implements ConnectionInterface
     {
         try {
             return (new Command\PeekStatus($status))
-                ->process($this->getSocket());
+                ->process($this->socket);
         } catch (NotFoundException $e) {
             return null;
         }
@@ -191,7 +191,7 @@ class Connection implements ConnectionInterface
     public function stats(): array
     {
         return (new Command\Stats())
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     /**
@@ -201,25 +201,25 @@ class Connection implements ConnectionInterface
     {
         $id = $this->filterJobId($id);
         return (new Command\StatsJob($id))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     public function statsTube(string $tube): array
     {
         return (new Command\StatsTube($tube))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     public function kick(int $quantity): int
     {
         return (new Command\Kick($quantity))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     public function listTubes(): array
     {
         return (new Command\ListTubes())
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     public function listTubeUsed(): string

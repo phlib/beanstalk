@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use PHPUnit\Framework\TestCase;
 
@@ -23,8 +22,8 @@ class IntegrationPoolTest extends TestCase
         }
 
         $connections = [
-            new Connection(new Socket(getenv('BSTALK1_HOST'), (int)getenv('BSTALK1_PORT'))),
-            new Connection(new Socket(getenv('BSTALK2_HOST'), (int)getenv('BSTALK2_PORT'))),
+            new Connection(getenv('BSTALK1_HOST'), (int)getenv('BSTALK1_PORT')),
+            new Connection(getenv('BSTALK2_HOST'), (int)getenv('BSTALK2_PORT')),
         ];
         $this->beanstalk = new Pool(new Pool\Collection($connections));
     }

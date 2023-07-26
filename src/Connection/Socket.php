@@ -8,8 +8,9 @@ use Phlib\Beanstalk\Exception;
 
 /**
  * @package Phlib\Beanstalk
+ * @internal This class is not part of the backward-compatibility promise.
  */
-class Socket implements SocketInterface
+class Socket
 {
     public const DEFAULT_PORT = 11300;
 
@@ -42,12 +43,7 @@ class Socket implements SocketInterface
         $this->disconnect();
     }
 
-    public function getUniqueIdentifier(): string
-    {
-        return "{$this->host}:{$this->port}";
-    }
-
-    public function connect(): self
+    private function connect(): void
     {
         if (!$this->connection) {
             $errNum = $errStr = null;
@@ -67,8 +63,6 @@ class Socket implements SocketInterface
             // remove timeout on the stream, allows blocking reserve
             stream_set_timeout($this->connection, -1, 0);
         }
-
-        return $this;
     }
 
     public function write(string $data): self

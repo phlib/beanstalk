@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use PHPUnit\Framework\TestCase;
 
@@ -22,7 +21,7 @@ class IntegrationTest extends TestCase
             return;
         }
 
-        $this->beanstalk = new Connection(new Socket(getenv('BSTALK1_HOST'), (int)getenv('BSTALK1_PORT')));
+        $this->beanstalk = new Connection(getenv('BSTALK1_HOST'), (int)getenv('BSTALK1_PORT'));
     }
 
     public function testReconnectingAfterDisconnect(): void

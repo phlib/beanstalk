@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\BuriedException;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\NotFoundException;
@@ -38,7 +38,7 @@ class Release implements CommandInterface
         return sprintf('release %d %d %d', $this->id, $this->priority, $this->delay);
     }
 
-    public function process(SocketInterface $socket): self
+    public function process(Socket $socket): self
     {
         $socket->write($this->getCommand());
 

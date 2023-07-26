@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Pool\Collection;
@@ -18,7 +17,7 @@ class Factory
 {
     public function create(string $host, int $port = Socket::DEFAULT_PORT, array $options = []): Connection
     {
-        return new Connection(new Socket($host, $port, $options));
+        return new Connection($host, $port, $options);
     }
 
     public function createFromArray(array $config): ConnectionInterface

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\BuriedException;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\DrainingException;
@@ -44,7 +44,7 @@ class Put implements CommandInterface
         return sprintf('put %d %d %d %d', $this->priority, $this->delay, $this->ttr, $bytesSent);
     }
 
-    public function process(SocketInterface $socket): int
+    public function process(Socket $socket): int
     {
         $socket->write($this->getCommand());
         $socket->write($this->data);

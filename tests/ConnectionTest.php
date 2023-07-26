@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
@@ -23,13 +22,34 @@ class ConnectionTest extends TestCase
     protected function setUp(): void
     {
         $this->socket = $this->createMock(Socket::class);
-        $this->beanstalk = new Connection($this->socket);
+        $this->beanstalk = new Connection(
+            'hostname',
+            Socket::DEFAULT_PORT,
+            [],
+            fn () => $this->socket,
+        );
         parent::setUp();
     }
 
     public function testImplementsInterface(): void
     {
         static::assertInstanceOf(ConnectionInterface::class, $this->beanstalk);
+    }
+
+    public function testGetName(): void
+    {
+        $hostname = sha1(uniqid('hostname'));
+        $port = rand(10000, 15000);
+
+        $connection = new Connection(
+            $hostname,
+            $port,
+            [],
+            fn () => $this->socket,
+        );
+
+        $expected = $hostname . ':' . $port;
+        static::assertSame($expected, $connection->getName());
     }
 
     public function testDisconnectCallsSocket(): void

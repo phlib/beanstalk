@@ -19,7 +19,7 @@ foreach ($autoloadFiles as $autoloadFile) {
 }
 
 // use
-use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Console\JobDeleteCommand;
 use Phlib\Beanstalk\Console\JobPeekCommand;
 use Phlib\Beanstalk\Console\JobStatsCommand;

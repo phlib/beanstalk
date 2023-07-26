@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
-
 /**
  * @package Phlib\Beanstalk
  */
