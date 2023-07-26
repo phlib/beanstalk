@@ -5,8 +5,7 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk\Pool;
 
 /**
- * Interface SelectionStrategyInterface
- * @package Phlib\Beanstalk\Pool
+ * @package Phlib\Beanstalk
  */
 interface SelectionStrategyInterface
 {

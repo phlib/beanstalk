@@ -10,8 +10,7 @@ use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\ValidateTrait;
 
 /**
- * Class Release
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Release implements CommandInterface
 {

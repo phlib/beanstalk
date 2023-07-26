@@ -10,7 +10,6 @@ use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
- * Class Connection
  * @package Phlib\Beanstalk
  */
 class Connection implements ConnectionInterface

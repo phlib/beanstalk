@@ -11,8 +11,7 @@ use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 
 /**
- * Class Collection
- * @package Phlib\Beanstalk\Pool
+ * @package Phlib\Beanstalk
  */
 class Collection implements CollectionInterface
 {

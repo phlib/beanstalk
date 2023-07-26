@@ -9,8 +9,7 @@ use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
- * Class Delete
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Delete implements CommandInterface
 {

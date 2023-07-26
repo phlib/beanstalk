@@ -7,7 +7,7 @@ namespace Phlib\Beanstalk\Command;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 /**
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class PeekStatus extends Peek
 {

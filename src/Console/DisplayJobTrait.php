@@ -7,6 +7,9 @@ namespace Phlib\Beanstalk\Console;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Output\OutputInterface;
 
+/**
+ * @package Phlib\Beanstalk
+ */
 trait DisplayJobTrait
 {
     private function displayJob(array $job, OutputInterface $output): void

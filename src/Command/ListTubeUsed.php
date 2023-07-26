@@ -8,8 +8,7 @@ use Phlib\Beanstalk\Connection\SocketInterface;
 use Phlib\Beanstalk\Exception\CommandException;
 
 /**
- * Class ListTubeUsed
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class ListTubeUsed implements CommandInterface
 {

@@ -9,8 +9,7 @@ use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\ValidateTrait;
 
 /**
- * Class Ignore
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Ignore implements CommandInterface
 {

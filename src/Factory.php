@@ -12,7 +12,6 @@ use Phlib\Beanstalk\Pool\RoundRobinStrategy;
 use Phlib\Beanstalk\Pool\SelectionStrategyInterface;
 
 /**
- * Class Factory
  * @package Phlib\Beanstalk
  */
 class Factory

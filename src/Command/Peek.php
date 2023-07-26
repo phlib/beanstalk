@@ -9,8 +9,7 @@ use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
- * Class Peek
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Peek implements CommandInterface
 {

@@ -9,8 +9,7 @@ use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\ValidateTrait;
 
 /**
- * Class UseTube
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class UseTube implements CommandInterface
 {

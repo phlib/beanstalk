@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk\Connection;
 
 /**
- * Interface SocketInterface
  * @package Phlib\Beanstalk
  */
 interface SocketInterface

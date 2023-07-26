@@ -3,6 +3,12 @@
 
 declare(strict_types=1);
 
+/**
+ * Beanstalk CLI tool
+ *
+ * @package Phlib\Beanstalk
+ */
+
 // autoload
 $autoloadFiles = [__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php'];
 foreach ($autoloadFiles as $autoloadFile) {
