@@ -12,9 +12,6 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add new `DrainingException` thrown by `put()` when the server is in draining
   mode and cannot accept new jobs.
   Previously this threw `CommandException` which the new exception extends.
-- Add `--watch` option to `beanstalk tube:stats` CLI command.
-- Add value to `--watch` CLI options, to specify the refresh interval.
-  Add info line to show the interval and current datetime.
 ### Changed
 - Status is a required argument for the `tube:peek` CLI command.
 - **BC break**: Constructor for `Connection` no longer needs a `Socket`.
@@ -29,6 +26,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - **BC break**: Remove `SocketInterface`. The details of a connection's
   socket are only for internal implementation.
   No impact to standard use of this package.
+
+## [2.x] - TBC
+- Add `--watch` option to `beanstalk tube:stats` CLI command.
+- Add value to `--watch` CLI options, to specify the refresh interval.
+  Add info line to show the interval and current datetime.
 
 ## [2.1.0] - 2023-07-05
 ### Added
