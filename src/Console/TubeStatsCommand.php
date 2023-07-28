@@ -14,7 +14,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @package Phlib\Beanstalk
  */
-class TubeStatsCommand extends AbstractStatsCommand
+class TubeStatsCommand extends AbstractWatchCommand
 {
     protected function configure(): void
     {
@@ -26,7 +26,7 @@ class TubeStatsCommand extends AbstractStatsCommand
         parent::configure();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output): int
+    protected function foreachWatch(InputInterface $input, OutputInterface $output): int
     {
         $tube = $input->getArgument('tube');
         $stat = $input->getOption('stat');
@@ -36,10 +36,11 @@ class TubeStatsCommand extends AbstractStatsCommand
 
         if (empty($stats)) {
             $output->writeln("No statistics found for tube '{$tube}'.");
-            return 0;
+            return 1;
         }
 
         if (empty($stat)) {
+            $output->writeln("=== {$tube} ===");
             $this->displayTable($stats, $output);
         } else {
             $this->displayStat($stats, $stat, $output);

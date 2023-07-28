@@ -12,6 +12,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add new `DrainingException` thrown by `put()` when the server is in draining
   mode and cannot accept new jobs.
   Previously this threw `CommandException` which the new exception extends.
+- Add `--watch` option to `beanstalk tube:stats` CLI command.
+- Add value to `--watch` CLI options, to specify the refresh interval.
+  Add info line to show the interval and current datetime.
 ### Changed
 - **BC break**: Constructor for `Connection` no longer needs a `Socket`.
   Pass the same parameters directly to `Connection`.
