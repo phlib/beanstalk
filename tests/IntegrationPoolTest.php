@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Exception\NotFoundException;
+use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -13,6 +14,14 @@ use PHPUnit\Framework\TestCase;
 class IntegrationPoolTest extends TestCase
 {
     private Pool $beanstalk;
+
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+
+        // Declare a namespaced shuffle function, so its use in this test doesn't block its use in Pool\CollectionTest
+        PHPMock::defineFunctionMock('\Phlib\Beanstalk\Pool', 'shuffle');
+    }
 
     protected function setUp(): void
     {
