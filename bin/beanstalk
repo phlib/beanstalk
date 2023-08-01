@@ -23,6 +23,7 @@ use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Console\JobDeleteCommand;
 use Phlib\Beanstalk\Console\JobPeekCommand;
 use Phlib\Beanstalk\Console\JobStatsCommand;
+use Phlib\Beanstalk\Console\ServerDistribCommand;
 use Phlib\Beanstalk\Console\ServerStatsCommand;
 use Phlib\Beanstalk\Console\ServerTubesCommand;
 use Phlib\Beanstalk\Console\TubeKickCommand;
@@ -39,6 +40,7 @@ $statsServiceFactory = fn (ConnectionInterface $beanstalk) => new StatsService($
 // lets go!
 $application = new Application('beanstalk');
 $application->addCommands([
+    new ServerDistribCommand($factory, $statsServiceFactory),
     new ServerStatsCommand($factory, $statsServiceFactory),
     new ServerTubesCommand($factory, $statsServiceFactory),
     new JobStatsCommand($factory),

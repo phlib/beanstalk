@@ -31,6 +31,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add `--watch` option to `beanstalk tube:stats` CLI command.
 - Add value to `--watch` CLI options, to specify the refresh interval.
   Add info line to show the interval and current datetime.
+- Add new *Server Distribution* CLI command, to show the balance of workers and
+  jobs across a Pool.
 
 ## [2.1.0] - 2023-07-05
 ### Added
