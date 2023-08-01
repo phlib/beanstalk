@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\Pool\RandomStrategy;
-use Phlib\Beanstalk\Pool\RoundRobinStrategy;
 use PHPUnit\Framework\TestCase;
 
 class FactoryTest extends TestCase
@@ -28,84 +26,28 @@ class FactoryTest extends TestCase
 
     public function createFromArrayDataProvider(): array
     {
-        $connectionClass = Connection::class;
-        $poolClass = Pool::class;
-        $defaultHost = [
-            'host' => 'localhost',
-        ];
-
         return [
             'local' => [
-                $connectionClass,
-                $defaultHost,
+                Connection::class,
+                [
+                    'host' => 'localhost',
+                ],
             ],
             'localWithPort' => [
-                $connectionClass,
+                Connection::class,
                 [
                     'host' => 'localhost',
                     'port' => 123456,
                 ],
             ],
-            'localArray' => [
-                $connectionClass,
-                [
-                    'server' => $defaultHost,
-                ],
-            ],
             'pool' => [
-                $poolClass,
+                Pool::class,
                 [
-                    'servers' => [$defaultHost, $defaultHost],
+                    ['host' => 'localhost1'],
+                    ['host' => 'localhost2'],
                 ],
             ],
         ];
-    }
-
-    /**
-     * @dataProvider creatingPoolUsesStrategyDataProvider
-     */
-    public function testCreatingPoolUsesStrategy(string $strategyClass): void
-    {
-        $hostConfig = [
-            'host' => 'localhost',
-        ];
-        $poolConfig = [
-            'servers' => [$hostConfig, $hostConfig],
-            'strategyClass' => $strategyClass,
-        ];
-
-        $factory = new Factory();
-        /** @var Pool $pool */
-        $pool = $factory->createFromArray($poolConfig);
-
-        /** @var Pool\Collection $collection */
-        $collection = $pool->getCollection();
-
-        static::assertInstanceOf($strategyClass, $collection->getSelectionStrategy());
-    }
-
-    public function creatingPoolUsesStrategyDataProvider(): array
-    {
-        return [
-            [RoundRobinStrategy::class],
-            [RandomStrategy::class],
-        ];
-    }
-
-    public function testCreatingPoolFailsWithInvalidStrategyClass(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $hostConfig = [
-            'host' => 'localhost',
-        ];
-        $poolConfig = [
-            'servers' => [$hostConfig, $hostConfig],
-            'strategyClass' => '\Some\RandomClass\ThatDoesnt\Exist',
-        ];
-
-        $factory = new Factory();
-        $factory->createFromArray($poolConfig);
     }
 
     public function testCreateFromArrayFailsWhenEmpty(): void

@@ -8,12 +8,15 @@ use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
+use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub\Stub;
 use PHPUnit\Framework\TestCase;
 
 class CollectionTest extends TestCase
 {
+    use PHPMock;
+
     private const SEND_COMMANDS_ALLOWED = [
         'useTube' => ['tube', 'self'],
         'put' => ['data', 123],
@@ -37,24 +40,33 @@ class CollectionTest extends TestCase
         'listTubesWatched' => [['some result']],
     ];
 
-    /**
-     * @var SelectionStrategyInterface|MockObject
-     */
-    private SelectionStrategyInterface $strategy;
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+
+        // Declare the namespaced function early, so it's available after being used in other tests
+        // @see https://github.com/php-mock/php-mock-phpunit#restrictions
+        PHPMock::defineFunctionMock(__NAMESPACE__, 'shuffle');
+    }
 
     protected function setUp(): void
     {
-        $this->strategy = $this->createMock(SelectionStrategyInterface::class);
+        parent::setUp();
+
+        // Prevent the shuffle giving a random connection order
+        $shuffle = $this->getFunctionMock(__NAMESPACE__, 'shuffle');
+        $shuffle->expects(static::any())
+            ->willReturn(null);
     }
 
     public function testImplementsCollectionInterface(): void
     {
-        static::assertInstanceOf(CollectionInterface::class, new Collection([], $this->strategy));
+        static::assertInstanceOf(CollectionInterface::class, new Collection([]));
     }
 
     public function testImplementsArrayAggregateInterface(): void
     {
-        static::assertInstanceOf(\IteratorAggregate::class, new Collection([], $this->strategy));
+        static::assertInstanceOf(\IteratorAggregate::class, new Collection([]));
     }
 
     public function testArrayAggregateReturnsConnections(): void
@@ -131,18 +143,6 @@ class CollectionTest extends TestCase
             $key1,
         ];
         static::assertSame($expected, $collection->getAvailableKeys());
-    }
-
-    public function testDefaultStrategyIsRoundRobin(): void
-    {
-        $collection = new Collection([]);
-        static::assertInstanceOf(RoundRobinStrategy::class, $collection->getSelectionStrategy());
-    }
-
-    public function testConstructorCanSetTheStrategy(): void
-    {
-        $collection = new Collection([], $this->strategy);
-        static::assertSame($this->strategy, $collection->getSelectionStrategy());
     }
 
     public function testConstructorTakesListOfValidConnections(): void
@@ -294,7 +294,7 @@ class CollectionTest extends TestCase
         $connection->expects(static::any())
             ->method($command)
             ->willThrowException(new RuntimeException());
-        $collection = new Collection([$connection], $this->strategy, [
+        $collection = new Collection([$connection], [
             'retry_delay' => 0,
         ]);
         try {
@@ -470,12 +470,10 @@ class CollectionTest extends TestCase
             ->willReturn($response);
 
         $connection2 = $this->getMockConnection('id-456');
+        $connection2->expects(static::never())
+            ->method($command);
 
-        $this->strategy->expects(static::any())
-            ->method('pickOne')
-            ->willReturn($identifier1);
-
-        $collection = new Collection([$connection1, $connection2], $this->strategy);
+        $collection = new Collection([$connection1, $connection2]);
         $collection->sendToOne($command);
     }
 
@@ -496,11 +494,7 @@ class CollectionTest extends TestCase
             ->method($command)
             ->willReturn(null);
 
-        $this->strategy->expects(static::any())
-            ->method('pickOne')
-            ->willReturnOnConsecutiveCalls($identifier1, $identifier2);
-
-        $collection = new Collection([$connection1, $connection2], $this->strategy);
+        $collection = new Collection([$connection1, $connection2]);
         $collection->sendToOne($command);
     }
 
@@ -524,11 +518,7 @@ class CollectionTest extends TestCase
             ->method($command)
             ->willReturn($response);
 
-        $this->strategy->expects(static::any())
-            ->method('pickOne')
-            ->willReturnOnConsecutiveCalls($identifier1, $identifier2);
-
-        $collection = new Collection([$connection1, $connection2], $this->strategy);
+        $collection = new Collection([$connection1, $connection2]);
         $collection->sendToOne($command);
     }
 
@@ -541,20 +531,23 @@ class CollectionTest extends TestCase
         $connection1 = $this->getMockConnection($identifier1);
         $connection1->expects(static::any())
             ->method($command)
-            ->willThrowException(new RuntimeException());
+            ->willThrowException(new RuntimeException('error1'));
 
         $identifier2 = 'id-456';
         $connection2 = $this->getMockConnection($identifier2);
         $connection2->expects(static::once())
             ->method($command)
-            ->willThrowException(new RuntimeException());
+            ->willThrowException(new RuntimeException('error2'));
 
-        $this->strategy->expects(static::any())
-            ->method('pickOne')
-            ->willReturnOnConsecutiveCalls($identifier1, $identifier2);
-
-        $collection = new Collection([$connection1, $connection2], $this->strategy);
-        $collection->sendToOne($command);
+        try {
+            $collection = new Collection([$connection1, $connection2]);
+            $collection->sendToOne($command);
+        } catch (RuntimeException $e) {
+            $previous = $e->getPrevious();
+            static::assertInstanceOf(RuntimeException::class, $previous);
+            static::assertSame('error2', $previous->getMessage());
+            throw $e;
+        }
     }
 
     /**

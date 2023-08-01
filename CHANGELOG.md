@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - **BC break**: Move `ValidateTrait` and `StatsService` out of root namespace.
   No impact to standard use of this package.
 ### Removed
+- **BC break**: Strategy options are removed. Server choice is random when
+  picking one.
+- **BC break**: Config format no longer supports nesting under `servers` key.
 - **BC break**: Remove `Socket::getUniqueIdentifier()` and `Socket::connect()`
   only needed internally. No impact to standard use of this package.
 - **BC break**: Remove `SocketInterface`. The details of a connection's

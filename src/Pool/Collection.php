@@ -17,14 +17,12 @@ class Collection implements CollectionInterface
 {
     private array $connections;
 
-    private SelectionStrategyInterface $strategy;
-
     private array $options;
 
     /**
      * @param ConnectionInterface[] $connections
      */
-    public function __construct(array $connections, SelectionStrategyInterface $strategy = null, array $options = [])
+    public function __construct(array $connections, array $options = [])
     {
         $formatted = [];
         foreach ($connections as $connection) {
@@ -39,18 +37,9 @@ class Collection implements CollectionInterface
         }
         $this->connections = $formatted;
 
-        if ($strategy === null) {
-            $strategy = new RoundRobinStrategy();
-        }
-        $this->strategy = $strategy;
         $this->options = $options + [
             'retry_delay' => 600,
         ];
-    }
-
-    public function getSelectionStrategy(): SelectionStrategyInterface
-    {
-        return $this->strategy;
     }
 
     public function getIterator(): \Traversable
@@ -102,9 +91,8 @@ class Collection implements CollectionInterface
         $e = null;
 
         $keysAvailable = array_keys($this->connections);
-        $keysUsed = [];
-        $keysExhausted = false;
-        while (!$keysExhausted && ($key = $this->strategy->pickOne($keysAvailable)) !== false) {
+        shuffle($keysAvailable);
+        foreach ($keysAvailable as $key) {
             try {
                 $result = $this->sendToExact($key, $command, $arguments);
                 if ($result['response'] !== null) {
@@ -112,11 +100,6 @@ class Collection implements CollectionInterface
                 }
             } catch (RuntimeException $e) {
                 // ignore
-            }
-
-            $keysUsed[$key] = true;
-            if (count($keysUsed) === count($keysAvailable)) {
-                $keysExhausted = true;
             }
         }
 
