@@ -6,10 +6,10 @@ namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * @package Phlib\Beanstalk
@@ -37,11 +37,15 @@ class ServerDistribCommand extends AbstractWatchCommand
         }
         $collection = $beanstalk->getCollection();
 
+        $io = new SymfonyStyle($input, $output);
+        $io->title('Server Distribution');
+
         $useTube = $input->getArgument('tube');
         $currentWorkers = 'current-workers';
         $command = 'stats';
         $args = [];
         if ($useTube) {
+            $io->section('Tube: ' . $useTube);
             $currentWorkers = 'current-watching';
             $command = 'statsTube';
             $args = [$useTube];
@@ -77,7 +81,7 @@ class ServerDistribCommand extends AbstractWatchCommand
             $rows[6][] = $buried;
         });
 
-        $table = new Table($output);
+        $table = $io->createTable();
         $table->setHeaders($headers);
         $table->addRows($rows);
         $table->render();
