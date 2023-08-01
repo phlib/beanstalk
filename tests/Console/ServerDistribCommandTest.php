@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Console;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Factory;
 use Phlib\Beanstalk\Pool;
 use Phlib\Beanstalk\Pool\Collection;
-use Phlib\Beanstalk\StatsService;
+use Phlib\Beanstalk\Stats\Service as StatsService;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class ServerDistribCommandTest extends ConsoleTestCase
@@ -36,7 +36,7 @@ class ServerDistribCommandTest extends ConsoleTestCase
         $this->expectExceptionMessage('Command only works with a pool of beanstalk servers');
 
         // Use standard non-Pool connection
-        $this->factory->method('createFromArrayBC')
+        $this->factory->method('createFromArray')
             ->willReturn($this->connection);
 
         $this->commandTester->execute([
@@ -51,7 +51,7 @@ class ServerDistribCommandTest extends ConsoleTestCase
     {
         $pool = $this->createMock(Pool::class);
 
-        $this->factory->method('createFromArrayBC')
+        $this->factory->method('createFromArray')
             ->willReturn($pool);
 
         $connections = [
