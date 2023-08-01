@@ -14,17 +14,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 class ServerDistribCommandTest extends ConsoleTestCase
 {
-    private const STAT_MAP = [
-        'current-jobs-buried' => 'jobs-buried',
-        'current-jobs-delayed' => 'jobs-delayed',
-        'current-jobs-ready' => 'jobs-ready',
-        'current-jobs-reserved' => 'jobs-reserved',
-        'current-jobs-urgent' => 'jobs-urgent',
-        'current-waiting' => 'workers-waiting',
-        'current-watching' => 'workers-watching',
-        'current-workers' => 'workers-watching',
-    ];
-
     /**
      * @var StatsService|MockObject
      */
@@ -55,7 +44,10 @@ class ServerDistribCommandTest extends ConsoleTestCase
         ]);
     }
 
-    public function testAllStats(): void
+    /**
+     * @dataProvider dataStatsDisplay
+     */
+    public function testStatsDisplay(array $expectedStats, ?string $tubeName): void
     {
         $pool = $this->createMock(Pool::class);
 
@@ -63,14 +55,21 @@ class ServerDistribCommandTest extends ConsoleTestCase
             ->willReturn($pool);
 
         $connections = [
-            $this->createConnectionStats(),
-            $this->createConnectionStats(),
+            $this->createConnectionStats(array_keys($expectedStats)),
+            $this->createConnectionStats(array_keys($expectedStats)),
         ];
+
+        $method = 'stats';
+        $args = [];
+        if (isset($tubeName)) {
+            $method = 'statsTube';
+            $args = [$tubeName];
+        }
 
         $collection = $this->createMock(Collection::class);
         $collection->expects(static::once())
             ->method('sendToAll')
-            ->with('stats', [])
+            ->with($method, $args)
             ->willReturnCallback(function ($command, $arguments, $success) use ($connections) {
                 foreach ($connections as $details) {
                     call_user_func($success, [
@@ -84,9 +83,13 @@ class ServerDistribCommandTest extends ConsoleTestCase
             ->method('getCollection')
             ->willReturn($collection);
 
-        $this->commandTester->execute([
+        $execInput = [
             'command' => $this->command->getName(),
-        ]);
+        ];
+        if (isset($tubeName)) {
+            $execInput['tube'] = $tubeName;
+        }
+        $this->commandTester->execute($execInput);
 
         $output = $this->commandTester->getDisplay();
 
@@ -97,10 +100,7 @@ class ServerDistribCommandTest extends ConsoleTestCase
         }
         static::assertMatchesRegularExpression('/' . $expectedHeaders . '/', $output);
 
-        // Table; doesn't use `current-watching` for all stats
-        $expectedStats = self::STAT_MAP;
-        unset($expectedStats['current-watching']);
-
+        // Table
         foreach ($expectedStats as $statName => $statDisplay) {
             $expectedRow = '[\s|]+' . $statDisplay . '[\s|]+';
             foreach ($connections as $details) {
@@ -110,65 +110,32 @@ class ServerDistribCommandTest extends ConsoleTestCase
         }
     }
 
-    public function testSingleTube(): void
+    public function dataStatsDisplay(): array
     {
-        $tubeName = sha1(uniqid('tube'));
-
-        $pool = $this->createMock(Pool::class);
-
-        $this->factory->method('createFromArrayBC')
-            ->willReturn($pool);
-
-        $connections = [
-            $this->createConnectionStats(),
-            $this->createConnectionStats(),
+        $baseStats = [
+            'current-jobs-buried' => 'jobs-buried',
+            'current-jobs-delayed' => 'jobs-delayed',
+            'current-jobs-ready' => 'jobs-ready',
+            'current-jobs-reserved' => 'jobs-reserved',
+            'current-jobs-urgent' => 'jobs-urgent',
+            'current-waiting' => 'workers-waiting',
         ];
 
-        $collection = $this->createMock(Collection::class);
-        $collection->expects(static::once())
-            ->method('sendToAll')
-            ->with('statsTube', [$tubeName])
-            ->willReturnCallback(function ($command, $arguments, $success) use ($connections) {
-                foreach ($connections as $details) {
-                    call_user_func($success, [
-                        'connection' => $details['connection'],
-                        'response' => $details['stats'],
-                    ]);
-                }
-            });
-
-        $pool->expects(static::once())
-            ->method('getCollection')
-            ->willReturn($collection);
-
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            'tube' => $tubeName,
+        $allStats = array_merge($baseStats, [
+            'current-workers' => 'workers-watching',
         ]);
 
-        $output = $this->commandTester->getDisplay();
+        $tubeStats = array_merge($baseStats, [
+            'current-watching' => 'workers-watching',
+        ]);
 
-        // Headers
-        $expectedHeaders = '[\s|]+Stat[\s|]+';
-        foreach ($connections as $details) {
-            $expectedHeaders .= $details['connectionName'] . '[\s|]+';
-        }
-        static::assertMatchesRegularExpression('/' . $expectedHeaders . '/', $output);
-
-        // Table; doesn't use `current-workers` for tube stats
-        $expectedStats = self::STAT_MAP;
-        unset($expectedStats['current-workers']);
-
-        foreach ($expectedStats as $statName => $statDisplay) {
-            $expectedRow = '[\s|]+' . $statDisplay . '[\s|]+';
-            foreach ($connections as $details) {
-                $expectedRow .= $details['stats'][$statName] . '[\s|]+';
-            }
-            static::assertMatchesRegularExpression('/' . $expectedRow . '/', $output);
-        }
+        return [
+            'all' => [$allStats, null],
+            'tube' => [$tubeStats, sha1(uniqid('tube'))],
+        ];
     }
 
-    private function createConnectionStats(): array
+    private function createConnectionStats(array $statNames): array
     {
         $connectionName = sha1(uniqid('name'));
         $connection = $this->createMock(ConnectionInterface::class);
@@ -176,7 +143,7 @@ class ServerDistribCommandTest extends ConsoleTestCase
             ->willReturn($connectionName);
 
         $stats = [];
-        foreach (self::STAT_MAP as $statName => $statDisplay) {
+        foreach ($statNames as $statName) {
             $stats[$statName] = rand(1, 1024);
         }
 
