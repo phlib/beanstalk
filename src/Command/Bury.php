@@ -1,58 +1,38 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
-use Phlib\Beanstalk\Exception\NotFoundException;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
-use Phlib\Beanstalk\ValidateTrait;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
- * Class Bury
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Bury implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
-    /**
-     * @var string|integer
-     */
-    protected $id;
+    private int $id;
 
-    /**
-     * @var integer
-     */
-    protected $priority;
+    private int $priority;
 
-    /**
-     * @param string|integer $id
-     * @param integer        $priority
-     */
-    public function __construct($id, $priority)
+    public function __construct(int $id, int $priority)
     {
         $this->validatePriority($priority);
 
-        $this->id       = $id;
+        $this->id = $id;
         $this->priority = $priority;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    private function getCommand(): string
     {
         return sprintf('bury %d %d', $this->id, $this->priority);
     }
 
-    /**
-     * @param SocketInterface $socket
-     * @return string|integer
-     * @throws NotFoundException
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(Socket $socket): self
     {
         $socket->write($this->getCommand());
 
@@ -62,10 +42,10 @@ class Bury implements CommandInterface
                 return $this;
 
             case 'NOT_FOUND':
-                throw new NotFoundException("Job id '$this->id' could not be found.");
+                throw new NotFoundException("Job id '{$this->id}' could not be found.");
 
             default:
-                throw new CommandException("Bury id '$this->id' failed '$response'");
+                throw new CommandException("Bury id '{$this->id}' failed '{$response}'");
         }
     }
 }

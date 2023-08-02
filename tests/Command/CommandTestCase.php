@@ -1,23 +1,23 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-class CommandTestCase extends \PHPUnit_Framework_TestCase
+namespace Phlib\Beanstalk\Command;
+
+use Phlib\Beanstalk\Connection\Socket;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
+
+class CommandTestCase extends TestCase
 {
     /**
-     * @var \Phlib\Beanstalk\Connection\SocketInterface|\PHPUnit_Framework_MockObject_MockObject
+     * @var Socket|MockObject
      */
-    protected $socket;
+    protected Socket $socket;
 
-    public function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
-        $this->socket = $this->getMockForAbstractClass('\Phlib\Beanstalk\Connection\SocketInterface');
-    }
-
-    public function tearDown()
-    {
-        $this->socket = null;
-        parent::tearDown();
+        $this->socket = $this->createMock(Socket::class);
     }
 }

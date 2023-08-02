@@ -1,56 +1,89 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Command\Release;
+namespace Phlib\Beanstalk\Command;
+
+use Phlib\Beanstalk\ConnectionInterface;
+use Phlib\Beanstalk\Exception\BuriedException;
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 class ReleaseTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Release(123, 456, 789));
+        static::assertInstanceOf(CommandInterface::class, new Release(123, 456, 789));
     }
 
-    public function testGetCommand()
+    public function testWithInvalidPriority(): void
     {
-        $this->assertEquals('release 123 456 789', (new Release(123, 456, 789))->getCommand());
+        $this->expectException(InvalidArgumentException::class);
+
+        // Priority must be integer between 0 and 4,294,967,295
+        new Release(123, 4294967296, 456);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
-    public function testWithInvalidPriority()
+    public function testWithInvalidDelay(): void
     {
-        new Release(123, 'foo', 456);
+        $this->expectException(InvalidArgumentException::class);
+
+        // Delay must be integer between 0 and 4,294,967,295
+        new Release(123, 456, 4294967296);
     }
 
-    public function testSuccessfulCommand()
+    public function testSuccessfulCommand(): void
     {
-        $this->socket->expects($this->any())
+        $id = rand();
+        $priority = rand(1, ConnectionInterface::MAX_PRIORITY);
+        $delay = rand(0, ConnectionInterface::MAX_DELAY);
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("release {$id} {$priority} {$delay}");
+
+        $this->socket->expects(static::any())
             ->method('read')
-            ->willReturn("RELEASED");
+            ->willReturn('RELEASED');
 
-        $release = new Release(123, 456, 789);
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\Release', $release->process($this->socket));
+        $release = new Release($id, $priority, $delay);
+        static::assertInstanceOf(Release::class, $release->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
-    public function testNotFoundThrowsException()
+    public function testNotFoundThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(NotFoundException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_FOUND');
         (new Release(123, 456, 789))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
-    public function testUnknownStatusThrowsException()
+    public function testBuriedThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(BuriedException::class);
+
+        $jobId = rand();
+
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturn('BURIED');
+
+        try {
+            (new Release($jobId, 456, 789))->process($this->socket);
+        } catch (BuriedException $e) {
+            self::assertSame($jobId, $e->getJobId());
+            throw $e;
+        }
+    }
+
+    public function testUnknownStatusThrowsException(): void
+    {
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Release(123, 456, 789))->process($this->socket);

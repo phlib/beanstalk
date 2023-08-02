@@ -1,47 +1,48 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Command\Delete;
+namespace Phlib\Beanstalk\Command;
+
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 class DeleteTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Delete(123));
+        static::assertInstanceOf(CommandInterface::class, new Delete(123));
     }
 
-    public function testGetCommand()
+    public function testSuccessfulCommand(): void
     {
-        $id = 123;
-        $this->assertEquals("delete $id", (new Delete($id))->getCommand());
-    }
+        $id = rand();
 
-    public function testSuccessfulCommand()
-    {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("delete {$id}");
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('DELETED');
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\Delete', (new Delete(123))->process($this->socket));
+        static::assertInstanceOf(Delete::class, (new Delete($id))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
-    public function testNotFoundThrowsException()
+    public function testNotFoundThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(NotFoundException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_FOUND');
         (new Delete(123))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Delete(123))->process($this->socket);

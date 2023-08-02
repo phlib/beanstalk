@@ -1,82 +1,90 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Connection;
+namespace Phlib\Beanstalk;
+
 use Phlib\Beanstalk\Exception\NotFoundException;
-use Phlib\Beanstalk\Connection\Socket;
+use PHPUnit\Framework\TestCase;
 
 /**
- * @runTestsInSeparateProcesses
  * @group integration
  */
-class IntegrationTest extends \PHPUnit_Framework_TestCase
+class IntegrationTest extends TestCase
 {
-    /**
-     * @var Connection
-     */
-    protected $beanstalk;
+    private Connection $beanstalk;
 
-    public function setUp()
+    protected function setUp(): void
     {
-        if (!isset($GLOBALS['BSTALK_HOST']) || !isset($GLOBALS['BSTALK_PORT'])) {
-            $this->markTestSkipped();
-        } else {
-            $this->beanstalk = new Connection(new Socket($GLOBALS['BSTALK_HOST'], $GLOBALS['BSTALK_PORT']));
+        if ((bool)getenv('BSTALK_ENABLED') !== true) {
+            static::markTestSkipped();
+            return;
         }
+
+        $this->beanstalk = new Connection(getenv('BSTALK1_HOST'), (int)getenv('BSTALK1_PORT'));
     }
 
-    public function testStartWithDefaultTube()
+    public function testReconnectingAfterDisconnect(): void
     {
-        $this->assertEquals('default', $this->beanstalk->listTubeUsed());
+        $this->beanstalk->listTubes(); // make sure we connect
+        $this->beanstalk->disconnect();
+
+        $tube = 'test-tube';
+        $this->beanstalk->useTube($tube);
+        static::assertContains($tube, $this->beanstalk->listTubes());
     }
 
-    public function testSwitchingUsedTube()
+    public function testStartWithDefaultTube(): void
+    {
+        static::assertSame('default', $this->beanstalk->listTubeUsed());
+    }
+
+    public function testSwitchingUsedTube(): void
     {
         $tube = 'test-tube';
         $this->beanstalk->useTube($tube);
-        $this->assertEquals($tube, $this->beanstalk->listTubeUsed());
+        static::assertSame($tube, $this->beanstalk->listTubeUsed());
     }
 
-    public function testStartWithDefaultWatching()
+    public function testStartWithDefaultWatching(): void
     {
-        $this->assertEquals(['default'], $this->beanstalk->listTubesWatched());
+        static::assertSame(['default'], $this->beanstalk->listTubesWatched());
     }
 
-    public function testWatchingMoreTubes()
+    public function testWatchingMoreTubes(): void
     {
         $tube = 'test-tube';
         $this->beanstalk->watch($tube);
-        $this->assertContains($tube, $this->beanstalk->listTubesWatched());
+        static::assertContains($tube, $this->beanstalk->listTubesWatched());
     }
 
-    public function testListTubes()
+    public function testListTubes(): void
     {
         $tube = 'test-tube';
         $this->beanstalk->useTube($tube);
-        $this->assertContains($tube, $this->beanstalk->listTubes());
+        static::assertContains($tube, $this->beanstalk->listTubes());
     }
 
-    public function testFullJobProcess()
+    public function testFullJobProcess(): void
     {
         $this->setupTube('integration-test');
         // make sure it's empty
-        $this->beanstalk->peekReady();
+        static::assertNull($this->beanstalk->peekReady());
 
         $data = 'This is my data';
         $id = $this->beanstalk->put($data);
         $jobData = $this->beanstalk->reserve();
 
-        $this->assertEquals($id, $jobData['id']);
-        $this->assertEquals($data, $jobData['body']);
+        static::assertSame($id, $jobData['id']);
+        static::assertSame($data, $jobData['body']);
 
         $this->beanstalk->touch($jobData['id']);
         $this->beanstalk->delete($jobData['id']);
 
-        $this->assertFalse($this->beanstalk->peekReady());
+        static::assertNull($this->beanstalk->peekReady());
     }
 
-    public function testBuriedJobProcess()
+    public function testBuriedJobProcess(): void
     {
         $this->setupTube('integration-test');
         try {
@@ -89,19 +97,19 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $id = $this->beanstalk->put($data);
         $jobData = $this->beanstalk->reserve();
 
-        $this->assertEquals($id, $jobData['id']);
-        $this->assertEquals($data, $jobData['body']);
+        static::assertSame($id, $jobData['id']);
+        static::assertSame($data, $jobData['body']);
 
         $this->beanstalk->bury($jobData['id']);
 
         $buriedData = $this->beanstalk->peekBuried();
-        $this->assertEquals($jobData['id'], $buriedData['id']);
+        static::assertSame($jobData['id'], $buriedData['id']);
 
         $this->beanstalk->kick(1);
         $this->beanstalk->delete($buriedData['id']);
     }
 
-    public function testLargeJobData()
+    public function testLargeJobData(): void
     {
         $this->setupTube('integration-test');
 
@@ -111,10 +119,10 @@ class IntegrationTest extends \PHPUnit_Framework_TestCase
         $jobData = $this->beanstalk->reserve();
         $this->beanstalk->delete($jobData['id']);
 
-        $this->assertEquals($length, strlen($jobData['body']));
+        static::assertSame($length, strlen($jobData['body']));
     }
 
-    public function setupTube($tube)
+    private function setupTube($tube): void
     {
         $this->beanstalk
             ->useTube($tube)

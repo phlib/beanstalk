@@ -1,48 +1,50 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Command\Bury;
+namespace Phlib\Beanstalk\Command;
+
+use Phlib\Beanstalk\ConnectionInterface;
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 class BuryTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Bury(123, 123));
+        static::assertInstanceOf(CommandInterface::class, new Bury(123, 123));
     }
 
-    public function testGetCommand()
+    public function testSuccessfulCommand(): void
     {
-        $id = 123;
-        $priority = 1;
-        $this->assertEquals("bury $id $priority", (new Bury($id, $priority))->getCommand());
-    }
+        $id = rand();
+        $priority = rand(1, ConnectionInterface::MAX_PRIORITY);
 
-    public function testSuccessfulCommand()
-    {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("bury {$id} {$priority}");
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('BURIED');
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\Bury', (new Bury(123, 123))->process($this->socket));
+        static::assertInstanceOf(Bury::class, (new Bury($id, $priority))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
-    public function testNotFoundThrowsException()
+    public function testNotFoundThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(NotFoundException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_FOUND');
         (new Bury(123, 123))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Bury(123, 123))->process($this->socket);

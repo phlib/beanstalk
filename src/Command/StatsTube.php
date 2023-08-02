@@ -1,37 +1,26 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\ValidateTrait;
-
 /**
- * Class StatsTube
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class StatsTube implements CommandInterface
 {
     use StatsTrait;
     use ValidateTrait;
-    use ToStringTrait;
 
-    /**
-     * @var string
-     */
-    protected $tube;
+    private string $tube;
 
-    /**
-     * @param string $tube
-     */
-    public function __construct($tube)
+    public function __construct(string $tube)
     {
         $this->validateTubeName($tube);
         $this->tube = $tube;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    private function getCommand(): string
     {
         return sprintf('stats-tube %s', $this->tube);
     }

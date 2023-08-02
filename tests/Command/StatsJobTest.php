@@ -1,19 +1,28 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Command\StatsJob;
+namespace Phlib\Beanstalk\Command;
 
 class StatsJobTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new StatsJob(123));
+        static::assertInstanceOf(CommandInterface::class, new StatsJob(123));
     }
 
-    public function testGetCommand()
+    public function testCommandSyntax(): void
     {
-        $id = 123;
-        $this->assertEquals("stats-job $id", (new StatsJob($id))->getCommand());
+        $id = rand();
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("stats-job {$id}");
+
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturn('OK 123');
+
+        (new StatsJob($id))->process($this->socket);
     }
 }

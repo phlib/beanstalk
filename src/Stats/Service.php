@@ -1,20 +1,39 @@
 <?php
 
-namespace Phlib\Beanstalk;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
+namespace Phlib\Beanstalk\Stats;
 
-class StatsService
+use Phlib\Beanstalk\ConnectionInterface;
+
+/**
+ * @package Phlib\Beanstalk
+ */
+class Service
 {
-    const SERVER_BINLOG  = 1;
-    const SERVER_COMMAND = 2;
-    const SERVER_CURRENT = 4;
-    const SERVER_ALL     = 7;
+    public const SERVER_BINLOG = 1;
 
-    /**
-     * @var array
-     */
-    protected $infoKeys = [
+    public const SERVER_COMMAND = 2;
+
+    public const SERVER_CURRENT = 4;
+
+    public const SERVER_ALL = 7;
+
+    public const TUBE_HEADER_MAPPING = [
+        'name' => 'Tube',
+        'current-jobs-urgent' => 'JobsUrgent',
+        'current-jobs-ready' => 'JobsReady',
+        'current-jobs-reserved' => 'JobsReserved',
+        'current-jobs-delayed' => 'JobsDelayed',
+        'current-jobs-buried' => 'JobsBuried',
+        'total-jobs' => 'TotalJobs',
+        'current-using' => 'Using',
+        'current-watching' => 'Watching',
+        'current-waiting' => 'Waiting',
+        'cmd-delete' => 'Delete',
+    ];
+
+    private const INFO_KEYS = [
         'pid',
         'hostname',
         'id',
@@ -28,10 +47,7 @@ class StatsService
         'rusage-stime',
     ];
 
-    /**
-     * @var array
-     */
-    protected $serverKeys = [
+    private const SERVER_KEYS = [
         'current-jobs-urgent',
         'current-jobs-ready',
         'current-jobs-reserved',
@@ -70,58 +86,32 @@ class StatsService
         'binlog-records-written',
         'binlog-max-size',
     ];
-    
-    /**
-     * @var ConnectionInterface
-     */
-    private $beanstalk;
 
-    /**
-     * @var array
-     */
-    protected $stats;
+    private ConnectionInterface $beanstalk;
 
-    /**
-     * @var array
-     */
-    protected $tubes;
+    private array $stats;
 
-    /**
-     * @param ConnectionInterface $beanstalk
-     */
     public function __construct(ConnectionInterface $beanstalk)
     {
         $this->beanstalk = $beanstalk;
     }
 
-    /**
-     * @return array
-     */
-    public function getServerInfo()
+    public function getServerInfo(): array
     {
-        return $this->filterTheseKeys($this->infoKeys, $this->getStats());
+        return $this->filterTheseKeys(self::INFO_KEYS, $this->getStats());
     }
 
-    /**
-     * @param int $filter
-     * @return array
-     */
-    public function getServerStats($filter = self::SERVER_ALL)
+    public function getServerStats(int $filter = self::SERVER_ALL): array
     {
         $serverKeys = $this->filterServerKeys($filter);
         $stats = $this->filterTheseKeys($serverKeys, $this->getStats());
-        ksort($stats);
         return $stats;
     }
 
-    /**
-     * @param $filter
-     * @return array
-     */
-    protected function filterServerKeys($filter)
+    private function filterServerKeys(int $filter): array
     {
-        $serverKeys = $this->serverKeys;
-        if ($filter != self::SERVER_ALL) {
+        $serverKeys = self::SERVER_KEYS;
+        if ($filter !== self::SERVER_ALL) {
             $include = [];
             if ($filter & self::SERVER_BINLOG) {
                 $include[] = 'binlog-';
@@ -135,7 +125,7 @@ class StatsService
             $filtered = [];
             foreach ($include as $beginsWith) {
                 foreach ($serverKeys as $serverKey) {
-                    if (substr($serverKey, 0, strlen($beginsWith)) != $beginsWith) {
+                    if (substr($serverKey, 0, strlen($beginsWith)) !== $beginsWith) {
                         continue;
                     }
                     $filtered[] = $serverKey;
@@ -146,18 +136,24 @@ class StatsService
         return $serverKeys;
     }
 
-    /**
-     * @return array
-     */
-    public function getAllTubeStats()
+    public function getTubeStats(string $tube): array
     {
-        if (!$this->tubes) {
-            $this->tubes = $this->beanstalk->listTubes();
-        }
+        $stats = $this->beanstalk->statsTube($tube);
+        unset($stats['name']);
+        return $stats;
+    }
+
+    public function getAllTubeStats(): array
+    {
+        $tubes = $this->beanstalk->listTubes();
         $tubeStats = [];
-        foreach ($this->tubes as $tube) {
+        foreach ($tubes as $tube) {
             $stats = $this->beanstalk->statsTube($tube);
-            $tubeStats[] = array_slice($stats, 0, -3); // @see getTubeHeaderMapping
+            /**
+             * Remove last 3 entries (for 'pause') to match stats in
+             * @see StatsService::TUBE_HEADER_MAPPING
+             */
+            $tubeStats[] = array_slice($stats, 0, -3);
         }
 
         usort($tubeStats, function ($a, $b) {
@@ -167,44 +163,16 @@ class StatsService
         return $tubeStats;
     }
 
-    /**
-     * @param array $keys
-     * @param $data
-     * @return array
-     */
-    protected function filterTheseKeys(array $keys, $data)
+    private function filterTheseKeys(array $keys, array $data): array
     {
         return array_intersect_key($data, array_flip($keys));
     }
 
-    /**
-     * @return array
-     */
-    protected function getStats()
+    private function getStats(): array
     {
-        if (!$this->stats) {
+        if (!isset($this->stats)) {
             $this->stats = $this->beanstalk->stats();
         }
         return $this->stats;
-    }
-
-    /**
-     * @return array
-     */
-    public function getTubeHeaderMapping()
-    {
-        return [
-            'name' => 'Tube',
-            'current-jobs-urgent' => 'JobsUrgent',
-            'current-jobs-ready' => 'JobsReady',
-            'current-jobs-reserved' => 'JobsReserved',
-            'current-jobs-delayed' => 'JobsDelayed',
-            'current-jobs-buried' => 'JobsBuried',
-            'total-jobs' => 'TotalJobs',
-            'current-using' => 'Using',
-            'current-watching' => 'Watching',
-            'current-waiting' => 'Waiting',
-            'cmd-delete' => 'Delete',
-        ];
     }
 }

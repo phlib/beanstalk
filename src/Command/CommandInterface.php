@@ -1,28 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 
 /**
- * Interface CommandInterface
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 interface CommandInterface
 {
     /**
-     * @return string
-     */
-    public function getCommand();
-
-    /**
-     * @param SocketInterface $socket
+     * @internal This method is not part of the backward-compatibility promise.
      * @return mixed
      */
-    public function process(SocketInterface $socket);
-
-    /**
-     * @return string
-     */
-    public function __toString();
+    public function process(Socket $socket);
 }

@@ -1,58 +1,41 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
-use Phlib\Beanstalk\ValidateTrait;
 
 /**
- * Class Watch
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Watch implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
-    /**
-     * @var string
-     */
-    protected $tube;
+    private string $tube;
 
-    /**
-     * @param string $tube
-     */
-    public function __construct($tube)
+    public function __construct(string $tube)
     {
         $this->validateTubeName($tube);
         $this->tube = $tube;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    private function getCommand(): string
     {
         return sprintf('watch %s', $this->tube);
     }
 
-    /**
-     * @param SocketInterface $socket
-     * @return integer
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(Socket $socket): int
     {
         $socket->write($this->getCommand());
-
         $status = strtok($socket->read(), ' ');
-        switch ($status) {
-            case 'WATCHING':
-                return (int)strtok(' ');
 
-            default:
-                throw new CommandException("Watch tube '$this->tube' failed '$status'");
+        if ($status !== 'WATCHING') {
+            throw new CommandException("Watch tube '{$this->tube}' failed '{$status}'");
         }
+
+        return (int)strtok(' ');
     }
 }

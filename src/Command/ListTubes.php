@@ -1,20 +1,17 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
 /**
- * Class ListTubes
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class ListTubes implements CommandInterface
 {
     use StatsTrait;
-    use ToStringTrait;
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    private function getCommand(): string
     {
         return 'list-tubes';
     }

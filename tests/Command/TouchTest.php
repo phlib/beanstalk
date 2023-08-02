@@ -1,50 +1,50 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Command\Touch;
+namespace Phlib\Beanstalk\Command;
+
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 class TouchTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Touch(123));
+        static::assertInstanceOf(CommandInterface::class, new Touch(123));
     }
 
-    public function testGetCommand()
+    public function testSuccessfulCommand(): void
     {
-        $id = 234;
-        $this->assertEquals("touch $id", (new Touch($id))->getCommand());
-    }
+        $id = rand();
 
-    public function testSuccessfulCommand()
-    {
-        $id = 123;
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("touch {$id}");
+
+        $this->socket->expects(static::any())
             ->method('read')
-            ->willReturn("TOUCHED");
+            ->willReturn('TOUCHED');
 
         $touch = new Touch($id);
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\Touch', $touch->process($this->socket));
+        static::assertInstanceOf(Touch::class, $touch->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\NotFoundException
-     */
-    public function testErrorThrowsException()
+    public function testErrorThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(NotFoundException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_TOUCHED');
         (new Touch(123))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Touch(123))->process($this->socket);

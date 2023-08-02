@@ -1,78 +1,63 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
-use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\Pool\Collection;
 
 /**
- * Class Factory
  * @package Phlib\Beanstalk
  */
 class Factory
 {
-    /**
-     * @param string $host
-     * @param integer $port
-     * @param array $options
-     * @return ConnectionInterface
-     */
-    public static function create($host, $port = Socket::DEFAULT_PORT, array $options = [])
+    public function create(string $host, int $port = Socket::DEFAULT_PORT, array $options = []): Connection
     {
-        return new Connection(new Socket($host, $port, $options));
+        return new Connection($host, $port, $options);
     }
 
-    /**
-     * @param array $config
-     * @return ConnectionInterface
-     */
-    public static function createFromArray(array $config)
+    public function createFromArray(array $config): ConnectionInterface
     {
         if (array_key_exists('host', $config)) {
-            $config = ['server' => $config];
-        }
-
-        if (array_key_exists('server', $config)) {
-            $server     = static::normalizeArgs($config['server']);
-            $connection = static::create($server['host'], $server['port'], $server['options']);
-        } elseif (array_key_exists('servers', $config)) {
-            $connection = new Pool(static::createConnections($config['servers']));
+            $config = $this->normalizeArgs($config);
+            $connection = $this->create($config['host'], $config['port'], $config['options']);
         } else {
-            throw new InvalidArgumentException('Missing required server(s) configuration');
+            $connections = $this->createConnections($config);
+            $connection = new Pool(new Collection($connections));
         }
 
         return $connection;
     }
 
     /**
-     * @param array $servers
-     * @return Socket[]
+     * @return Connection[]
      */
-    public static function createConnections(array $servers)
+    public function createConnections(array $servers): array
     {
+        if (empty($servers)) {
+            throw new InvalidArgumentException('Missing server configurations');
+        }
+
         $connections = [];
-        foreach ($servers as $server) {
-            if (array_key_exists('enabled', $server) && $server['enabled'] == false) {
+        foreach ($servers as $config) {
+            if (array_key_exists('enabled', $config) && $config['enabled'] === false) {
                 continue;
             }
-            $server = static::normalizeArgs($server);
-            $connection = static::create($server['host'], $server['port'], $server['options']);
+            $config = $this->normalizeArgs($config);
+            $connection = $this->create($config['host'], $config['port'], $config['options']);
             $connections[] = $connection;
         }
-        return new Pool\Collection($connections);
+        return $connections;
     }
 
-    /**
-     * @param array $serverArgs
-     * @return array
-     */
-    protected static function normalizeArgs(array $serverArgs)
+    private function normalizeArgs(array $serverArgs): array
     {
         return $serverArgs + [
             'host' => null,
             'port' => Socket::DEFAULT_PORT,
-            'options' => []
+            'options' => [],
         ];
     }
 }

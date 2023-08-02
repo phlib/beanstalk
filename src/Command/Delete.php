@@ -1,47 +1,31 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
-use Phlib\Beanstalk\Exception\NotFoundException;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
- * Class Delete
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Delete implements CommandInterface
 {
-    use ToStringTrait;
+    private int $id;
 
-    /**
-     * @var string|integer
-     */
-    protected $id;
-
-    /**
-     * @param string|integer $id
-     */
-    public function __construct($id)
+    public function __construct(int $id)
     {
         $this->id = $id;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    private function getCommand(): string
     {
         return sprintf('delete %d', $this->id);
     }
 
-    /**
-     * @param SocketInterface $socket
-     * @return $this
-     * @throws NotFoundException
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(Socket $socket): self
     {
         $socket->write($this->getCommand());
 
@@ -54,7 +38,7 @@ class Delete implements CommandInterface
                 throw new NotFoundException("Job id '{$this->id}' could not be found.");
 
             default:
-                throw new CommandException("Delete id '{$this->id}' failed '$response'");
+                throw new CommandException("Delete id '{$this->id}' failed '{$response}'");
         }
     }
 }

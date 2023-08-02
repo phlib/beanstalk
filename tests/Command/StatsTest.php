@@ -1,18 +1,26 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Command\Stats;
+namespace Phlib\Beanstalk\Command;
 
 class StatsTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Stats());
+        static::assertInstanceOf(CommandInterface::class, new Stats());
     }
 
-    public function testGetCommand()
+    public function testCommandSyntax(): void
     {
-        $this->assertEquals('stats', (new Stats())->getCommand());
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with('stats');
+
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturn('OK 123');
+
+        (new Stats())->process($this->socket);
     }
 }

@@ -1,225 +1,152 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
- * Class Connection
  * @package Phlib\Beanstalk
  */
 class Connection implements ConnectionInterface
 {
-    const DEFAULT_TUBE = 'default';
+    public const DEFAULT_TUBE = 'default';
+
+    private string $name;
+
+    private Socket $socket;
+
+    private string $using = self::DEFAULT_TUBE;
+
+    private array $watching = [
+        self::DEFAULT_TUBE => true,
+    ];
 
     /**
-     * @var string
+     * @param \Closure|null $createSocket This parameter is not part of the BC promise. Used for unit test DI.
      */
-    protected $name;
+    public function __construct(
+        string $host,
+        int $port = Socket::DEFAULT_PORT,
+        array $options = [],
+        \Closure $createSocket = null
+    ) {
+        if (isset($createSocket)) {
+            $this->socket = $createSocket($host, $port, $options);
+        } else {
+            $this->socket = new Socket($host, $port, $options);
+        }
 
-    /**
-     * @var SocketInterface
-     */
-    protected $socket;
-
-    /**
-     * @var string
-     */
-    protected $using = self::DEFAULT_TUBE;
-
-    /**
-     * @var array
-     */
-    protected $watching = [self::DEFAULT_TUBE => true];
-
-    /**
-     * @var boolean
-     */
-    protected $askServer = false;
-
-    /**
-     * Constructor
-     *
-     * @param SocketInterface $socket
-     */
-    public function __construct(SocketInterface $socket)
-    {
-        $this->setSocket($socket);
-        $this->name = $socket->getUniqueIdentifier();
+        $this->name = $host . ':' . $port;
     }
 
-    /**
-     * @return SocketInterface
-     */
-    public function getSocket()
+    public function disconnect(): bool
     {
-        return $this->socket;
+        return $this->socket->disconnect();
     }
 
-    /**
-     * @param SocketInterface $socket
-     * @return $this
-     */
-    public function setSocket(SocketInterface $socket)
-    {
-        $this->socket = $socket;
-        return $this;
-    }
-
-    /**
-     * @return string
-     */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
 
-    /**
-     * @param string $value
-     * @return $this
-     */
-    public function setName($value)
-    {
-        $this->name = $value;
-        return $this;
-    }
-
-    /**
-     * @param string $tube
-     * @return $this
-     * @throws Exception\CommandException
-     */
-    public function useTube($tube)
+    public function useTube(string $tube): self
     {
         (new Command\UseTube($tube))
-            ->process($this->getSocket());
+            ->process($this->socket);
         $this->using = $tube;
         return $this;
     }
 
-    /**
-     * @param string   $data
-     * @param integer $priority
-     * @param integer $delay
-     * @param integer $ttr
-     * @return integer
-     * @throws Exception\CommandException
-     */
     public function put(
-        $data,
-        $priority = ConnectionInterface::DEFAULT_PRIORITY,
-        $delay = ConnectionInterface::DEFAULT_DELAY,
-        $ttr = ConnectionInterface::DEFAULT_TTR
-    ) {
-        $data = (string)$data;
+        string $data,
+        int $priority = ConnectionInterface::DEFAULT_PRIORITY,
+        int $delay = ConnectionInterface::DEFAULT_DELAY,
+        int $ttr = ConnectionInterface::DEFAULT_TTR
+    ): int {
         return (new Command\Put($data, $priority, $delay, $ttr))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
-    /**
-     * @param integer $timeout
-     * @return array|false
-     * @throws Exception\CommandException
-     */
-    public function reserve($timeout = null)
+    public function reserve(?int $timeout = null): ?array
     {
         $jobData = (new Command\Reserve($timeout))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $jobData;
     }
 
     /**
-     * @param string|integer $id
-     * @return $this
-     * @throws Exception\NotFoundException
-     * @throws Exception\CommandException
+     * @param string|int $id
      */
-    public function delete($id)
+    public function delete($id): self
     {
+        $id = $this->filterJobId($id);
         (new Command\Delete($id))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $this;
     }
 
     /**
-     * @param string|integer $id
-     * @param integer        $priority
-     * @param integer        $delay
-     * @return $this
-     * @throws Exception\NotFoundException
-     * @throws Exception\CommandException
+     * @param string|int $id
      */
     public function release(
         $id,
-        $priority = ConnectionInterface::DEFAULT_PRIORITY,
-        $delay = ConnectionInterface::DEFAULT_DELAY
-    ) {
+        int $priority = ConnectionInterface::DEFAULT_PRIORITY,
+        int $delay = ConnectionInterface::DEFAULT_DELAY
+    ): self {
+        $id = $this->filterJobId($id);
         (new Command\Release($id, $priority, $delay))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $this;
     }
 
     /**
-     * @param string|integer $id
-     * @param integer        $priority
-     * @return $this
-     * @throws Exception\NotFoundException
-     * @throws Exception\CommandException
+     * @param string|int $id
      */
-    public function bury($id, $priority = ConnectionInterface::DEFAULT_PRIORITY)
+    public function bury($id, int $priority = ConnectionInterface::DEFAULT_PRIORITY): self
     {
+        $id = $this->filterJobId($id);
         (new Command\Bury($id, $priority))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $this;
     }
 
     /**
-     * @param string|integer $id
-     * @return $this
-     * @throws Exception\NotFoundException
-     * @throws Exception\CommandException
+     * @param string|int $id
      */
-    public function touch($id)
+    public function touch($id): self
     {
+        $id = $this->filterJobId($id);
         (new Command\Touch($id))
-            ->process($this->getSocket());
+            ->process($this->socket);
         return $this;
     }
 
-    /**
-     * @param string $tube
-     * @return $this
-     * @throws Exception\CommandException
-     */
-    public function watch($tube)
+    public function watch(string $tube): self
     {
         if (isset($this->watching[$tube])) {
             return $this;
         }
 
         (new Command\Watch($tube))
-            ->process($this->getSocket());
+            ->process($this->socket);
         $this->watching[$tube] = true;
 
         return $this;
     }
 
-    /**
-     * @param string $tube
-     * @return int|false
-     * @throws Exception\CommandException
-     */
-    public function ignore($tube)
+    public function ignore(string $tube): ?int
     {
         if (isset($this->watching[$tube])) {
-            if (count($this->watching) == 1) {
-                return false;
+            if (count($this->watching) === 1) {
+                return null;
             }
 
             (new Command\Ignore($tube))
-                ->process($this->getSocket());
+                ->process($this->socket);
             unset($this->watching[$tube]);
         }
 
@@ -227,127 +154,101 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param string|integer $id
-     * @return array
+     * @param string|int $id
      */
-    public function peek($id)
+    public function peek($id): array
     {
-        $jobData = (new Command\Peek($id))
-            ->process($this->getSocket());
-        return $jobData;
+        $id = $this->filterJobId($id);
+        return (new Command\Peek($id))
+            ->process($this->socket);
     }
 
-    /**
-     * @return array|false
-     */
-    public function peekReady()
+    public function peekReady(): ?array
+    {
+        return $this->peekStatus(Command\PeekStatus::READY);
+    }
+
+    public function peekDelayed(): ?array
+    {
+        return $this->peekStatus(Command\PeekStatus::DELAYED);
+    }
+
+    public function peekBuried(): ?array
+    {
+        return $this->peekStatus(Command\PeekStatus::BURIED);
+    }
+
+    private function peekStatus(string $status): ?array
     {
         try {
-            $jobData = (new Command\Peek(Command\Peek::READY))
-                ->process($this->getSocket());
-            return $jobData;
+            return (new Command\PeekStatus($status))
+                ->process($this->socket);
         } catch (NotFoundException $e) {
-            return false;
+            return null;
         }
     }
 
-    /**
-     * @return array|false
-     */
-    public function peekDelayed()
-    {
-        try {
-            $jobData = (new Command\Peek(Command\Peek::DELAYED))
-                ->process($this->getSocket());
-            return $jobData;
-        } catch (NotFoundException $e) {
-            return false;
-        }
-    }
-
-    /**
-     * @return array|false
-     */
-    public function peekBuried()
-    {
-        try {
-            $jobData = (new Command\Peek(Command\Peek::BURIED))
-                ->process($this->getSocket());
-            return $jobData;
-        } catch (NotFoundException $e) {
-            return false;
-        }
-    }
-
-    /**
-     * @return array
-     */
-    public function stats()
+    public function stats(): array
     {
         return (new Command\Stats())
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
     /**
-     * @param string|integer $id
-     * @return array
+     * @param string|int $id
      */
-    public function statsJob($id)
+    public function statsJob($id): array
     {
+        $id = $this->filterJobId($id);
         return (new Command\StatsJob($id))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
-    /**
-     * @param string $tube
-     * @return array
-     */
-    public function statsTube($tube)
+    public function statsTube(string $tube): array
     {
         return (new Command\StatsTube($tube))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
-    /**
-     * @param integer $quantity
-     * @return integer
-     */
-    public function kick($quantity)
+    public function kick(int $quantity): int
     {
         return (new Command\Kick($quantity))
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
-    /**
-     * @return array
-     */
-    public function listTubes()
+    public function listTubes(): array
     {
         return (new Command\ListTubes())
-            ->process($this->getSocket());
+            ->process($this->socket);
     }
 
-    /**
-     * @return array
-     */
-    public function listTubeUsed()
+    public function listTubeUsed(): string
     {
-        if ($this->askServer) {
-            $this->using = (new Command\ListTubesUsed())
-                ->process($this->getSocket());
-        }
         return $this->using;
     }
 
-    /**
-     * @return array
-     */
-    public function listTubesWatched()
+    public function listTubesWatched(): array
     {
-        if ($this->askServer) {
-            return (new Command\ListTubesWatched())
-                ->process($this->getSocket());
-        }
         return array_keys($this->watching);
+    }
+
+    /**
+     * @param string|int
+     */
+    private function filterJobId($id): int
+    {
+        if (is_int($id)) {
+            return $id;
+        }
+
+        if (!is_string($id)) {
+            throw new InvalidArgumentException('Job ID must be integer');
+        }
+
+        if ((string)(int)$id !== $id) {
+            throw new InvalidArgumentException('Job ID must be integer');
+        }
+
+        return (int)$id;
     }
 }

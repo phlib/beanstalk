@@ -1,72 +1,74 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Command\Reserve;
+namespace Phlib\Beanstalk\Command;
+
+use Phlib\Beanstalk\Exception\CommandException;
 
 class ReserveTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Reserve(123));
+        static::assertInstanceOf(CommandInterface::class, new Reserve(123));
     }
 
     /**
-     * @dataProvider getCommandDataProvider
+     * @dataProvider commandDataProvider
      */
-    public function testGetCommand($timeout, $command)
+    public function testSuccessfulCommand(?int $timeout, string $command): void
     {
-        $this->assertEquals($command, (new Reserve($timeout))->getCommand());
+        $id = 123;
+        $data = 'Foo Bar';
+        $bytes = strlen($data);
+        $response = [
+            'id' => $id,
+            'body' => $data,
+        ];
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with($command);
+
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturnOnConsecutiveCalls("RESERVED {$id} {$bytes}\r\n", $data . "\r\n");
+
+        static::assertSame($response, (new Reserve($timeout))->process($this->socket));
     }
 
-    public function getCommandDataProvider()
+    public function commandDataProvider(): array
     {
         return [
-            [123, 'reserve-with-timeout 123'],
-            [null, 'reserve'],
+            'withTimeout' => [123, 'reserve-with-timeout 123'],
+            'justReserve' => [null, 'reserve'],
         ];
     }
 
-    public function testSuccessfulCommand()
-    {
-        $id       = 123;
-        $data     = 'Foo Bar';
-        $bytes    = strlen($data);
-        $response = ['id' => $id, 'body' => $data];
-
-        $this->socket->expects($this->any())
-            ->method('read')
-            ->will($this->onConsecutiveCalls("RESERVED $id $bytes\r\n", $data . "\r\n"));
-
-        $this->assertEquals($response, (new Reserve())->process($this->socket));
-    }
-
     /**
-     * @param string $status
      * @dataProvider failureStatusReturnsFalseDataProvider
      */
-    public function testFailureStatusReturnsFalse($status)
+    public function testFailureStatusReturnsFalse(string $status): void
     {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn($status);
-        $this->assertFalse((new Reserve(123))->process($this->socket));
+        static::assertNull((new Reserve(123))->process($this->socket));
     }
 
-    public function failureStatusReturnsFalseDataProvider()
+    public function failureStatusReturnsFalseDataProvider(): array
     {
         return [
-            ['TIMED_OUT'],
-            ['DEADLINE_SOON'],
+            'timeout' => ['TIMED_OUT'],
+            'deadline' => ['DEADLINE_SOON'],
         ];
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Reserve(123))->process($this->socket);

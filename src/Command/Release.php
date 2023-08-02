@@ -1,79 +1,56 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
-use Phlib\Beanstalk\Exception\NotFoundException;
+use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\BuriedException;
 use Phlib\Beanstalk\Exception\CommandException;
-use Phlib\Beanstalk\ValidateTrait;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
- * Class Release
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Release implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
-    /**
-     * @var string|integer
-     */
-    protected $id;
+    private int $id;
 
-    /**
-     * @var integer
-     */
-    protected $priority;
+    private int $priority;
 
-    /**
-     * @var integer
-     */
-    protected $delay;
+    private int $delay;
 
-    /**
-     * @param string  $id
-     * @param integer $priority
-     * @param integer $delay
-     */
-    public function __construct($id, $priority, $delay)
+    public function __construct(int $id, int $priority, int $delay)
     {
         $this->validatePriority($priority);
+        $this->validateDelay($delay);
 
-        $this->id       = $id;
+        $this->id = $id;
         $this->priority = $priority;
-        $this->delay    = $delay;
+        $this->delay = $delay;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    private function getCommand(): string
     {
         return sprintf('release %d %d %d', $this->id, $this->priority, $this->delay);
     }
 
-    /**
-     * @param SocketInterface $socket
-     * @return $this
-     * @throws NotFoundException
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(Socket $socket): self
     {
         $socket->write($this->getCommand());
 
         $response = $socket->read();
         switch ($response) {
             case 'RELEASED':
-            case 'BURIED':
                 return $this;
-
+            case 'BURIED':
+                throw BuriedException::create($this->id);
             case 'NOT_FOUND':
-                throw new NotFoundException("Job id '$this->id' could not be found.");
-
+                throw new NotFoundException("Job id '{$this->id}' could not be found.");
             default:
-                throw new CommandException("Release '$this->id' failed '$response'");
+                throw new CommandException("Release '{$this->id}' failed '{$response}'");
         }
     }
 }

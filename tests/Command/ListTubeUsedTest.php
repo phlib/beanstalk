@@ -1,36 +1,37 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Command\ListTubeUsed;
+namespace Phlib\Beanstalk\Command;
+
+use Phlib\Beanstalk\Exception\CommandException;
 
 class ListTubeUsedTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new ListTubeUsed());
+        static::assertInstanceOf(CommandInterface::class, new ListTubeUsed());
     }
 
-    public function testGetCommand()
+    public function testSuccessfulCommand(): void
     {
-        $this->assertEquals("list-tube-used", (new ListTubeUsed())->getCommand());
-    }
+        $tube = sha1(uniqid());
 
-    public function testSuccessfulCommand()
-    {
-        $tube = 'test-tube';
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with('list-tube-used');
+
+        $this->socket->expects(static::any())
             ->method('read')
-            ->willReturn("USING $tube");
-        $this->assertEquals($tube, (new ListTubeUsed())->process($this->socket));
+            ->willReturn("USING {$tube}");
+        static::assertSame($tube, (new ListTubeUsed())->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new ListTubeUsed())->process($this->socket);

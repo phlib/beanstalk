@@ -1,47 +1,47 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Command\Ignore;
+namespace Phlib\Beanstalk\Command;
+
+use Phlib\Beanstalk\Exception\CommandException;
 
 class IgnoreTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Ignore('test-tube'));
+        static::assertInstanceOf(CommandInterface::class, new Ignore('test-tube'));
     }
 
-    public function testGetCommand()
+    public function testSuccessfulCommand(): void
     {
-        $tube = 'test-tube';
-        $this->assertEquals("ignore $tube", (new Ignore($tube))->getCommand());
-    }
+        $tube = sha1(uniqid());
 
-    public function testSuccessfulCommand()
-    {
-        $this->socket->expects($this->any())
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("ignore {$tube}");
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('WATCHING');
-        $this->assertInternalType('int', (new Ignore('test-tube'))->process($this->socket));
+        static::assertIsInt((new Ignore($tube))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
-    public function testNotFoundThrowsException()
+    public function testNotFoundThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_IGNORED');
         (new Ignore('test-tube'))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Ignore('test-tube'))->process($this->socket);

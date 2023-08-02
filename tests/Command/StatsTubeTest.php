@@ -1,27 +1,37 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Command\StatsTube;
+namespace Phlib\Beanstalk\Command;
+
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 class StatsTubeTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new StatsTube('test-tube'));
+        static::assertInstanceOf(CommandInterface::class, new StatsTube('test-tube'));
     }
 
-    public function testGetCommand()
+    public function testCommandSyntax(): void
     {
-        $tube = 'test-tube';
-        $this->assertEquals("stats-tube $tube", (new StatsTube($tube))->getCommand());
+        $tube = sha1(uniqid());
+
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("stats-tube {$tube}");
+
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturn('OK 123');
+
+        (new StatsTube($tube))->process($this->socket);
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
-    public function testTubeIsValidated()
+    public function testTubeIsValidated(): void
     {
+        $this->expectException(InvalidArgumentException::class);
+
         new StatsTube('');
     }
 }

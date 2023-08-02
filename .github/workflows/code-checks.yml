@@ -1,0 +1,54 @@
+name: CodeChecks
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        php:
+          - '7.4'
+          - '8.0'
+          - '8.1'
+
+    name: PHP ${{ matrix.php }} tests
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install beanstalkd
+        run: sudo apt-get install beanstalkd
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: xdebug
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php${{ matrix.php }}-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php${{ matrix.php }}-
+
+      - name: Composer
+        run: composer install --no-progress
+
+      - name: Check CS
+        run: vendor/bin/ecs
+
+      - name: PHPUnit
+        run: vendor/bin/phpunit --coverage-clover=coverage.xml
+        env:
+          BSTALK_ENABLED: 1
+
+      - name: "Upload coverage to Codecov"
+        uses: "codecov/codecov-action@v3"

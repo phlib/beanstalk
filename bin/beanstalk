@@ -1,6 +1,14 @@
 #!/usr/bin/env php
 <?php
 
+declare(strict_types=1);
+
+/**
+ * Beanstalk CLI tool
+ *
+ * @package Phlib\Beanstalk
+ */
+
 // autoload
 $autoloadFiles = [__DIR__ . '/../vendor/autoload.php', __DIR__ . '/../../../autoload.php'];
 foreach ($autoloadFiles as $autoloadFile) {
@@ -11,31 +19,41 @@ foreach ($autoloadFiles as $autoloadFile) {
 }
 
 // use
-use Symfony\Component\Console\Application;
-use Phlib\ConsoleConfiguration\Helper\ConfigurationHelper;
+use Phlib\Beanstalk\ConnectionInterface;
+use Phlib\Beanstalk\Console\JobDeleteCommand;
+use Phlib\Beanstalk\Console\JobPeekCommand;
+use Phlib\Beanstalk\Console\JobStatsCommand;
+use Phlib\Beanstalk\Console\ServerDistribCommand;
 use Phlib\Beanstalk\Console\ServerStatsCommand;
 use Phlib\Beanstalk\Console\ServerTubesCommand;
-use Phlib\Beanstalk\Console\JobStatsCommand;
-use Phlib\Beanstalk\Console\JobPeekCommand;
-use Phlib\Beanstalk\Console\JobDeleteCommand;
-use Phlib\Beanstalk\Console\TubePeekCommand;
 use Phlib\Beanstalk\Console\TubeKickCommand;
+use Phlib\Beanstalk\Console\TubePeekCommand;
+use Phlib\Beanstalk\Console\TubeStatsCommand;
+use Phlib\Beanstalk\Factory;
+use Phlib\Beanstalk\Stats\Service as StatsService;
+use Phlib\ConsoleConfiguration\Helper\ConfigurationHelper;
+use Symfony\Component\Console\Application;
+
+$factory = new Factory();
+$statsServiceFactory = fn (ConnectionInterface $beanstalk) => new StatsService($beanstalk);
 
 // lets go!
 $application = new Application('beanstalk');
 $application->addCommands([
-    new ServerStatsCommand(),
-    new ServerTubesCommand(),
-    new JobStatsCommand(),
-    new JobPeekCommand(),
-    new JobDeleteCommand(),
-    new TubePeekCommand(),
-    new TubeKickCommand()
+    new ServerDistribCommand($factory, $statsServiceFactory),
+    new ServerStatsCommand($factory, $statsServiceFactory),
+    new ServerTubesCommand($factory, $statsServiceFactory),
+    new JobStatsCommand($factory),
+    new JobPeekCommand($factory),
+    new JobDeleteCommand($factory),
+    new TubePeekCommand($factory),
+    new TubeKickCommand($factory),
+    new TubeStatsCommand($factory, $statsServiceFactory),
 ]);
 
 ConfigurationHelper::initHelper(
     $application,
-    ['host'     => 'localhost'],
+    ['host' => 'localhost'],
     ['filename' => 'beanstalk-config.php']
 );
 

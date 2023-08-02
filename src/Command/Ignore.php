@@ -1,48 +1,33 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
-use Phlib\Beanstalk\ValidateTrait;
 
 /**
- * Class Ignore
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Ignore implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
-    /**
-     * @var string
-     */
-    protected $tube;
+    private string $tube;
 
-    /**
-     * @param string $tube
-     */
-    public function __construct($tube)
+    public function __construct(string $tube)
     {
         $this->validateTubeName($tube);
         $this->tube = $tube;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    private function getCommand(): string
     {
         return sprintf('ignore %s', $this->tube);
     }
 
-    /**
-     * @param SocketInterface $socket
-     * @return integer
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(Socket $socket): int
     {
         $socket->write($this->getCommand());
 
@@ -55,7 +40,7 @@ class Ignore implements CommandInterface
                 throw new CommandException('Can not ignore only tube currently watching.');
 
             default:
-                throw new CommandException("Ignore tube '$this->tube' failed '$status'");
+                throw new CommandException("Ignore tube '{$this->tube}' failed '{$status}'");
         }
     }
 }

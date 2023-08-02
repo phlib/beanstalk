@@ -1,25 +1,19 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
-use Phlib\Beanstalk\Exception\NotFoundException;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
- * Class AbstractStats
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 trait StatsTrait
 {
-
-    /**
-     * @param SocketInterface $socket
-     * @return array
-     * @throws NotFoundException
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(Socket $socket): array
     {
         $socket->write($this->getCommand());
         $status = strtok($socket->read(), ' ');
@@ -29,34 +23,37 @@ trait StatsTrait
                 return $this->decode($data);
 
             case 'NOT_FOUND':
-                throw new NotFoundException("Stats read failed '$status'");
+                throw new NotFoundException('Stats read could not find specified job');
 
             default:
-                throw new CommandException("Stats read failed '$status'");
+                throw new CommandException("Stats read failed '{$status}'");
         }
     }
 
     /**
      * Decodes the YAML string into an array of data.
-     *
-     * @param  string $response
-     * @return array
      */
-    protected function decode($response)
+    private function decode(string $response): array
     {
         $lines = array_slice(explode("\n", trim($response)), 1);
 
         $result = [];
         foreach ($lines as $line) {
-            if ($line[0] == '-') {
-                $result[] = trim(ltrim($line, '- '));
+            if ($line[0] === '-') {
+                $value = trim(ltrim($line, '- '));
+
+                if (is_numeric($value)) {
+                    $value = $value + 0;
+                }
+
+                $result[] = $value;
             } else {
                 $key = strtok($line, ': ');
                 if ($key) {
                     $value = ltrim(trim(strtok('')), ' ');
 
                     if (is_numeric($value)) {
-                        $value = $value + 0;
+                        $value += 0;
                     }
 
                     $result[$key] = $value;

@@ -1,72 +1,49 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\BuriedException;
 use Phlib\Beanstalk\Exception\CommandException;
-use Phlib\Beanstalk\ValidateTrait;
+use Phlib\Beanstalk\Exception\DrainingException;
 
 /**
- * Class Put
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Put implements CommandInterface
 {
     use ValidateTrait;
-    use ToStringTrait;
 
-    /**
-     * @var string
-     */
-    protected $data;
+    private string $data;
 
-    /**
-     * @var integer
-     */
-    protected $priority;
+    private int $priority;
 
-    /**
-     * @var integer
-     */
-    protected $delay;
+    private int $delay;
 
-    /**
-     * @var integer
-     */
-    protected $ttr;
+    private int $ttr;
 
-    /**
-     * @param string  $data
-     * @param integer $priority
-     * @param integer $delay
-     * @param integer $ttr
-     */
-    public function __construct($data, $priority, $delay, $ttr)
+    public function __construct(string $data, int $priority, int $delay, int $ttr)
     {
         $this->validateJobData($data);
         $this->validatePriority($priority);
+        $this->validateDelay($delay);
+        $this->validateTtr($ttr);
 
-        $this->data     = (string)$data;
+        $this->data = $data;
         $this->priority = $priority;
-        $this->delay    = $delay;
-        $this->ttr      = $ttr;
+        $this->delay = $delay;
+        $this->ttr = $ttr;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    private function getCommand(): string
     {
         $bytesSent = strlen($this->data);
         return sprintf('put %d %d %d %d', $this->priority, $this->delay, $this->ttr, $bytesSent);
     }
 
-    /**
-     * @param SocketInterface $socket
-     * @return string|integer
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(Socket $socket): int
     {
         $socket->write($this->getCommand());
         $socket->write($this->data);
@@ -74,14 +51,16 @@ class Put implements CommandInterface
         $status = strtok($socket->read(), ' ');
         switch ($status) {
             case 'INSERTED':
-            case 'BURIED':
                 return (int)strtok(' '); // job id
-
+            case 'BURIED':
+                $jobId = (int)strtok(' ');
+                throw BuriedException::create($jobId);
+            case 'DRAINING':
+                throw new DrainingException('Server in a draining status');
             case 'EXPECTED_CRLF':
             case 'JOB_TOO_BIG':
-            case 'DRAINING':
             default:
-                throw new CommandException("Put failed '$status'");
+                throw new CommandException("Put failed '{$status}'");
         }
     }
 }

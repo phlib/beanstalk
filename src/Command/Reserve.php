@@ -1,66 +1,54 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
 
 /**
- * Class Reserve
- * @package Phlib\Beanstalk\Command
+ * @package Phlib\Beanstalk
  */
 class Reserve implements CommandInterface
 {
-    use ToStringTrait;
+    private ?int $timeout;
 
-    /**
-     * @var integer|null
-     */
-    protected $timeout;
-
-    /**
-     * @param integer|null $timeout
-     */
-    public function __construct($timeout = null)
+    public function __construct(?int $timeout = null)
     {
         $this->timeout = $timeout;
     }
 
-    /**
-     * @return string
-     */
-    public function getCommand()
+    private function getCommand(): string
     {
-        if (is_null($this->timeout)) {
+        if ($this->timeout === null) {
             return 'reserve';
-        } else {
-            return sprintf('reserve-with-timeout %d', $this->timeout);
         }
+
+        return sprintf('reserve-with-timeout %d', $this->timeout);
     }
 
-    /**
-     * @param SocketInterface $socket
-     * @return array|false
-     * @throws CommandException
-     */
-    public function process(SocketInterface $socket)
+    public function process(Socket $socket): ?array
     {
         $socket->write($this->getCommand());
         $status = strtok($socket->read(), ' ');
         switch ($status) {
             case 'RESERVED':
-                $id     = (int)strtok(' ');
-                $bytes  = (int)strtok(' ');
-                $body   = substr($socket->read($bytes + 2), 0, -2);
+                $id = (int)strtok(' ');
+                $bytes = (int)strtok(' ');
+                $body = substr($socket->read($bytes + 2), 0, -2);
 
-                return ['id' => $id, 'body' => $body];
+                return [
+                    'id' => $id,
+                    'body' => $body,
+                ];
 
             case 'DEADLINE_SOON':
             case 'TIMED_OUT':
-                return false;
+                return null;
 
             default:
-                throw new CommandException("Reserve failed '$status'");
+                throw new CommandException("Reserve failed '{$status}'");
         }
     }
 }

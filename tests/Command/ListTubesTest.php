@@ -1,18 +1,26 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Command\ListTubes;
+namespace Phlib\Beanstalk\Command;
 
 class ListTubesTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new ListTubes());
+        static::assertInstanceOf(CommandInterface::class, new ListTubes());
     }
 
-    public function testGetCommand()
+    public function testCommandSyntax(): void
     {
-        $this->assertEquals("list-tubes", (new ListTubes())->getCommand());
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with('list-tubes');
+
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturn('OK 123');
+
+        (new ListTubes())->process($this->socket);
     }
 }

@@ -1,46 +1,46 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Command\UseTube;
+namespace Phlib\Beanstalk\Command;
+
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 class UseTubeTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new UseTube('test-tube'));
+        static::assertInstanceOf(CommandInterface::class, new UseTube('test-tube'));
     }
 
-    public function testGetCommand()
+    public function testTubeIsValidated(): void
     {
-        $tube = 'test-tube';
-        $this->assertEquals("use $tube", (new UseTube($tube))->getCommand());
-    }
+        $this->expectException(InvalidArgumentException::class);
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
-    public function testTubeIsValidated()
-    {
         new UseTube('');
     }
 
-    public function testSuccessfulCommand()
+    public function testSuccessfulCommand(): void
     {
-        $tube = 'test-tube';
-        $this->socket->expects($this->any())
-            ->method('read')
-            ->willReturn("USING $tube");
+        $tube = sha1(uniqid());
 
-        $this->assertEquals($tube, (new UseTube($tube))->process($this->socket));
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("use {$tube}");
+
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturn("USING {$tube}");
+
+        static::assertSame($tube, (new UseTube($tube))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new UseTube('test-tube'))->process($this->socket);

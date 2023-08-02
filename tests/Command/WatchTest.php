@@ -1,47 +1,47 @@
 <?php
 
-namespace Phlib\Beanstalk\Tests\Command;
+declare(strict_types=1);
 
-use Phlib\Beanstalk\Command\Watch;
+namespace Phlib\Beanstalk\Command;
+
+use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\InvalidArgumentException;
 
 class WatchTest extends CommandTestCase
 {
-    public function testImplementsCommand()
+    public function testImplementsCommand(): void
     {
-        $this->assertInstanceOf('\Phlib\Beanstalk\Command\CommandInterface', new Watch('test-tube'));
+        static::assertInstanceOf(CommandInterface::class, new Watch('test-tube'));
     }
 
-    public function testGetCommand()
+    public function testTubeIsValidated(): void
     {
-        $tube = 'test-tube';
-        $this->assertEquals("watch $tube", (new Watch($tube))->getCommand());
-    }
+        $this->expectException(InvalidArgumentException::class);
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\InvalidArgumentException
-     */
-    public function testTubeIsValidated()
-    {
         new Watch('');
     }
 
-    public function testSuccessfulCommand()
+    public function testSuccessfulCommand(): void
     {
-        $tube = 'test-tube';
-        $watchingCount = 12;
-        $this->socket->expects($this->any())
-            ->method('read')
-            ->willReturn("WATCHING $watchingCount");
+        $tube = sha1(uniqid());
 
-        $this->assertEquals($watchingCount, (new Watch($tube))->process($this->socket));
+        $this->socket->expects(static::once())
+            ->method('write')
+            ->with("watch {$tube}");
+
+        $watchingCount = 12;
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturn("WATCHING {$watchingCount}");
+
+        static::assertSame($watchingCount, (new Watch($tube))->process($this->socket));
     }
 
-    /**
-     * @expectedException \Phlib\Beanstalk\Exception\CommandException
-     */
-    public function testUnknownStatusThrowsException()
+    public function testUnknownStatusThrowsException(): void
     {
-        $this->socket->expects($this->any())
+        $this->expectException(CommandException::class);
+
+        $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('UNKNOWN_ERROR');
         (new Watch('test-tube'))->process($this->socket);
