@@ -1,38 +1,37 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Phlib\Beanstalk\Model;
 
-
+/**
+ * @package Phlib\Beanstalk
+ */
 class Stats
 {
-    /**
-     * @var array
-     */
-    protected static $listStats = ['pid', 'version', 'hostname', 'name', 'uptime', 'binlog-current-index'];
+    private const LIST_STATS = [
+        'pid',
+        'version',
+        'hostname',
+        'name',
+        'uptime',
+        'binlog-current-index',
+    ];
 
-    /**
-     * @var array
-     */
-    protected static $maxStats  = ['timeouts', 'binlog-max-size', 'binlog-oldest-index'];
+    private const MAX_STATS = [
+        'timeouts',
+        'binlog-max-size',
+        'binlog-oldest-index',
+    ];
 
-    /**
-     * @var array
-     */
-    protected $data;
+    private array $data;
 
-    /**
-     * @param array $data
-     */
     public function __construct(array $data = [])
     {
         $this->data = $data;
     }
 
-    /**
-     * @param array $newData
-     * @return Stats
-     */
-    public function aggregate(array $newData)
+    public function aggregate(array $newData): self
     {
         $data = $this->data;
         foreach ($newData as $name => $value) {
@@ -41,11 +40,11 @@ class Stats
                 continue;
             }
 
-            if (in_array($name, self::$listStats)) {
-                if ($data[$name] != $value) {
+            if (in_array($name, self::LIST_STATS, true)) {
+                if ($data[$name] !== $value) {
                     $data[$name] .= ',' . $value;
                 }
-            } elseif (in_array($name, self::$maxStats)) {
+            } elseif (in_array($name, self::MAX_STATS, true)) {
                 if ($value > $data[$name]) {
                     $data[$name] = $value;
                 }
@@ -53,23 +52,17 @@ class Stats
                 $data[$name] += $value;
             }
         }
+
         return new self($data);
     }
 
-    /**
-     * @return array
-     */
-    public function toArray()
+    public function toArray(): array
     {
         return $this->data;
     }
 
-    /**
-     * @return bool
-     */
-    public function isEmpty()
+    public function isEmpty(): bool
     {
         return empty($this->data);
     }
-
 }

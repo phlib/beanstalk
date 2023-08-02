@@ -1,51 +1,52 @@
 <?php
 
+declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Model;
 
+use PHPUnit\Framework\TestCase;
 
-class StatsTest extends \PHPUnit_Framework_TestCase
+class StatsTest extends TestCase
 {
-
-    public function testCreateStatsWithData()
+    public function testCreateStatsWithData(): void
     {
         $data = [
-            'timeouts'        => 5,
+            'timeouts' => 5,
             'binlog-max-size' => 10,
         ];
         $stats = new Stats($data);
-        $this->assertInstanceOf('\Phlib\Beanstalk\Model\Stats', $stats);
+        static::assertInstanceOf(Stats::class, $stats);
     }
 
-    public function testToArrayReturnsOriginalData()
+    public function testToArrayReturnsOriginalData(): void
     {
         $data = [
-            'timeouts'        => 5,
+            'timeouts' => 5,
             'binlog-max-size' => 10,
         ];
         $stats = new Stats($data);
-        $this->assertSame($data, $stats->toArray());
+        static::assertSame($data, $stats->toArray());
     }
 
-    public function testIsEmptyWithEmptyData()
+    public function testIsEmptyWithEmptyData(): void
     {
         $stats = new Stats();
-        $this->assertTrue($stats->isEmpty());
+        static::assertTrue($stats->isEmpty());
 
         $stats = new Stats([]);
-        $this->assertTrue($stats->isEmpty());
+        static::assertTrue($stats->isEmpty());
     }
 
-    public function testIsEmptyWithData()
+    public function testIsEmptyWithData(): void
     {
         $stats = new Stats([
-            'timeouts'        => 5,
+            'timeouts' => 5,
             'binlog-max-size' => 10,
         ]);
-        $this->assertFalse($stats->isEmpty());
+        static::assertFalse($stats->isEmpty());
     }
 
-    public function testAddStatsNewData()
+    public function testAddStatsNewData(): void
     {
         $stats = new Stats([
             'key1' => 'value1',
@@ -57,51 +58,60 @@ class StatsTest extends \PHPUnit_Framework_TestCase
             'key4' => 'value4',
         ]);
 
-        $this->assertSame([
-            'key1' => 'value1',
-            'key2' => 'value2',
-            'key3' => 'value3',
-            'key4' => 'value4',
-        ], $stats->toArray());
+        static::assertSame(
+            [
+                'key1' => 'value1',
+                'key2' => 'value2',
+                'key3' => 'value3',
+                'key4' => 'value4',
+            ],
+            $stats->toArray()
+        );
     }
 
-    public function testAddStatsListData()
+    public function testAddStatsListData(): void
     {
         $stats = new Stats([
             'version' => '1.0.0',
-            'name'    => 'first',
+            'name' => 'first',
         ]);
 
         $stats = $stats->aggregate([
             'version' => '1.0.2',
-            'name'    => 'second',
+            'name' => 'second',
         ]);
 
-        $this->assertSame([
-            'version' => '1.0.0,1.0.2',
-            'name'    => 'first,second',
-        ], $stats->toArray());
+        static::assertSame(
+            [
+                'version' => '1.0.0,1.0.2',
+                'name' => 'first,second',
+            ],
+            $stats->toArray()
+        );
     }
 
-    public function testAddStatsMaxData()
+    public function testAddStatsMaxData(): void
     {
         $stats = new Stats([
-            'timeouts'        => 5,
+            'timeouts' => 5,
             'binlog-max-size' => 10,
         ]);
 
         $stats = $stats->aggregate([
-            'timeouts'        => 3,
+            'timeouts' => 3,
             'binlog-max-size' => 16,
         ]);
 
-        $this->assertSame([
-            'timeouts'        => 5,
-            'binlog-max-size' => 16,
-        ], $stats->toArray());
+        static::assertSame(
+            [
+                'timeouts' => 5,
+                'binlog-max-size' => 16,
+            ],
+            $stats->toArray()
+        );
     }
 
-    public function testAddStatsSum()
+    public function testAddStatsSum(): void
     {
         $stats = new Stats([
             'sumvalue1' => 5,
@@ -113,9 +123,12 @@ class StatsTest extends \PHPUnit_Framework_TestCase
             'sumvalue2' => 1,
         ]);
 
-        $this->assertSame([
-            'sumvalue1' => 19,
-            'sumvalue2' => 4,
-        ], $stats->toArray());;
+        static::assertSame(
+            [
+                'sumvalue1' => 19,
+                'sumvalue2' => 4,
+            ],
+            $stats->toArray()
+        );
     }
 }
