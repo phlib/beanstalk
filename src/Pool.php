@@ -6,6 +6,7 @@ namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\RuntimeException;
+use Phlib\Beanstalk\Model\Stats;
 use Phlib\Beanstalk\Pool\CollectionInterface;
 
 /**
@@ -220,20 +221,20 @@ class Pool implements ConnectionInterface
 
     public function stats(): ?array
     {
-        $stats = [];
+        $stats = new Stats();
         $onSuccess = function (array $result) use (&$stats): bool {
             if (!is_array($result['response'])) {
                 return true;
             }
-            $stats = $this->statsCombine($stats, $result['response']);
+            $stats = $stats->aggregate($result['response']);
             return true;
         };
         $this->collection->sendToAll('stats', [], $onSuccess);
 
-        if (!is_array($stats) || empty($stats)) {
+        if ($stats->isEmpty()) {
             return null;
         }
-        return $stats;
+        return $stats->toArray();
     }
 
     /**
@@ -250,45 +251,20 @@ class Pool implements ConnectionInterface
 
     public function statsTube(string $tube): ?array
     {
-        $stats = [];
+        $stats = new Stats();
         $onSuccess = function (array $result) use (&$stats): bool {
             if (!is_array($result['response'])) {
                 return true;
             }
-            $stats = $this->statsCombine($stats, $result['response']);
+            $stats = $stats->aggregate($result['response']);
             return true;
         };
         $this->collection->sendToAll('statsTube', [$tube], $onSuccess);
 
-        if (!is_array($stats) || empty($stats)) {
+        if ($stats->isEmpty()) {
             return null;
         }
-        return $stats;
-    }
-
-    private function statsCombine(array $cumulative, array $stats): array
-    {
-        $list = ['pid', 'version', 'hostname', 'name', 'uptime', 'binlog-current-index'];
-        $maximum = ['timeouts', 'binlog-max-size', 'binlog-oldest-index'];
-        foreach ($stats as $name => $value) {
-            if (!array_key_exists($name, $cumulative)) {
-                $cumulative[$name] = $value;
-                continue;
-            }
-
-            if (in_array($name, $list, true)) {
-                if ($cumulative[$name] !== $value) {
-                    $cumulative[$name] .= ',' . $value;
-                }
-            } elseif (in_array($name, $maximum, true)) {
-                if ($value > $cumulative[$name]) {
-                    $cumulative[$name] = $value;
-                }
-            } else {
-                $cumulative[$name] += $value;
-            }
-        }
-        return $cumulative;
+        return $stats->toArray();
     }
 
     public function listTubes(): array
