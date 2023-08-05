@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
@@ -136,11 +137,11 @@ class Connection implements ConnectionInterface
         return count($this->watching);
     }
 
-    public function ignore(string $tube): ?int
+    public function ignore(string $tube): int
     {
         if (isset($this->watching[$tube])) {
             if (count($this->watching) === 1) {
-                return null;
+                throw new CommandException('Cannot ignore the only tube in the watch list');
             }
 
             (new Command\Ignore($tube))

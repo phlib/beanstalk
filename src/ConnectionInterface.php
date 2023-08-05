@@ -68,7 +68,7 @@ interface ConnectionInterface
     /**
      * @return int|null Number of tubes being watched or null when last tube cannot be ignored
      */
-    public function ignore(string $tube): ?int;
+    public function ignore(string $tube): int;
 
     /**
      * @param string|int $id

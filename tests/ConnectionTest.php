@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -187,8 +188,11 @@ class ConnectionTest extends TestCase
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('WATCHING 123');
-        $this->beanstalk->watch($tube);
-        $this->execute("ignore {$tube}", 'WATCHING 123', 'ignore', [$tube]);
+        $before = $this->beanstalk->watch($tube);
+        static::assertSame(2, $before);
+
+        $after = $this->execute("ignore {$tube}", 'WATCHING 123', 'ignore', [$tube]);
+        static::assertSame(1, $after);
     }
 
     public function testIgnoreDoesNothingWhenNotWatching(): void
@@ -196,12 +200,16 @@ class ConnectionTest extends TestCase
         $tube = 'test-tube';
         $this->socket->expects(static::never())
             ->method('write');
-        $this->beanstalk->ignore($tube);
+        $actual = $this->beanstalk->ignore($tube);
+        static::assertSame(1, $actual);
     }
 
-    public function testIgnoreDoesNothingWhenOnlyHasOneTube(): void
+    public function testIgnoreExceptionWhenOnlyHasOneTube(): void
     {
-        static::assertNull($this->beanstalk->ignore('default'));
+        $this->expectException(CommandException::class);
+        $this->expectExceptionMessage('Cannot ignore the only tube in the watch list');
+
+        $this->beanstalk->ignore('default');
     }
 
     public function testPeek(): void

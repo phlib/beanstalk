@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
+use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Model\Stats;
@@ -143,11 +144,11 @@ class Pool implements ConnectionInterface
         return count($this->watching);
     }
 
-    public function ignore(string $tube): ?int
+    public function ignore(string $tube): int
     {
         if (isset($this->watching[$tube])) {
             if (count($this->watching) === 1) {
-                return null;
+                throw new CommandException('Cannot ignore the only tube in the watch list');
             }
             $this->collection->sendToAll('ignore', [$tube]);
             unset($this->watching[$tube]);

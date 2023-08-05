@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
+use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool\Collection;
@@ -77,8 +78,11 @@ class PoolTest extends TestCase
 
     public function testIgnoreDoesNotAllowLessThanOneWatching(): void
     {
+        $this->expectException(CommandException::class);
+        $this->expectExceptionMessage('Cannot ignore the only tube in the watch list');
+
         // 'default' tube is already being watched
-        static::assertNull($this->pool->ignore('default'));
+        $this->pool->ignore('default');
     }
 
     public function testIgnore(): void
