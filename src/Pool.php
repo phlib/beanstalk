@@ -219,7 +219,7 @@ class Pool implements ConnectionInterface
         return $kicked;
     }
 
-    public function stats(): ?array
+    public function stats(): array
     {
         $stats = new Stats();
         $onSuccess = function (array $result) use (&$stats): bool {
@@ -231,9 +231,6 @@ class Pool implements ConnectionInterface
         };
         $this->collection->sendToAll('stats', [], $onSuccess);
 
-        if ($stats->isEmpty()) {
-            return null;
-        }
         return $stats->toArray();
     }
 
@@ -249,7 +246,7 @@ class Pool implements ConnectionInterface
         return $job;
     }
 
-    public function statsTube(string $tube): ?array
+    public function statsTube(string $tube): array
     {
         $stats = new Stats();
         $onSuccess = function (array $result) use (&$stats): bool {
@@ -261,9 +258,6 @@ class Pool implements ConnectionInterface
         };
         $this->collection->sendToAll('statsTube', [$tube], $onSuccess);
 
-        if ($stats->isEmpty()) {
-            return null;
-        }
         return $stats->toArray();
     }
 

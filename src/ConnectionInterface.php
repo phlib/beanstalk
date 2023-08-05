@@ -88,9 +88,9 @@ interface ConnectionInterface
 
     public function kick(int $quantity): int;
 
-    public function statsTube(string $tube): ?array;
+    public function statsTube(string $tube): array;
 
-    public function stats(): ?array;
+    public function stats(): array;
 
     public function listTubes(): array;
 
