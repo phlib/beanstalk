@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Console;
 
+use Phlib\Beanstalk\Console\Service\StatsService;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\Stats\Service as StatsService;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class TubeStatsCommandTest extends ConsoleTestCase

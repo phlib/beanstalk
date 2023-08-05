@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Phlib\Beanstalk\Stats;
+namespace Phlib\Beanstalk\Console\Service;
 
 use Phlib\Beanstalk\ConnectionInterface;
 
 /**
  * @package Phlib\Beanstalk
  */
-class Service
+class StatsService
 {
     public const SERVER_BINLOG = 1;
 

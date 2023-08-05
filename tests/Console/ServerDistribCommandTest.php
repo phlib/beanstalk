@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\ConnectionInterface;
+use Phlib\Beanstalk\Console\Service\StatsService;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Factory;
 use Phlib\Beanstalk\Pool;
 use Phlib\Beanstalk\Pool\Collection;
-use Phlib\Beanstalk\Stats\Service as StatsService;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class ServerDistribCommandTest extends ConsoleTestCase

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Phlib\Beanstalk\Stats;
+namespace Phlib\Beanstalk\Console\Service;
 
 use Phlib\Beanstalk\Connection;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -145,7 +145,7 @@ class StatsServiceTest extends TestCase
      */
     private Connection $connection;
 
-    private Service $statsService;
+    private StatsService $statsService;
 
     protected function setUp(): void
     {
@@ -154,7 +154,7 @@ class StatsServiceTest extends TestCase
             ->method('getName')
             ->willReturn(sha1(uniqid()));
 
-        $this->statsService = new Service($this->connection);
+        $this->statsService = new StatsService($this->connection);
 
         parent::setUp();
     }
@@ -190,10 +190,10 @@ class StatsServiceTest extends TestCase
     public function dataGetServerStats(): array
     {
         return [
-            'binlog' => [Service::SERVER_BINLOG, self::STATS_KEY_BINLOG],
-            'command' => [Service::SERVER_COMMAND, self::STATS_KEY_COMMAND],
-            'current' => [Service::SERVER_CURRENT, self::STATS_KEY_CURRENT],
-            'all' => [Service::SERVER_ALL, array_merge(self::STATS_KEY_BINLOG, self::STATS_KEY_COMMAND, self::STATS_KEY_CURRENT)],
+            'binlog' => [StatsService::SERVER_BINLOG, self::STATS_KEY_BINLOG],
+            'command' => [StatsService::SERVER_COMMAND, self::STATS_KEY_COMMAND],
+            'current' => [StatsService::SERVER_CURRENT, self::STATS_KEY_CURRENT],
+            'all' => [StatsService::SERVER_ALL, array_merge(self::STATS_KEY_BINLOG, self::STATS_KEY_COMMAND, self::STATS_KEY_CURRENT)],
         ];
     }
 

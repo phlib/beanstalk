@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Console;
 
+use Phlib\Beanstalk\Console\Service\StatsService;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\Stats\Service as StatsService;
 use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;

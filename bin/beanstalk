@@ -26,11 +26,11 @@ use Phlib\Beanstalk\Console\JobStatsCommand;
 use Phlib\Beanstalk\Console\ServerDistribCommand;
 use Phlib\Beanstalk\Console\ServerStatsCommand;
 use Phlib\Beanstalk\Console\ServerTubesCommand;
+use Phlib\Beanstalk\Console\Service\StatsService;
 use Phlib\Beanstalk\Console\TubeKickCommand;
 use Phlib\Beanstalk\Console\TubePeekCommand;
 use Phlib\Beanstalk\Console\TubeStatsCommand;
 use Phlib\Beanstalk\Factory;
-use Phlib\Beanstalk\Stats\Service as StatsService;
 use Phlib\ConsoleConfiguration\Helper\ConfigurationHelper;
 use Symfony\Component\Console\Application;
 
