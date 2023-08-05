@@ -166,14 +166,19 @@ class ConnectionTest extends TestCase
     public function testWatch(): void
     {
         $tube = 'test-tube';
-        $this->execute("watch {$tube}", "WATCHING {$tube}", 'watch', [$tube]);
+        $actual = $this->execute("watch {$tube}", 'WATCHING 2', 'watch', [$tube]);
+        static::assertSame(2, $actual);
     }
 
     public function testWatchForExistingWatchedTube(): void
     {
         $tube = 'test-tube';
-        $this->execute("watch {$tube}", 'WATCHING 123', 'watch', [$tube]);
-        $this->beanstalk->watch($tube);
+
+        $actual1 = $this->execute("watch {$tube}", 'WATCHING 123', 'watch', [$tube]);
+        static::assertSame(2, $actual1);
+
+        $actual2 = $this->beanstalk->watch($tube);
+        static::assertSame(2, $actual2);
     }
 
     public function testIgnore(): void

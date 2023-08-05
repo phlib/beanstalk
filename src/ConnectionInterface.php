@@ -63,7 +63,7 @@ interface ConnectionInterface
      */
     public function delete($id): self;
 
-    public function watch(string $tube): self;
+    public function watch(string $tube): int;
 
     /**
      * @return int|null Number of tubes being watched or null when last tube cannot be ignored

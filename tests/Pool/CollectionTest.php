@@ -25,7 +25,7 @@ class CollectionTest extends TestCase
         'release' => [123, 'self'],
         'bury' => [123, 'self'],
         'delete' => [123, 'self'],
-        'watch' => ['tube', 'self'],
+        'watch' => ['tube', 123],
         'ignore' => ['tube', 123],
         'peek' => [123, ['some result']],
         'statsJob' => [123, ['some result']],

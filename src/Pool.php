@@ -134,13 +134,13 @@ class Pool implements ConnectionInterface
         return $this;
     }
 
-    public function watch(string $tube): self
+    public function watch(string $tube): int
     {
         if (!isset($this->watching[$tube])) {
             $this->collection->sendToAll('watch', [$tube]);
             $this->watching[$tube] = true;
         }
-        return $this;
+        return count($this->watching);
     }
 
     public function ignore(string $tube): ?int

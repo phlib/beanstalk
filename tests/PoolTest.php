@@ -83,7 +83,8 @@ class PoolTest extends TestCase
 
     public function testIgnore(): void
     {
-        $this->pool->watch('test-tube');
+        $actual = $this->pool->watch('test-tube');
+        static::assertSame(2, $actual);
         static::assertSame(1, $this->pool->ignore('default'));
     }
 
@@ -582,7 +583,8 @@ class PoolTest extends TestCase
 
     public function testListTubesWatched(): void
     {
-        $this->pool->watch('test');
+        $actual = $this->pool->watch('test');
+        static::assertSame(2, $actual);
         static::assertSame(['default', 'test'], $this->pool->listTubesWatched());
     }
 

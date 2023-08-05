@@ -125,17 +125,15 @@ class Connection implements ConnectionInterface
         return $this;
     }
 
-    public function watch(string $tube): self
+    public function watch(string $tube): int
     {
-        if (isset($this->watching[$tube])) {
-            return $this;
+        if (!isset($this->watching[$tube])) {
+            (new Command\Watch($tube))
+                ->process($this->socket);
+            $this->watching[$tube] = true;
         }
 
-        (new Command\Watch($tube))
-            ->process($this->socket);
-        $this->watching[$tube] = true;
-
-        return $this;
+        return count($this->watching);
     }
 
     public function ignore(string $tube): ?int
