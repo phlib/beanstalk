@@ -29,7 +29,7 @@ interface ConnectionInterface
 
     public function disconnect(): bool;
 
-    public function useTube(string $tube): self;
+    public function useTube(string $tube): void;
 
     /**
      * @return string|int

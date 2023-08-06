@@ -25,8 +25,10 @@ class TubeKickCommand extends AbstractCommand
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $this->getBeanstalk()
+            ->useTube($input->getArgument('tube'));
+
         $quantity = $this->getBeanstalk()
-            ->useTube($input->getArgument('tube'))
             ->kick((int)$input->getArgument('quantity'));
         $output->writeln("Successfully kicked {$quantity} jobs.");
 

@@ -48,11 +48,10 @@ class Pool implements ConnectionInterface
         return $this->collection;
     }
 
-    public function useTube(string $tube): self
+    public function useTube(string $tube): void
     {
         $this->collection->sendToAll('useTube', [$tube]);
         $this->using = $tube;
-        return $this;
     }
 
     public function put(

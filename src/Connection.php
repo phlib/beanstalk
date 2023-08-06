@@ -54,12 +54,11 @@ class Connection implements ConnectionInterface
         return $this->name;
     }
 
-    public function useTube(string $tube): self
+    public function useTube(string $tube): void
     {
         (new Command\UseTube($tube))
             ->process($this->socket);
         $this->using = $tube;
-        return $this;
     }
 
     public function put(

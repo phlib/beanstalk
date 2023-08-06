@@ -123,7 +123,7 @@ class Collection implements CollectionInterface
             // Use switch instead of `->{$command}` to allow static analysis
             switch ($command) {
                 case 'useTube':
-                    $result = $connection->useTube(...$arguments);
+                    $connection->useTube(...$arguments);
                     break;
                 case 'put':
                     $result = $connection->put(...$arguments);
