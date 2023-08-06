@@ -15,10 +15,7 @@ interface CollectionInterface extends \IteratorAggregate
 
     public function getConnection(string $key): ConnectionInterface;
 
-    /**
-     * @return mixed
-     */
-    public function sendToExact(string $key, string $command, array $arguments = []);
+    public function sendToExact(string $key, string $command, array $arguments = []): array;
 
     /**
      * @return mixed
