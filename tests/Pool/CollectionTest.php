@@ -18,13 +18,13 @@ class CollectionTest extends TestCase
     use PHPMock;
 
     private const SEND_COMMANDS_ALLOWED = [
-        'useTube' => ['tube', 'self'],
+        'useTube' => ['tube', 'void'],
         'put' => ['data', 123],
         'reserve' => [123, ['some result']],
-        'touch' => [123, 'self'],
-        'release' => [123, 'self'],
-        'bury' => [123, 'self'],
-        'delete' => [123, 'self'],
+        'touch' => [123, 'void'],
+        'release' => [123, 'void'],
+        'bury' => [123, 'void'],
+        'delete' => [123, 'void'],
         'watch' => ['tube', 123],
         'ignore' => ['tube', 123],
         'peek' => [123, ['some result']],
@@ -199,13 +199,15 @@ class CollectionTest extends TestCase
     /**
      * @dataProvider dataSendToExactCommandAllowed
      */
-    public function testSendToExactCommandAllowed(string $command, array $placeholderArgs, Stub $returnStub): void
+    public function testSendToExactCommandAllowed(string $command, array $placeholderArgs, ?Stub $returnStub): void
     {
         $identifier = 'id-123';
         $connection = $this->getMockConnection($identifier);
-        $connection->expects(static::once())
-            ->method($command)
-            ->will($returnStub);
+        $mockMethod = $connection->expects(static::once())
+            ->method($command);
+        if (isset($returnStub)) {
+            $mockMethod->will($returnStub);
+        }
 
         $collection = new Collection([$connection]);
         $collection->sendToExact($identifier, $command, $placeholderArgs);
@@ -219,8 +221,8 @@ class CollectionTest extends TestCase
          */
         foreach (self::SEND_COMMANDS_ALLOWED as $command => $map) {
             $result = array_pop($map);
-            if ($result === 'self') {
-                $stub = static::returnSelf();
+            if ($result === 'void') {
+                $stub = null;
             } else {
                 $stub = static::returnValue($result);
             }

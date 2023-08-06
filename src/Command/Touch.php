@@ -25,14 +25,14 @@ class Touch implements CommandInterface
         return sprintf('touch %d', $this->id);
     }
 
-    public function process(Socket $socket): self
+    public function process(Socket $socket): void
     {
         $socket->write($this->getCommand());
 
         $status = $socket->read();
         switch ($status) {
             case 'TOUCHED':
-                return $this;
+                return;
 
             case 'NOT_TOUCHED':
                 throw new NotFoundException("Job id '{$this->id}' could not be found.");

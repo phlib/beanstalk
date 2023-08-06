@@ -46,22 +46,22 @@ interface ConnectionInterface
     /**
      * @param string|int $id
      */
-    public function touch($id): self;
+    public function touch($id): void;
 
     /**
      * @param string|int $id
      */
-    public function release($id, int $priority = self::DEFAULT_PRIORITY, int $delay = self::DEFAULT_DELAY): self;
+    public function release($id, int $priority = self::DEFAULT_PRIORITY, int $delay = self::DEFAULT_DELAY): void;
 
     /**
      * @param string|int $id
      */
-    public function bury($id, int $priority = self::DEFAULT_PRIORITY): self;
+    public function bury($id, int $priority = self::DEFAULT_PRIORITY): void;
 
     /**
      * @param string|int $id
      */
-    public function delete($id): self;
+    public function delete($id): void;
 
     public function watch(string $tube): int;
 

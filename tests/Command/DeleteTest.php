@@ -25,7 +25,9 @@ class DeleteTest extends CommandTestCase
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('DELETED');
-        static::assertInstanceOf(Delete::class, (new Delete($id))->process($this->socket));
+
+        $delete = new Delete($id);
+        $delete->process($this->socket);
     }
 
     public function testNotFoundThrowsException(): void

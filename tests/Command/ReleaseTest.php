@@ -48,7 +48,7 @@ class ReleaseTest extends CommandTestCase
             ->willReturn('RELEASED');
 
         $release = new Release($id, $priority, $delay);
-        static::assertInstanceOf(Release::class, $release->process($this->socket));
+        $release->process($this->socket);
     }
 
     public function testNotFoundThrowsException(): void

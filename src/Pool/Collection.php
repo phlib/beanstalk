@@ -132,16 +132,16 @@ class Collection implements CollectionInterface
                     $result = $connection->reserve(...$arguments);
                     break;
                 case 'touch':
-                    $result = $connection->touch(...$arguments);
+                    $connection->touch(...$arguments);
                     break;
                 case 'release':
-                    $result = $connection->release(...$arguments);
+                    $connection->release(...$arguments);
                     break;
                 case 'bury':
-                    $result = $connection->bury(...$arguments);
+                    $connection->bury(...$arguments);
                     break;
                 case 'delete':
-                    $result = $connection->delete(...$arguments);
+                    $connection->delete(...$arguments);
                     break;
                 case 'watch':
                     $result = $connection->watch(...$arguments);

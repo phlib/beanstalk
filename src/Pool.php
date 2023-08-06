@@ -97,41 +97,37 @@ class Pool implements ConnectionInterface
     /**
      * @param string|int $id
      */
-    public function touch($id): self
+    public function touch($id): void
     {
         [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'touch', [$jobId]);
-        return $this;
     }
 
     /**
      * @param string|int $id
      */
-    public function release($id, int $priority = self::DEFAULT_PRIORITY, int $delay = self::DEFAULT_DELAY): self
+    public function release($id, int $priority = self::DEFAULT_PRIORITY, int $delay = self::DEFAULT_DELAY): void
     {
         [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'release', [$jobId, $priority, $delay]);
-        return $this;
     }
 
     /**
      * @param string|int $id
      */
-    public function bury($id, int $priority = self::DEFAULT_PRIORITY): self
+    public function bury($id, int $priority = self::DEFAULT_PRIORITY): void
     {
         [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'bury', [$jobId, $priority]);
-        return $this;
     }
 
     /**
      * @param string|int $id
      */
-    public function delete($id): self
+    public function delete($id): void
     {
         [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'delete', [$jobId]);
-        return $this;
     }
 
     public function watch(string $tube): int

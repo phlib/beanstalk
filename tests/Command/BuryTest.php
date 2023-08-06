@@ -27,7 +27,9 @@ class BuryTest extends CommandTestCase
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('BURIED');
-        static::assertInstanceOf(Bury::class, (new Bury($id, $priority))->process($this->socket));
+
+        $bury = new Bury($id, $priority);
+        $bury->process($this->socket);
     }
 
     public function testNotFoundThrowsException(): void
