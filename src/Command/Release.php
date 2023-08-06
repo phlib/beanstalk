@@ -37,14 +37,14 @@ class Release implements CommandInterface
         return sprintf('release %d %d %d', $this->id, $this->priority, $this->delay);
     }
 
-    public function process(Socket $socket): self
+    public function process(Socket $socket): void
     {
         $socket->write($this->getCommand());
 
         $response = $socket->read();
         switch ($response) {
             case 'RELEASED':
-                return $this;
+                return;
             case 'BURIED':
                 throw BuriedException::create($this->id);
             case 'NOT_FOUND':

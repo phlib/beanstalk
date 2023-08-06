@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
+use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Model\Stats;
@@ -47,11 +48,10 @@ class Pool implements ConnectionInterface
         return $this->collection;
     }
 
-    public function useTube(string $tube): self
+    public function useTube(string $tube): void
     {
         $this->collection->sendToAll('useTube', [$tube]);
         $this->using = $tube;
-        return $this;
     }
 
     public function put(
@@ -97,57 +97,53 @@ class Pool implements ConnectionInterface
     /**
      * @param string|int $id
      */
-    public function touch($id): self
+    public function touch($id): void
     {
         [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'touch', [$jobId]);
-        return $this;
     }
 
     /**
      * @param string|int $id
      */
-    public function release($id, int $priority = self::DEFAULT_PRIORITY, int $delay = self::DEFAULT_DELAY): self
+    public function release($id, int $priority = self::DEFAULT_PRIORITY, int $delay = self::DEFAULT_DELAY): void
     {
         [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'release', [$jobId, $priority, $delay]);
-        return $this;
     }
 
     /**
      * @param string|int $id
      */
-    public function bury($id, int $priority = self::DEFAULT_PRIORITY): self
+    public function bury($id, int $priority = self::DEFAULT_PRIORITY): void
     {
         [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'bury', [$jobId, $priority]);
-        return $this;
     }
 
     /**
      * @param string|int $id
      */
-    public function delete($id): self
+    public function delete($id): void
     {
         [$key, $jobId] = $this->splitId($id);
         $this->collection->sendToExact($key, 'delete', [$jobId]);
-        return $this;
     }
 
-    public function watch(string $tube): self
+    public function watch(string $tube): int
     {
         if (!isset($this->watching[$tube])) {
             $this->collection->sendToAll('watch', [$tube]);
             $this->watching[$tube] = true;
         }
-        return $this;
+        return count($this->watching);
     }
 
-    public function ignore(string $tube): ?int
+    public function ignore(string $tube): int
     {
         if (isset($this->watching[$tube])) {
             if (count($this->watching) === 1) {
-                return null;
+                throw new CommandException('Cannot ignore the only tube in the watch list');
             }
             $this->collection->sendToAll('ignore', [$tube]);
             unset($this->watching[$tube]);

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
@@ -53,12 +54,11 @@ class Connection implements ConnectionInterface
         return $this->name;
     }
 
-    public function useTube(string $tube): self
+    public function useTube(string $tube): void
     {
         (new Command\UseTube($tube))
             ->process($this->socket);
         $this->using = $tube;
-        return $this;
     }
 
     public function put(
@@ -81,12 +81,11 @@ class Connection implements ConnectionInterface
     /**
      * @param string|int $id
      */
-    public function delete($id): self
+    public function delete($id): void
     {
         $id = $this->filterJobId($id);
         (new Command\Delete($id))
             ->process($this->socket);
-        return $this;
     }
 
     /**
@@ -96,53 +95,48 @@ class Connection implements ConnectionInterface
         $id,
         int $priority = ConnectionInterface::DEFAULT_PRIORITY,
         int $delay = ConnectionInterface::DEFAULT_DELAY
-    ): self {
+    ): void {
         $id = $this->filterJobId($id);
         (new Command\Release($id, $priority, $delay))
             ->process($this->socket);
-        return $this;
     }
 
     /**
      * @param string|int $id
      */
-    public function bury($id, int $priority = ConnectionInterface::DEFAULT_PRIORITY): self
+    public function bury($id, int $priority = ConnectionInterface::DEFAULT_PRIORITY): void
     {
         $id = $this->filterJobId($id);
         (new Command\Bury($id, $priority))
             ->process($this->socket);
-        return $this;
     }
 
     /**
      * @param string|int $id
      */
-    public function touch($id): self
+    public function touch($id): void
     {
         $id = $this->filterJobId($id);
         (new Command\Touch($id))
             ->process($this->socket);
-        return $this;
     }
 
-    public function watch(string $tube): self
+    public function watch(string $tube): int
     {
-        if (isset($this->watching[$tube])) {
-            return $this;
+        if (!isset($this->watching[$tube])) {
+            (new Command\Watch($tube))
+                ->process($this->socket);
+            $this->watching[$tube] = true;
         }
 
-        (new Command\Watch($tube))
-            ->process($this->socket);
-        $this->watching[$tube] = true;
-
-        return $this;
+        return count($this->watching);
     }
 
-    public function ignore(string $tube): ?int
+    public function ignore(string $tube): int
     {
         if (isset($this->watching[$tube])) {
             if (count($this->watching) === 1) {
-                return null;
+                throw new CommandException('Cannot ignore the only tube in the watch list');
             }
 
             (new Command\Ignore($tube))

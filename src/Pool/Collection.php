@@ -112,18 +112,18 @@ class Collection implements CollectionInterface
         throw $final;
     }
 
-    /**
-     * @return mixed
-     */
-    public function sendToExact(string $key, string $command, array $arguments = [])
+    public function sendToExact(string $key, string $command, array $arguments = []): array
     {
         try {
             $connection = $this->getConnection($key);
 
+            // Default `true` for commands with no specific result; distinct from those that specifically return `null`.
+            $result = true;
+
             // Use switch instead of `->{$command}` to allow static analysis
             switch ($command) {
                 case 'useTube':
-                    $result = $connection->useTube(...$arguments);
+                    $connection->useTube(...$arguments);
                     break;
                 case 'put':
                     $result = $connection->put(...$arguments);
@@ -132,16 +132,16 @@ class Collection implements CollectionInterface
                     $result = $connection->reserve(...$arguments);
                     break;
                 case 'touch':
-                    $result = $connection->touch(...$arguments);
+                    $connection->touch(...$arguments);
                     break;
                 case 'release':
-                    $result = $connection->release(...$arguments);
+                    $connection->release(...$arguments);
                     break;
                 case 'bury':
-                    $result = $connection->bury(...$arguments);
+                    $connection->bury(...$arguments);
                     break;
                 case 'delete':
-                    $result = $connection->delete(...$arguments);
+                    $connection->delete(...$arguments);
                     break;
                 case 'watch':
                     $result = $connection->watch(...$arguments);
@@ -222,22 +222,19 @@ class Collection implements CollectionInterface
                 if (!($e instanceof BeanstalkException)) {
                     throw $e;
                 }
-                // ignore
-                $result = [
-                    'response' => null,
-                ];
             }
 
             $continue = true;
-            if ($result['response'] === null && $failure !== null) {
+            if (isset($e) && $failure !== null) {
                 $continue = call_user_func($failure);
-            } elseif ($result['response'] !== null && $success !== null) {
+            } elseif (isset($result) && $success !== null) {
                 $continue = call_user_func($success, $result);
             }
 
             if ($continue === false) {
                 return;
             }
+            unset($result, $e);
         }
     }
 }

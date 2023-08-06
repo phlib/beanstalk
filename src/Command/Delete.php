@@ -25,14 +25,14 @@ class Delete implements CommandInterface
         return sprintf('delete %d', $this->id);
     }
 
-    public function process(Socket $socket): self
+    public function process(Socket $socket): void
     {
         $socket->write($this->getCommand());
 
         $response = $socket->read();
         switch ($response) {
             case 'DELETED':
-                return $this;
+                return;
 
             case 'NOT_FOUND':
                 throw new NotFoundException("Job id '{$this->id}' could not be found.");

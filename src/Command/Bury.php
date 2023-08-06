@@ -32,14 +32,14 @@ class Bury implements CommandInterface
         return sprintf('bury %d %d', $this->id, $this->priority);
     }
 
-    public function process(Socket $socket): self
+    public function process(Socket $socket): void
     {
         $socket->write($this->getCommand());
 
         $response = $socket->read();
         switch ($response) {
             case 'BURIED':
-                return $this;
+                return;
 
             case 'NOT_FOUND':
                 throw new NotFoundException("Job id '{$this->id}' could not be found.");

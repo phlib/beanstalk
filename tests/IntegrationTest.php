@@ -53,9 +53,15 @@ class IntegrationTest extends TestCase
 
     public function testWatchingMoreTubes(): void
     {
-        $tube = 'test-tube';
-        $this->beanstalk->watch($tube);
-        static::assertContains($tube, $this->beanstalk->listTubesWatched());
+        $tube1 = 'test-tube-1';
+        $actual1 = $this->beanstalk->watch($tube1);
+        static::assertSame(2, $actual1);
+        static::assertContains($tube1, $this->beanstalk->listTubesWatched());
+
+        $tube2 = 'test-tube-2';
+        $actual2 = $this->beanstalk->watch($tube2);
+        static::assertSame(3, $actual2);
+        static::assertContains($tube2, $this->beanstalk->listTubesWatched());
     }
 
     public function testListTubes(): void
@@ -122,11 +128,10 @@ class IntegrationTest extends TestCase
         static::assertSame($length, strlen($jobData['body']));
     }
 
-    private function setupTube($tube): void
+    private function setupTube(string $tube): void
     {
-        $this->beanstalk
-            ->useTube($tube)
-            ->watch($tube)
-            ->ignore('default');
+        $this->beanstalk->useTube($tube);
+        $this->beanstalk->watch($tube);
+        $this->beanstalk->ignore('default');
     }
 }

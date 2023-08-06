@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   mode and cannot accept new jobs.
   Previously this threw `CommandException` which the new exception extends.
 ### Changed
+- Update commands to better reflect the protocol:
+  - `watch()` returns integer of number of watched tubes.
+  - `ignore()` throws `CommandException` if trying to ignore the final tube.
+  - `useTube()`, `touch()`, `release()`, `bury()`, `delete()`
+    have void return type.
 - Status is a required argument for the `tube:peek` CLI command.
 - **BC break**: Constructor for `Connection` no longer needs a `Socket`.
   Pass the same parameters directly to `Connection`.

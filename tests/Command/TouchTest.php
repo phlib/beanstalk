@@ -27,7 +27,7 @@ class TouchTest extends CommandTestCase
             ->willReturn('TOUCHED');
 
         $touch = new Touch($id);
-        static::assertInstanceOf(Touch::class, $touch->process($this->socket));
+        $touch->process($this->socket);
     }
 
     public function testErrorThrowsException(): void
