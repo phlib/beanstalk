@@ -215,21 +215,6 @@ class Pool implements ConnectionInterface
         return $kicked;
     }
 
-    public function stats(): array
-    {
-        $stats = new Stats();
-        $onSuccess = function (array $result) use (&$stats): bool {
-            if (!is_array($result['response'])) {
-                return true;
-            }
-            $stats = $stats->aggregate($result['response']);
-            return true;
-        };
-        $this->collection->sendToAll('stats', [], $onSuccess);
-
-        return $stats->toArray();
-    }
-
     /**
      * @param string|int $id
      */
@@ -253,6 +238,21 @@ class Pool implements ConnectionInterface
             return true;
         };
         $this->collection->sendToAll('statsTube', [$tube], $onSuccess);
+
+        return $stats->toArray();
+    }
+
+    public function stats(): array
+    {
+        $stats = new Stats();
+        $onSuccess = function (array $result) use (&$stats): bool {
+            if (!is_array($result['response'])) {
+                return true;
+            }
+            $stats = $stats->aggregate($result['response']);
+            return true;
+        };
+        $this->collection->sendToAll('stats', [], $onSuccess);
 
         return $stats->toArray();
     }

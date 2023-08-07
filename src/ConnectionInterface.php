@@ -75,11 +75,6 @@ interface ConnectionInterface
      */
     public function peek($id): array;
 
-    /**
-     * @param string|int $id
-     */
-    public function statsJob($id): array;
-
     public function peekReady(): ?array;
 
     public function peekDelayed(): ?array;
@@ -87,6 +82,11 @@ interface ConnectionInterface
     public function peekBuried(): ?array;
 
     public function kick(int $quantity): int;
+
+    /**
+     * @param string|int $id
+     */
+    public function statsJob($id): array;
 
     public function statsTube(string $tube): array;
 

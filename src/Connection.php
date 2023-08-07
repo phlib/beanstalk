@@ -182,9 +182,9 @@ class Connection implements ConnectionInterface
         }
     }
 
-    public function stats(): array
+    public function kick(int $quantity): int
     {
-        return (new Command\Stats())
+        return (new Command\Kick($quantity))
             ->process($this->socket);
     }
 
@@ -204,9 +204,9 @@ class Connection implements ConnectionInterface
             ->process($this->socket);
     }
 
-    public function kick(int $quantity): int
+    public function stats(): array
     {
-        return (new Command\Kick($quantity))
+        return (new Command\Stats())
             ->process($this->socket);
     }
 
