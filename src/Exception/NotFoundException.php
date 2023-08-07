@@ -32,4 +32,8 @@ class NotFoundException extends \Exception implements Exception
     public const PEEK_STATUS_CODE = 3;
 
     public const PEEK_STATUS_MSG = 'Peek failed to find any jobs for the given status';
+
+    public const RESERVE_NO_JOBS_AVAILABLE_CODE = 4;
+
+    public const RESERVE_NO_JOBS_AVAILABLE_MSG = 'No jobs available to reserve';
 }

@@ -6,6 +6,7 @@ namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Model\Stats;
 use Phlib\Beanstalk\Pool\CollectionInterface;
@@ -67,7 +68,7 @@ class Pool implements ConnectionInterface
         return $this->combineId($result['connection'], (int)$result['response']);
     }
 
-    public function reserve(?int $timeout = null): ?array
+    public function reserve(?int $timeout = null): array
     {
         $startTime = time();
         do {
@@ -83,7 +84,7 @@ class Pool implements ConnectionInterface
 
                     $result['response']['id'] = $this->combineId($result['connection'], (int)$result['response']['id']);
                     return $result['response'];
-                } catch (RuntimeException $e) {
+                } catch (NotFoundException | RuntimeException $e) {
                     // ignore servers not responding
                 }
             }
@@ -91,7 +92,10 @@ class Pool implements ConnectionInterface
             usleep(25 * 1000);
         } while (time() - $startTime < $timeout);
 
-        return null;
+        throw new NotFoundException(
+            NotFoundException::RESERVE_NO_JOBS_AVAILABLE_MSG,
+            NotFoundException::RESERVE_NO_JOBS_AVAILABLE_CODE,
+        );
     }
 
     /**

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 class ReserveTest extends CommandTestCase
 {
@@ -46,17 +47,21 @@ class ReserveTest extends CommandTestCase
     }
 
     /**
-     * @dataProvider failureStatusReturnsFalseDataProvider
+     * @dataProvider dataFailureStatus
      */
-    public function testFailureStatusReturnsFalse(string $status): void
+    public function testFailureStatus(string $status): void
     {
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::RESERVE_NO_JOBS_AVAILABLE_MSG);
+        $this->expectExceptionCode(NotFoundException::RESERVE_NO_JOBS_AVAILABLE_CODE);
+
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn($status);
-        static::assertNull((new Reserve(123))->process($this->socket));
+        (new Reserve(123))->process($this->socket);
     }
 
-    public function failureStatusReturnsFalseDataProvider(): array
+    public function dataFailureStatus(): array
     {
         return [
             'timeout' => ['TIMED_OUT'],

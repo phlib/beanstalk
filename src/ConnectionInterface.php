@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
+use Phlib\Beanstalk\Exception\NotFoundException;
+
 /**
  * @package Phlib\Beanstalk
  */
@@ -41,7 +43,10 @@ interface ConnectionInterface
         int $ttr = self::DEFAULT_TTR
     );
 
-    public function reserve(?int $timeout = null): ?array;
+    /**
+     * @throws NotFoundException when no jobs available to reserve within timeout
+     */
+    public function reserve(?int $timeout = null): array;
 
     /**
      * @param string|int $id

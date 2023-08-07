@@ -71,7 +71,7 @@ class Connection implements ConnectionInterface
             ->process($this->socket);
     }
 
-    public function reserve(?int $timeout = null): ?array
+    public function reserve(?int $timeout = null): array
     {
         $jobData = (new Command\Reserve($timeout))
             ->process($this->socket);

@@ -6,6 +6,7 @@ namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Pool\Collection;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -134,17 +135,20 @@ class PoolTest extends TestCase
             static::markTestSkipped('Timing test skipped');
         }
 
-        $connection = $this->createMockConnection('host:123');
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::RESERVE_NO_JOBS_AVAILABLE_MSG);
+        $this->expectExceptionCode(NotFoundException::RESERVE_NO_JOBS_AVAILABLE_CODE);
+
         $this->collection->expects(static::any())
             ->method('getAvailableKeys')
             ->willReturn(['host:123', 'host:456']);
         $this->collection->expects(static::any())
             ->method('sendToExact')
             ->with(static::anything(), 'reserve', [0])
-            ->willReturn([
-                'connection' => $connection,
-                'response' => null,
-            ]);
+            ->willThrowException(new NotFoundException(
+                NotFoundException::RESERVE_NO_JOBS_AVAILABLE_MSG,
+                NotFoundException::RESERVE_NO_JOBS_AVAILABLE_CODE,
+            ));
         $startTime = time();
         $this->pool->reserve(2);
         $totalTime = time() - $startTime;
@@ -199,16 +203,19 @@ class PoolTest extends TestCase
         $this->collection->expects(static::exactly(2))
             ->method('sendToExact')
             ->with(static::anything(), 'reserve', [0])
-            ->willReturnOnConsecutiveCalls(
-                [
-                    'connection' => $connection,
-                    'response' => null, // <-- should ignore this one
-                ],
-                [
+            ->willReturnCallback(function () use ($connection, $response) {
+                static $count = 0;
+                if ($count++ === 0) {
+                    throw new NotFoundException(
+                        NotFoundException::RESERVE_NO_JOBS_AVAILABLE_MSG,
+                        NotFoundException::RESERVE_NO_JOBS_AVAILABLE_CODE,
+                    );
+                }
+                return [
                     'connection' => $connection,
                     'response' => $response,
-                ]
-            );
+                ];
+            });
         static::assertSame($expected, $this->pool->reserve());
     }
 
