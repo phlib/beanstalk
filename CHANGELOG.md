@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Status is a required argument for the `tube:peek` CLI command.
 - **BC break**: `reserve()` throws `NotFoundException` if no jobs available,
   rather than return null.
+- **BC break**: `peekBuried()`, `peekDelayed()` & `peekReady()` throw
+  `NotFoundException` if there are no matching jobs, rather than return null.
 - **BC break**: Change `Collection::getConnection()` to throw
   `InvalidArgumentException` instead of `NotFoundException` if the given
   connection key does not exist in the pool.

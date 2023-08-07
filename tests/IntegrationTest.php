@@ -73,21 +73,40 @@ class IntegrationTest extends TestCase
 
     public function testFullJobProcess(): void
     {
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+
         $this->setupTube('integration-test');
-        // make sure it's empty
-        static::assertNull($this->beanstalk->peekReady());
+
+        try {
+            // make sure it's empty
+            $this->beanstalk->peekReady();
+            static::fail('peekReady should have no jobs');
+        } catch (NotFoundException $e) {
+            // expected response
+        }
 
         $data = 'This is my data';
         $id = $this->beanstalk->put($data);
-        $jobData = $this->beanstalk->reserve();
 
+        try {
+            $peek = $this->beanstalk->peekReady();
+        } catch (NotFoundException $e) {
+            // Job should have been found
+            static::fail('peekReady should show the job after touch');
+        }
+        static::assertSame($id, $peek['id']);
+        static::assertSame($data, $peek['body']);
+
+        $jobData = $this->beanstalk->reserve();
         static::assertSame($id, $jobData['id']);
         static::assertSame($data, $jobData['body']);
 
         $this->beanstalk->touch($jobData['id']);
         $this->beanstalk->delete($jobData['id']);
 
-        static::assertNull($this->beanstalk->peekReady());
+        $this->beanstalk->peekReady();
     }
 
     public function testBuriedJobProcess(): void

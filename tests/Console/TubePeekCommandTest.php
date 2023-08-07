@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 class TubePeekCommandTest extends ConsoleTestCase
 {
@@ -127,7 +128,10 @@ class TubePeekCommandTest extends ConsoleTestCase
 
         $this->connection->expects(static::once())
             ->method('peekBuried')
-            ->willReturn(null);
+            ->willThrowException(new NotFoundException(
+                NotFoundException::PEEK_STATUS_MSG,
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
 
         $this->commandTester->execute([
             'command' => $this->command->getName(),

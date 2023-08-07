@@ -340,14 +340,19 @@ class PoolTest extends TestCase
 
     public function testPeekReadyWithNoReadyJobs(): void
     {
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+
         $this->collection->expects(static::any())
             ->method('sendToOne')
             ->with('peekReady', [])
-            ->willReturn([
-                'connection' => null,
-                'response' => null,
-            ]);
-        static::assertNull($this->pool->peekReady());
+            ->willThrowException(new NotFoundException(
+                NotFoundException::PEEK_STATUS_MSG,
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
+
+        $this->pool->peekReady();
     }
 
     public function testPeekDelayed(): void
@@ -378,14 +383,19 @@ class PoolTest extends TestCase
 
     public function testPeekDelayedWithNoDelayedJobs(): void
     {
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+
         $this->collection->expects(static::any())
             ->method('sendToOne')
             ->with('peekDelayed', [])
-            ->willReturn([
-                'connection' => null,
-                'response' => null,
-            ]);
-        static::assertNull($this->pool->peekDelayed());
+            ->willThrowException(new NotFoundException(
+                NotFoundException::PEEK_STATUS_MSG,
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
+
+        $this->pool->peekDelayed();
     }
 
     public function testPeekBuried(): void
@@ -416,11 +426,19 @@ class PoolTest extends TestCase
 
     public function testPeekBuriedWithNoBuriedJobs(): void
     {
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+
         $this->collection->expects(static::any())
             ->method('sendToOne')
             ->with('peekBuried', [])
-            ->willThrowException(new RuntimeException());
-        static::assertNull($this->pool->peekBuried());
+            ->willThrowException(new NotFoundException(
+                NotFoundException::PEEK_STATUS_MSG,
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
+
+        $this->pool->peekBuried();
     }
 
     public function testStats(): void

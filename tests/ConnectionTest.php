@@ -246,17 +246,29 @@ class ConnectionTest extends TestCase
 
     public function testPeekReadyNotFound(): void
     {
-        static::assertNull($this->execute('peek-ready', 'NOT_FOUND', 'peekReady'));
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+
+        $this->execute('peek-ready', 'NOT_FOUND', 'peekReady');
     }
 
     public function testPeekDelayedNotFound(): void
     {
-        static::assertNull($this->execute('peek-delayed', 'NOT_FOUND', 'peekDelayed'));
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+
+        $this->execute('peek-delayed', 'NOT_FOUND', 'peekDelayed');
     }
 
     public function testPeekBuriedNotFound(): void
     {
-        static::assertNull($this->execute('peek-buried', 'NOT_FOUND', 'peekBuried'));
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+
+        $this->execute('peek-buried', 'NOT_FOUND', 'peekBuried');
     }
 
     public function testKick(): void

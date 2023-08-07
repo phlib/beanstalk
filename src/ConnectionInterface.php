@@ -77,14 +77,24 @@ interface ConnectionInterface
 
     /**
      * @param string|int $id
+     * @throws NotFoundException when the job cannot be found
      */
     public function peek($id): array;
 
-    public function peekReady(): ?array;
+    /**
+     * @throws NotFoundException when no jobs to peek in the 'ready' status
+     */
+    public function peekReady(): array;
 
-    public function peekDelayed(): ?array;
+    /**
+     * @throws NotFoundException when no jobs to peek in the 'delayed' status
+     */
+    public function peekDelayed(): array;
 
-    public function peekBuried(): ?array;
+    /**
+     * @throws NotFoundException when no jobs to peek in the 'buried' status
+     */
+    public function peekBuried(): array;
 
     public function kick(int $quantity): int;
 

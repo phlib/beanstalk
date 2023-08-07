@@ -7,7 +7,6 @@ namespace Phlib\Beanstalk;
 use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
  * @package Phlib\Beanstalk
@@ -157,29 +156,25 @@ class Connection implements ConnectionInterface
             ->process($this->socket);
     }
 
-    public function peekReady(): ?array
+    public function peekReady(): array
     {
         return $this->peekStatus(Command\PeekStatus::READY);
     }
 
-    public function peekDelayed(): ?array
+    public function peekDelayed(): array
     {
         return $this->peekStatus(Command\PeekStatus::DELAYED);
     }
 
-    public function peekBuried(): ?array
+    public function peekBuried(): array
     {
         return $this->peekStatus(Command\PeekStatus::BURIED);
     }
 
-    private function peekStatus(string $status): ?array
+    private function peekStatus(string $status): array
     {
-        try {
-            return (new Command\PeekStatus($status))
-                ->process($this->socket);
-        } catch (NotFoundException $e) {
-            return null;
-        }
+        return (new Command\PeekStatus($status))
+            ->process($this->socket);
     }
 
     public function kick(int $quantity): int

@@ -167,29 +167,25 @@ class Pool implements ConnectionInterface
         return $job;
     }
 
-    public function peekReady(): ?array
+    public function peekReady(): array
     {
         return $this->peekStatus('peekReady');
     }
 
-    public function peekDelayed(): ?array
+    public function peekDelayed(): array
     {
         return $this->peekStatus('peekDelayed');
     }
 
-    public function peekBuried(): ?array
+    public function peekBuried(): array
     {
         return $this->peekStatus('peekBuried');
     }
 
-    private function peekStatus(string $command): ?array
+    private function peekStatus(string $command): array
     {
-        try {
-            $result = $this->collection->sendToOne($command, []);
-        } catch (RuntimeException $e) {
-            return null;
-        }
-        if (isset($result['response']) && is_array($result['response']) && isset($result['response']['id'])) {
+        $result = $this->collection->sendToOne($command, []);
+        if (is_array($result['response']) && isset($result['response']['id'])) {
             $result['response']['id'] = $this->combineId($result['connection'], (int)$result['response']['id']);
         }
         return $result['response'];
