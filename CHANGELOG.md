@@ -19,6 +19,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - `useTube()`, `touch()`, `release()`, `bury()`, `delete()`
     have void return type.
 - Status is a required argument for the `tube:peek` CLI command.
+- **BC break**: Change `Collection::getConnection()` to throw
+  `InvalidArgumentException` instead of `NotFoundException` if the given
+  connection key does not exist in the pool.
 - **BC break**: Constructor for `Connection` no longer needs a `Socket`.
   Pass the same parameters directly to `Connection`.
 - **BC break**: Move core `ConnectionInterface` up to package root namespace.

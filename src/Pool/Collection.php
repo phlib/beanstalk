@@ -7,7 +7,6 @@ namespace Phlib\Beanstalk\Pool;
 use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\Exception as BeanstalkException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 
 /**
@@ -58,7 +57,7 @@ class Collection implements CollectionInterface
     public function getConnection(string $key): ConnectionInterface
     {
         if (!array_key_exists($key, $this->connections)) {
-            throw new NotFoundException("Specified key '{$key}' is not in the pool.");
+            throw new InvalidArgumentException("Specified key '{$key}' is not in the pool.");
         }
         $retryAt = $this->connections[$key]['retry_at'];
         if ($retryAt !== false && $retryAt > time()) {

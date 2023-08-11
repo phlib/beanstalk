@@ -162,7 +162,8 @@ class CollectionTest extends TestCase
 
     public function testForUnknownConnection(): void
     {
-        $this->expectException(NotFoundException::class);
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('not in the pool');
 
         $collection = new Collection([$this->getMockConnection('id-123')]);
         $collection->getConnection('foo-bar');
