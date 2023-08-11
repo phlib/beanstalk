@@ -235,10 +235,13 @@ class ConnectionTest extends TestCase
 
     public function testPeekNotFound(): void
     {
-        $this->expectException(NotFoundException::class);
+        $jobId = rand();
 
-        $id = 245;
-        static::assertFalse($this->execute("peek {$id}", 'NOT_FOUND', 'peek', [$id]));
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(sprintf(NotFoundException::JOB_ID_MSG_F, $jobId));
+        $this->expectExceptionCode(NotFoundException::JOB_ID_CODE);
+
+        $this->execute("peek {$jobId}", 'NOT_FOUND', 'peek', [$jobId]);
     }
 
     public function testPeekReadyNotFound(): void

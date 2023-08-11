@@ -53,12 +53,16 @@ class ReleaseTest extends CommandTestCase
 
     public function testNotFoundThrowsException(): void
     {
+        $jobId = rand();
+
         $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(sprintf(NotFoundException::JOB_ID_MSG_F, $jobId));
+        $this->expectExceptionCode(NotFoundException::JOB_ID_CODE);
 
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_FOUND');
-        (new Release(123, 456, 789))->process($this->socket);
+        (new Release($jobId, 456, 789))->process($this->socket);
     }
 
     public function testBuriedThrowsException(): void

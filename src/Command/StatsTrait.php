@@ -23,7 +23,10 @@ trait StatsTrait
                 return $this->decode($data);
 
             case 'NOT_FOUND':
-                throw new NotFoundException('Stats read could not find specified job');
+                throw new NotFoundException(
+                    NotFoundException::STATS_MSG,
+                    NotFoundException::STATS_CODE,
+                );
 
             default:
                 throw new CommandException("Stats read failed '{$status}'");

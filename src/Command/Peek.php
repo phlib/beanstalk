@@ -42,7 +42,16 @@ class Peek implements CommandInterface
                 ];
 
             case 'NOT_FOUND':
-                throw new NotFoundException('Peek failed to find any jobs');
+                if (isset($this->jobId)) {
+                    throw new NotFoundException(
+                        sprintf(NotFoundException::JOB_ID_MSG_F, $this->jobId),
+                        NotFoundException::JOB_ID_CODE,
+                    );
+                }
+                throw new NotFoundException(
+                    NotFoundException::PEEK_STATUS_MSG,
+                    NotFoundException::PEEK_STATUS_CODE,
+                );
 
             default:
                 throw new CommandException("Unknown peek response '{$response}'");

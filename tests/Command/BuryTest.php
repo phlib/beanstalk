@@ -34,12 +34,16 @@ class BuryTest extends CommandTestCase
 
     public function testNotFoundThrowsException(): void
     {
+        $jobId = rand();
+
         $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(sprintf(NotFoundException::JOB_ID_MSG_F, $jobId));
+        $this->expectExceptionCode(NotFoundException::JOB_ID_CODE);
 
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_FOUND');
-        (new Bury(123, 123))->process($this->socket);
+        (new Bury($jobId, 123))->process($this->socket);
     }
 
     public function testUnknownStatusThrowsException(): void

@@ -59,6 +59,8 @@ class PeekStatusTest extends CommandTestCase
     public function testNotFoundThrowsException(): void
     {
         $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
 
         $this->socket->expects(static::any())
             ->method('read')

@@ -38,14 +38,16 @@ class JobPeekCommandTest extends ConsoleTestCase
 
     public function testJobNotFound(): void
     {
-        $this->expectException(NotFoundException::class);
-
         $jobId = rand();
+        $message = sha1(uniqid('xMsg'));
+
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage($message);
 
         $this->connection->expects(static::once())
             ->method('peek')
             ->with($jobId)
-            ->willThrowException(new NotFoundException('job not found'));
+            ->willThrowException(new NotFoundException($message));
 
         $this->commandTester->execute([
             'command' => $this->command->getName(),

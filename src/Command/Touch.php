@@ -35,7 +35,10 @@ class Touch implements CommandInterface
                 return;
 
             case 'NOT_TOUCHED':
-                throw new NotFoundException("Job id '{$this->id}' could not be found.");
+                throw new NotFoundException(
+                    sprintf(NotFoundException::JOB_ID_MSG_F, $this->id),
+                    NotFoundException::JOB_ID_CODE,
+                );
 
             default:
                 throw new CommandException("Touch id '{$this->id}' failed '{$status}'");
