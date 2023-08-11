@@ -6,6 +6,7 @@ namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Model\Stats;
 use Phlib\Beanstalk\Pool\CollectionInterface;
@@ -67,7 +68,7 @@ class Pool implements ConnectionInterface
         return $this->combineId($result['connection'], (int)$result['response']);
     }
 
-    public function reserve(?int $timeout = null): ?array
+    public function reserve(?int $timeout = null): array
     {
         $startTime = time();
         do {
@@ -83,7 +84,7 @@ class Pool implements ConnectionInterface
 
                     $result['response']['id'] = $this->combineId($result['connection'], (int)$result['response']['id']);
                     return $result['response'];
-                } catch (RuntimeException $e) {
+                } catch (NotFoundException | RuntimeException $e) {
                     // ignore servers not responding
                 }
             }
@@ -91,7 +92,10 @@ class Pool implements ConnectionInterface
             usleep(25 * 1000);
         } while (time() - $startTime < $timeout);
 
-        return null;
+        throw new NotFoundException(
+            NotFoundException::RESERVE_NO_JOBS_AVAILABLE_MSG,
+            NotFoundException::RESERVE_NO_JOBS_AVAILABLE_CODE,
+        );
     }
 
     /**
@@ -163,29 +167,25 @@ class Pool implements ConnectionInterface
         return $job;
     }
 
-    public function peekReady(): ?array
+    public function peekReady(): array
     {
         return $this->peekStatus('peekReady');
     }
 
-    public function peekDelayed(): ?array
+    public function peekDelayed(): array
     {
         return $this->peekStatus('peekDelayed');
     }
 
-    public function peekBuried(): ?array
+    public function peekBuried(): array
     {
         return $this->peekStatus('peekBuried');
     }
 
-    private function peekStatus(string $command): ?array
+    private function peekStatus(string $command): array
     {
-        try {
-            $result = $this->collection->sendToOne($command, []);
-        } catch (RuntimeException $e) {
-            return null;
-        }
-        if (isset($result['response']) && is_array($result['response']) && isset($result['response']['id'])) {
+        $result = $this->collection->sendToOne($command, []);
+        if (is_array($result['response']) && isset($result['response']['id'])) {
             $result['response']['id'] = $this->combineId($result['connection'], (int)$result['response']['id']);
         }
         return $result['response'];

@@ -235,25 +235,40 @@ class ConnectionTest extends TestCase
 
     public function testPeekNotFound(): void
     {
-        $this->expectException(NotFoundException::class);
+        $jobId = rand();
 
-        $id = 245;
-        static::assertFalse($this->execute("peek {$id}", 'NOT_FOUND', 'peek', [$id]));
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(sprintf(NotFoundException::JOB_ID_MSG_F, $jobId));
+        $this->expectExceptionCode(NotFoundException::JOB_ID_CODE);
+
+        $this->execute("peek {$jobId}", 'NOT_FOUND', 'peek', [$jobId]);
     }
 
     public function testPeekReadyNotFound(): void
     {
-        static::assertNull($this->execute('peek-ready', 'NOT_FOUND', 'peekReady'));
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+
+        $this->execute('peek-ready', 'NOT_FOUND', 'peekReady');
     }
 
     public function testPeekDelayedNotFound(): void
     {
-        static::assertNull($this->execute('peek-delayed', 'NOT_FOUND', 'peekDelayed'));
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+
+        $this->execute('peek-delayed', 'NOT_FOUND', 'peekDelayed');
     }
 
     public function testPeekBuriedNotFound(): void
     {
-        static::assertNull($this->execute('peek-buried', 'NOT_FOUND', 'peekBuried'));
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+
+        $this->execute('peek-buried', 'NOT_FOUND', 'peekBuried');
     }
 
     public function testKick(): void

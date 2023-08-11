@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add new `DrainingException` thrown by `put()` when the server is in draining
   mode and cannot accept new jobs.
   Previously this threw `CommandException` which the new exception extends.
+- Add constants with standardised codes and messages for `NotFoundException`.
 ### Changed
 - Update commands to better reflect the protocol:
   - `watch()` returns integer of number of watched tubes.
@@ -19,6 +20,13 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - `useTube()`, `touch()`, `release()`, `bury()`, `delete()`
     have void return type.
 - Status is a required argument for the `tube:peek` CLI command.
+- **BC break**: `reserve()` throws `NotFoundException` if no jobs available,
+  rather than return null.
+- **BC break**: `peekBuried()`, `peekDelayed()` & `peekReady()` throw
+  `NotFoundException` if there are no matching jobs, rather than return null.
+- **BC break**: Change `Collection::getConnection()` to throw
+  `InvalidArgumentException` instead of `NotFoundException` if the given
+  connection key does not exist in the pool.
 - **BC break**: Constructor for `Connection` no longer needs a `Socket`.
   Pass the same parameters directly to `Connection`.
 - **BC break**: Move core `ConnectionInterface` up to package root namespace.

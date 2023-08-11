@@ -58,7 +58,7 @@ class Collection implements CollectionInterface
     public function getConnection(string $key): ConnectionInterface
     {
         if (!array_key_exists($key, $this->connections)) {
-            throw new NotFoundException("Specified key '{$key}' is not in the pool.");
+            throw new InvalidArgumentException("Specified key '{$key}' is not in the pool.");
         }
         $retryAt = $this->connections[$key]['retry_at'];
         if ($retryAt !== false && $retryAt > time()) {
@@ -88,28 +88,25 @@ class Collection implements CollectionInterface
      */
     public function sendToOne(string $command, array $arguments = [])
     {
-        $e = null;
-
         $keysAvailable = array_keys($this->connections);
         shuffle($keysAvailable);
         foreach ($keysAvailable as $key) {
             try {
-                $result = $this->sendToExact($key, $command, $arguments);
-                if ($result['response'] !== null) {
-                    return $result;
-                }
-            } catch (RuntimeException $e) {
+                return $this->sendToExact($key, $command, $arguments);
+            } catch (NotFoundException | RuntimeException $e) {
                 // ignore
             }
         }
 
-        $message = "Failed to send command '{$command}' to one of the connections.";
-        if ($e instanceof \Exception) {
-            $final = new RuntimeException($message, 0, $e);
-        } else {
-            $final = new RuntimeException($message);
+        if (isset($e) && $e instanceof NotFoundException) {
+            throw $e;
         }
-        throw $final;
+
+        throw new RuntimeException(
+            "Failed to send command '{$command}' to one of the connections.",
+            0,
+            $e ?? null,
+        );
     }
 
     public function sendToExact(string $key, string $command, array $arguments = []): array

@@ -48,7 +48,10 @@ class Release implements CommandInterface
             case 'BURIED':
                 throw BuriedException::create($this->id);
             case 'NOT_FOUND':
-                throw new NotFoundException("Job id '{$this->id}' could not be found.");
+                throw new NotFoundException(
+                    sprintf(NotFoundException::JOB_ID_MSG_F, $this->id),
+                    NotFoundException::JOB_ID_CODE,
+                );
             default:
                 throw new CommandException("Release '{$this->id}' failed '{$response}'");
         }

@@ -162,7 +162,8 @@ class CollectionTest extends TestCase
 
     public function testForUnknownConnection(): void
     {
-        $this->expectException(NotFoundException::class);
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('not in the pool');
 
         $collection = new Collection([$this->getMockConnection('id-123')]);
         $collection->getConnection('foo-bar');
@@ -479,22 +480,61 @@ class CollectionTest extends TestCase
         $collection->sendToOne($command);
     }
 
-    public function testSendToOneWhenAllConnectionsAreUsed(): void
+    public function testSendToOneIgnoresNotFound(): void
     {
-        $this->expectException(RuntimeException::class);
+        $command = 'peekReady';
+        $response = [
+            'id' => 123,
+            'body' => 'jobData',
+        ];
+
+        $identifier1 = 'id-123';
+        $connection1 = $this->getMockConnection($identifier1);
+        $connection1->expects(static::once())
+            ->method($command)
+            ->willThrowException(new NotFoundException(
+                NotFoundException::PEEK_STATUS_MSG,
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
+
+        $identifier2 = 'id-456';
+        $connection2 = $this->getMockConnection($identifier2);
+        $connection2->expects(static::once())
+            ->method($command)
+            ->willReturn($response);
+
+        $collection = new Collection([$connection1, $connection2]);
+        $actual = $collection->sendToOne($command);
+
+        static::assertSame($response, $actual['response']);
+    }
+
+    public function testSendToOneThrowsTheLastNotFound(): void
+    {
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage('error2');
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
 
         $command = 'peekReady';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
-        $connection1->expects(static::any())
+        $connection1->expects(static::once())
             ->method($command)
-            ->willReturn(null);
+            ->willThrowException(new NotFoundException(
+                // Deliberate non-standard message to track which exception is returned
+                'error1',
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
 
         $identifier2 = 'id-456';
         $connection2 = $this->getMockConnection($identifier2);
-        $connection2->expects(static::any())
+        $connection2->expects(static::once())
             ->method($command)
-            ->willReturn(null);
+            ->willThrowException(new NotFoundException(
+                // Deliberate non-standard message to track which exception is returned
+                'error2',
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
 
         $collection = new Collection([$connection1, $connection2]);
         $collection->sendToOne($command);
@@ -510,7 +550,7 @@ class CollectionTest extends TestCase
 
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
-        $connection1->expects(static::any())
+        $connection1->expects(static::once())
             ->method($command)
             ->willThrowException(new RuntimeException());
 
@@ -527,11 +567,12 @@ class CollectionTest extends TestCase
     public function testSendToOneThrowsTheLastError(): void
     {
         $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Failed to send command');
 
         $command = 'peekReady';
         $identifier1 = 'id-123';
         $connection1 = $this->getMockConnection($identifier1);
-        $connection1->expects(static::any())
+        $connection1->expects(static::once())
             ->method($command)
             ->willThrowException(new RuntimeException('error1'));
 
@@ -548,6 +589,23 @@ class CollectionTest extends TestCase
             $previous = $e->getPrevious();
             static::assertInstanceOf(RuntimeException::class, $previous);
             static::assertSame('error2', $previous->getMessage());
+            throw $e;
+        }
+    }
+
+    public function testSendToOneThrowsExceptionWhenNoAvailableConnections(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Failed to send command');
+
+        $command = 'peekReady';
+
+        try {
+            $collection = new Collection([]);
+            $collection->sendToOne($command);
+        } catch (RuntimeException $e) {
+            $previous = $e->getPrevious();
+            static::assertNull($previous);
             throw $e;
         }
     }

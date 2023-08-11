@@ -13,6 +13,8 @@ class StatsTraitTest extends CommandTestCase
     public function testWhenStatusNotFound(): void
     {
         $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::STATS_MSG);
+        $this->expectExceptionCode(NotFoundException::STATS_CODE);
 
         $this->socket->expects(static::any())
             ->method('read')

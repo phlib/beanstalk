@@ -6,6 +6,7 @@ namespace Phlib\Beanstalk\Command;
 
 use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
  * @package Phlib\Beanstalk
@@ -45,7 +46,10 @@ class Reserve implements CommandInterface
 
             case 'DEADLINE_SOON':
             case 'TIMED_OUT':
-                return null;
+                throw new NotFoundException(
+                    NotFoundException::RESERVE_NO_JOBS_AVAILABLE_MSG,
+                    NotFoundException::RESERVE_NO_JOBS_AVAILABLE_CODE,
+                );
 
             default:
                 throw new CommandException("Reserve failed '{$status}'");

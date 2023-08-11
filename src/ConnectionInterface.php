@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
+use Phlib\Beanstalk\Exception\NotFoundException;
+
 /**
  * @package Phlib\Beanstalk
  */
@@ -41,7 +43,10 @@ interface ConnectionInterface
         int $ttr = self::DEFAULT_TTR
     );
 
-    public function reserve(?int $timeout = null): ?array;
+    /**
+     * @throws NotFoundException when no jobs available to reserve within timeout
+     */
+    public function reserve(?int $timeout = null): array;
 
     /**
      * @param string|int $id
@@ -72,14 +77,24 @@ interface ConnectionInterface
 
     /**
      * @param string|int $id
+     * @throws NotFoundException when the job cannot be found
      */
     public function peek($id): array;
 
-    public function peekReady(): ?array;
+    /**
+     * @throws NotFoundException when no jobs to peek in the 'ready' status
+     */
+    public function peekReady(): array;
 
-    public function peekDelayed(): ?array;
+    /**
+     * @throws NotFoundException when no jobs to peek in the 'delayed' status
+     */
+    public function peekDelayed(): array;
 
-    public function peekBuried(): ?array;
+    /**
+     * @throws NotFoundException when no jobs to peek in the 'buried' status
+     */
+    public function peekBuried(): array;
 
     public function kick(int $quantity): int;
 
