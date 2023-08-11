@@ -130,6 +130,10 @@ class PoolTest extends TestCase
      */
     public function testReserveWithNoJobsDoesNotTakeLongerThanTimeout(): void
     {
+        if ((bool)getenv('TEST_SKIP_TIMING') === true) {
+            static::markTestSkipped('Timing test skipped');
+        }
+
         $connection = $this->createMockConnection('host:123');
         $this->collection->expects(static::any())
             ->method('getAvailableKeys')

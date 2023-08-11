@@ -61,6 +61,10 @@ class AbstractWatchCommandTest extends ConsoleTestCase
      */
     public function testWatchRunsMultiple(): void
     {
+        if ((bool)getenv('TEST_SKIP_TIMING') === true) {
+            static::markTestSkipped('Timing test skipped');
+        }
+
         // Only way to stop the loop is to return a non-zero exit code
         $this->command->expects(static::exactly(3))
             ->method('foreachWatch')
@@ -106,7 +110,9 @@ class AbstractWatchCommandTest extends ConsoleTestCase
      */
     public function testWatchInterval(): void
     {
-        $message = sha1(uniqid('message'));
+        if ((bool)getenv('TEST_SKIP_TIMING') === true) {
+            static::markTestSkipped('Timing test skipped');
+        }
 
         // Only way to stop the loop is to return a non-zero exit code
         $this->command->expects(static::exactly(2))
