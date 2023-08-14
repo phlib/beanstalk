@@ -19,7 +19,7 @@ class AbstractWatchCommandTest extends ConsoleTestCase
     protected function setUpCommand(): AbstractCommand
     {
         $statsService = $this->createMock(StatsService::class);
-        $statsServiceFactory = fn () => $statsService;
+        $statsServiceFactory = fn() => $statsService;
 
         $command = $this->getMockForAbstractClass(
             AbstractWatchCommand::class,
