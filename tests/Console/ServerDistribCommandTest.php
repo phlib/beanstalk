@@ -25,7 +25,7 @@ class ServerDistribCommandTest extends ConsoleTestCase
         $this->factory = $this->createMock(Factory::class);
 
         $this->statsService = $this->createMock(StatsService::class);
-        $statsServiceFactory = fn () => $this->statsService;
+        $statsServiceFactory = fn() => $this->statsService;
 
         return new ServerDistribCommand($this->factory, $statsServiceFactory);
     }

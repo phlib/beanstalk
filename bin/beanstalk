@@ -35,7 +35,7 @@ use Phlib\ConsoleConfiguration\Helper\ConfigurationHelper;
 use Symfony\Component\Console\Application;
 
 $factory = new Factory();
-$statsServiceFactory = fn (ConnectionInterface $beanstalk) => new StatsService($beanstalk);
+$statsServiceFactory = fn(ConnectionInterface $beanstalk) => new StatsService($beanstalk);
 
 // lets go!
 $application = new Application('beanstalk');
