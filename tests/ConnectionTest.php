@@ -27,7 +27,7 @@ class ConnectionTest extends TestCase
             'hostname',
             Socket::DEFAULT_PORT,
             [],
-            fn () => $this->socket,
+            fn() => $this->socket,
         );
         parent::setUp();
     }
@@ -46,7 +46,7 @@ class ConnectionTest extends TestCase
             $hostname,
             $port,
             [],
-            fn () => $this->socket,
+            fn() => $this->socket,
         );
 
         $expected = $hostname . ':' . $port;
