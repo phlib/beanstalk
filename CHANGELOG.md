@@ -20,6 +20,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   - `useTube()`, `touch()`, `release()`, `bury()`, `delete()`
     have void return type.
 - Status is a required argument for the `tube:peek` CLI command.
+- **BC break**: `Pool` is constructed directly with an array of `Connection`;
+  does not use `Collection`. See updated examples.
 - **BC break**: `reserve()` throws `NotFoundException` if no jobs available,
   rather than return null.
 - **BC break**: `peekBuried()`, `peekDelayed()` & `peekReady()` throw

@@ -8,37 +8,98 @@ use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
-use Phlib\Beanstalk\Pool\Collection;
+use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class PoolTest extends TestCase
 {
+    use PHPMock;
+
+    private const NAME_CONN_1 = 'connection1';
+
+    private const NAME_CONN_2 = 'connection2';
+
     private Pool $pool;
 
     /**
-     * @var Collection|MockObject
+     * @var Connection|MockObject
      */
-    private Collection $collection;
+    private Connection $connection1;
+
+    /**
+     * @var Connection|MockObject
+     */
+    private Connection $connection2;
+
+    public static function setUpBeforeClass(): void
+    {
+        parent::setUpBeforeClass();
+
+        // Declare the namespaced function early, so it's available after being used in other tests
+        // @see https://github.com/php-mock/php-mock-phpunit#restrictions
+        PHPMock::defineFunctionMock(__NAMESPACE__, 'shuffle');
+    }
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->collection = $this->createMock(Collection::class);
-        $this->pool = new Pool($this->collection);
+        // Prevent the shuffle giving a random connection order
+        $shuffle = $this->getFunctionMock(__NAMESPACE__, 'shuffle');
+        $shuffle->expects(static::any())
+            ->willReturn(null);
+
+        $this->connection1 = $this->createMock(Connection::class);
+        $this->connection1->method('getName')
+            ->willReturn(self::NAME_CONN_1);
+
+        $this->connection2 = $this->createMock(Connection::class);
+        $this->connection2->method('getName')
+            ->willReturn(self::NAME_CONN_2);
+
+        $this->pool = new Pool([$this->connection1, $this->connection2]);
+    }
+
+    public function testConstructErrorWithNoConnections(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Connections for Pool are empty');
+
+        new Pool([]);
+    }
+
+    public function testConstructErrorRepeatConnections(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Specified connection');
+        $this->expectExceptionMessage('already exists');
+
+        new Pool([
+            $this->connection1,
+            $this->connection1,
+        ]);
+    }
+
+    public function testGetConnections(): void
+    {
+        $expected = [
+            $this->connection1,
+            $this->connection2,
+        ];
+
+        $actual = $this->pool->getConnections();
+        self::assertSame($expected, $actual);
     }
 
     public function testDisconnectCallsAllConnections(): void
     {
-        $connection = $this->createMock(Connection::class);
-        $connection->expects(static::exactly(2))
+        $this->connection1->expects(static::once())
             ->method('disconnect')
             ->willReturn(true);
-        $collection = new \ArrayIterator([$connection, $connection]);
-        $this->collection->expects(static::any())
-            ->method('getIterator')
-            ->willReturn($collection);
+        $this->connection2->expects(static::once())
+            ->method('disconnect')
+            ->willReturn(true);
         $this->pool->disconnect();
     }
 
@@ -47,14 +108,10 @@ class PoolTest extends TestCase
      */
     public function testDisconnectReturnsValue(bool $expected, array $returnValues): void
     {
-        $connection = $this->createMock(Connection::class);
-        $connection->expects(static::any())
-            ->method('disconnect')
-            ->willReturnOnConsecutiveCalls(...$returnValues);
-        $collection = new \ArrayIterator([$connection, $connection]);
-        $this->collection->expects(static::any())
-            ->method('getIterator')
-            ->willReturn($collection);
+        $this->connection1->method('disconnect')
+            ->willReturn($returnValues[0]);
+        $this->connection2->method('disconnect')
+            ->willReturn($returnValues[1]);
         static::assertSame($expected, $this->pool->disconnect());
     }
 
@@ -68,13 +125,94 @@ class PoolTest extends TestCase
         ];
     }
 
+    public function testGetName(): void
+    {
+        $actual = $this->pool->getName();
+        // Test the name has some standard characters. It doesn't matter what it is.
+        self::assertMatchesRegularExpression('/[a-z0-9]{32}/', $actual);
+    }
+
     public function testUseTubeCallsAllConnections(): void
     {
         $tube = 'test-tube';
-        $this->collection->expects(static::once())
-            ->method('sendToAll', [])
-            ->with('useTube', [$tube]);
+
+        $this->connection1->expects(static::once())
+            ->method('useTube')
+            ->with($tube);
+        $this->connection2->expects(static::once())
+            ->method('useTube')
+            ->with($tube);
+
         $this->pool->useTube($tube);
+    }
+
+    public function testUseTubeSkipsUnavailableConnections(): void
+    {
+        $tube = sha1(uniqid('tube'));
+
+        // Force a connection error so ManagedConnection treats it as unavailable
+        $this->connection1->expects(static::once())
+            ->method('watch')
+            ->willThrowException(new RuntimeException());
+        $this->pool->watch($tube);
+
+        $this->connection1->expects(static::never())
+            ->method('useTube');
+        $this->connection2->expects(static::once())
+            ->method('useTube')
+            ->with($tube);
+
+        $this->pool->useTube($tube);
+    }
+
+    public function testUseTubeSkipsConnectionErrors(): void
+    {
+        $tube = sha1(uniqid('tube'));
+
+        $this->connection1->expects(static::once())
+            ->method('useTube')
+            ->with($tube)
+            ->willThrowException(new RuntimeException('connection error'));
+
+        $this->connection2->expects(static::once())
+            ->method('useTube')
+            ->with($tube);
+
+        $this->pool->useTube($tube);
+    }
+
+    public function testWatch(): void
+    {
+        $tube = sha1(uniqid('tube'));
+
+        $this->connection1->expects(static::once())
+            ->method('watch')
+            ->with($tube)
+            ->willReturn(2);
+
+        $this->connection2->expects(static::once())
+            ->method('watch')
+            ->with($tube)
+            ->willReturn(2);
+
+        $actual = $this->pool->watch($tube);
+        static::assertSame(2, $actual);
+    }
+
+    public function testWatchSkipsConnectionErrors(): void
+    {
+        $tube = sha1(uniqid('tube'));
+
+        $this->connection1->expects(static::once())
+            ->method('watch')
+            ->with($tube)
+            ->willThrowException(new RuntimeException('connection error'));
+
+        $this->connection2->expects(static::once())
+            ->method('watch')
+            ->with($tube);
+
+        $this->pool->watch($tube);
     }
 
     public function testIgnoreDoesNotAllowLessThanOneWatching(): void
@@ -90,40 +228,74 @@ class PoolTest extends TestCase
     {
         $actual = $this->pool->watch('test-tube');
         static::assertSame(2, $actual);
+
+        $this->connection1->expects(static::once())
+            ->method('ignore')
+            ->with('default')
+            ->willReturn(1);
+
+        $this->connection2->expects(static::once())
+            ->method('ignore')
+            ->with('default')
+            ->willReturn(1);
+
         static::assertSame(1, $this->pool->ignore('default'));
+    }
+
+    public function testIgnoreSkipsConnectionErrors(): void
+    {
+        $tube = sha1(uniqid('tube'));
+
+        $this->pool->watch($tube);
+
+        $this->connection1->expects(static::once())
+            ->method('ignore')
+            ->with($tube)
+            ->willThrowException(new RuntimeException('connection error'));
+
+        $this->connection2->expects(static::once())
+            ->method('ignore')
+            ->with($tube);
+
+        $this->pool->ignore($tube);
     }
 
     public function testPutSuccess(): void
     {
         $jobId = rand();
-        $connectionName = '127.0.0.1:11300';
 
-        $connection = $this->createMock(Connection::class);
-        $connection->method('getName')
-            ->willReturn($connectionName);
-        $this->collection->expects(static::once())
-            ->method('sendToOne')
-            ->with('put', ['myJobData'])
-            ->willReturn([
-                'connection' => $connection,
-                'response' => $jobId,
-            ]);
+        $this->connection1->expects(static::once())
+            ->method('put')
+            ->with('myJobData')
+            ->willReturn($jobId);
 
         $combinedId = $this->pool->put('myJobData');
 
-        $expectedId = $connectionName . '.' . $jobId;
+        $expectedId = self::NAME_CONN_1 . '.' . $jobId;
         static::assertSame($expectedId, $combinedId);
     }
 
     public function testPutTotalFailure(): void
     {
         $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Failed to send command to one of the available servers in the pool');
 
-        $this->collection->expects(static::any())
-            ->method('sendToOne')
-            ->with('put', ['myJobData'])
-            ->willThrowException(new RuntimeException());
-        $this->pool->put('myJobData');
+        $this->connection1->method('put')
+            ->with('myJobData')
+            ->willThrowException(new RuntimeException('error1'));
+        $this->connection2->method('put')
+            ->with('myJobData')
+            ->willThrowException(new RuntimeException('error2'));
+
+        try {
+            $this->pool->put('myJobData');
+        } catch (RuntimeException $e) {
+            // Test that the previous exception is set as the last connection's error
+            $previous = $e->getPrevious();
+            static::assertInstanceOf(RuntimeException::class, $previous);
+            static::assertSame('error2', $previous->getMessage());
+            throw $e;
+        }
     }
 
     /**
@@ -139,16 +311,19 @@ class PoolTest extends TestCase
         $this->expectExceptionMessage(NotFoundException::RESERVE_NO_JOBS_AVAILABLE_MSG);
         $this->expectExceptionCode(NotFoundException::RESERVE_NO_JOBS_AVAILABLE_CODE);
 
-        $this->collection->expects(static::any())
-            ->method('getAvailableKeys')
-            ->willReturn(['host:123', 'host:456']);
-        $this->collection->expects(static::any())
-            ->method('sendToExact')
-            ->with(static::anything(), 'reserve', [0])
+        $this->connection1->method('reserve')
+            ->with(0)
             ->willThrowException(new NotFoundException(
                 NotFoundException::RESERVE_NO_JOBS_AVAILABLE_MSG,
                 NotFoundException::RESERVE_NO_JOBS_AVAILABLE_CODE,
             ));
+        $this->connection2->method('reserve')
+            ->with(0)
+            ->willThrowException(new NotFoundException(
+                NotFoundException::RESERVE_NO_JOBS_AVAILABLE_MSG,
+                NotFoundException::RESERVE_NO_JOBS_AVAILABLE_CODE,
+            ));
+
         $startTime = time();
         $this->pool->reserve(2);
         $totalTime = time() - $startTime;
@@ -159,101 +334,68 @@ class PoolTest extends TestCase
     public function testReserve(): void
     {
         $jobId = '123';
-        $host = 'host:123';
         $response = [
             'id' => $jobId,
             'body' => 'jobData',
         ];
         $expected = [
-            'id' => "{$host}.{$jobId}",
+            'id' => self::NAME_CONN_1 . '.' . $jobId,
             'body' => 'jobData',
         ];
-        $connection = $this->createMockConnection($host);
 
-        $this->collection->expects(static::any())
-            ->method('getAvailableKeys')
-            ->willReturn([$host]);
-        $this->collection->expects(static::any())
-            ->method('sendToExact')
-            ->with(static::anything(), 'reserve', [0])
-            ->willReturn([
-                'connection' => $connection,
-                'response' => $response,
-            ]);
+        $this->connection1->method('reserve')
+            ->with(0)
+            ->willReturn($response);
+
         static::assertSame($expected, $this->pool->reserve());
     }
 
     public function testReserveWithNoJobsOnFirstServer(): void
     {
         $jobId = '123';
-        $host = 'host:123';
         $response = [
             'id' => $jobId,
             'body' => 'jobData',
         ];
         $expected = [
-            'id' => "{$host}.{$jobId}",
+            'id' => self::NAME_CONN_2 . '.' . $jobId,
             'body' => 'jobData',
         ];
-        $connection = $this->createMockConnection($host);
 
-        $this->collection->expects(static::any())
-            ->method('getAvailableKeys')
-            ->willReturn(['host:456', $host]);
-        $this->collection->expects(static::exactly(2))
-            ->method('sendToExact')
-            ->with(static::anything(), 'reserve', [0])
-            ->willReturnCallback(function () use ($connection, $response) {
-                static $count = 0;
-                if ($count++ === 0) {
-                    throw new NotFoundException(
-                        NotFoundException::RESERVE_NO_JOBS_AVAILABLE_MSG,
-                        NotFoundException::RESERVE_NO_JOBS_AVAILABLE_CODE,
-                    );
-                }
-                return [
-                    'connection' => $connection,
-                    'response' => $response,
-                ];
-            });
+        $this->connection1->method('reserve')
+            ->with(0)
+            ->willThrowException(new NotFoundException(
+                NotFoundException::RESERVE_NO_JOBS_AVAILABLE_MSG,
+                NotFoundException::RESERVE_NO_JOBS_AVAILABLE_CODE,
+            ));
+        $this->connection2->method('reserve')
+            ->with(0)
+            ->willReturn($response);
+
         static::assertSame($expected, $this->pool->reserve());
     }
 
     public function testReserveWithFailingServer(): void
     {
         $jobId = '123';
-        $host = 'host:123';
         $response = [
             'id' => $jobId,
             'body' => 'jobData',
         ];
         $expected = [
-            'id' => "{$host}.{$jobId}",
+            'id' => self::NAME_CONN_2 . '.' . $jobId,
             'body' => 'jobData',
         ];
-        $connection = $this->createMockConnection($host);
 
-        $this->collection->expects(static::any())
-            ->method('getAvailableKeys')
-            ->willReturn(['host:456', $host]);
-        $invocationRule = static::exactly(2);
-        $result = [
-            'connection' => $connection,
-            'response' => $response,
-        ];
-        $this->collection->expects($invocationRule)
-            ->method('sendToExact')
-            ->with(static::anything(), 'reserve', [0])
-            ->willReturnCallback(function () use ($invocationRule, $result): array {
-                switch ($invocationRule->getInvocationCount()) {
-                    case 1:
-                        throw new RuntimeException();
-                    case 2:
-                        return $result;
-                    default:
-                        throw new \InvalidArgumentException('Unexpected invocation');
-                }
-            });
+        $this->connection1->expects(static::once())
+            ->method('reserve')
+            ->with(0)
+            ->willThrowException(new RuntimeException());
+        $this->connection2->expects(static::once())
+            ->method('reserve')
+            ->with(0)
+            ->willReturn($response);
+
         static::assertSame($expected, $this->pool->reserve());
     }
 
@@ -269,16 +411,14 @@ class PoolTest extends TestCase
      */
     public function testMethodsWithJobId(string $method): void
     {
-        $host = 'host:456';
+        $server = self::NAME_CONN_1;
         $jobId = 123;
-        $this->collection->expects(static::once())
-            ->method('sendToExact')
-            ->with(
-                static::equalTo($host),
-                static::equalTo($method),
-                static::containsIdentical($jobId)
-            );
-        $this->pool->{$method}("{$host}.{$jobId}");
+
+        $this->connection1->expects(static::once())
+            ->method($method)
+            ->with($jobId);
+
+        $this->pool->{$method}("{$server}.{$jobId}");
     }
 
     public function methodsWithJobIdDataProvider(): array
@@ -288,7 +428,7 @@ class PoolTest extends TestCase
 
     public function testPeek(): void
     {
-        $host = 'host:456';
+        $server = self::NAME_CONN_2;
         $jobId = '123';
         $jobBody = 'jobBody';
         $response = [
@@ -296,25 +436,63 @@ class PoolTest extends TestCase
             'body' => $jobBody,
         ];
         $expected = [
-            'id' => "{$host}.{$jobId}",
+            'id' => "{$server}.{$jobId}",
             'body' => $jobBody,
         ];
-        $connection = $this->createMockConnection($host);
 
-        $this->collection->expects(static::any())
-            ->method('sendToExact')
-            ->with(static::anything(), 'peek', [$jobId])
-            ->willReturn([
-                'connection' => $connection,
-                'response' => $response,
-            ]);
+        $this->connection1->expects(static::never())
+            ->method('peek');
+        $this->connection2->expects(static::once())
+            ->method('peek')
+            ->with($jobId)
+            ->willReturn($response);
 
-        static::assertSame($expected, $this->pool->peek("{$host}.{$jobId}"));
+        static::assertSame($expected, $this->pool->peek("{$server}.{$jobId}"));
+    }
+
+    public function testPeekInvalidConnection(): void
+    {
+        $server = substr(sha1(uniqid('conn')), 0, 10);
+
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage("Specified connection '{$server}' is not in the pool");
+
+        $jobId = '123';
+
+        $this->connection1->expects(static::never())
+            ->method('peek');
+        $this->connection2->expects(static::never())
+            ->method('peek');
+
+        $this->pool->peek("{$server}.{$jobId}");
+    }
+
+    public function testPeekUnavailableConnection(): void
+    {
+        $server = self::NAME_CONN_1;
+
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage("Specified connection '{$server}' is not currently available");
+
+        // Force a connection error so ManagedConnection treats it as unavailable
+        $this->connection1->expects(static::once())
+            ->method('watch')
+            ->willThrowException(new RuntimeException());
+        $this->pool->watch('tube');
+
+        $jobId = '123';
+
+        $this->connection1->expects(static::never())
+            ->method('peek');
+        $this->connection2->expects(static::never())
+            ->method('peek');
+
+        $this->pool->peek("{$server}.{$jobId}");
     }
 
     public function testPeekReady(): void
     {
-        $host = 'host:123';
+        $server = self::NAME_CONN_2;
         $jobId = '123';
         $jobBody = 'jobBody';
         $response = [
@@ -322,18 +500,19 @@ class PoolTest extends TestCase
             'body' => $jobBody,
         ];
         $expected = [
-            'id' => "{$host}.{$jobId}",
+            'id' => "{$server}.{$jobId}",
             'body' => $jobBody,
         ];
-        $connection = $this->createMockConnection($host);
 
-        $this->collection->expects(static::any())
-            ->method('sendToOne')
-            ->with('peekReady', [])
-            ->willReturn([
-                'connection' => $connection,
-                'response' => $response,
-            ]);
+        $this->connection1->expects(static::once())
+            ->method('peekReady')
+            ->willThrowException(new NotFoundException(
+                NotFoundException::PEEK_STATUS_MSG,
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
+        $this->connection2->expects(static::once())
+            ->method('peekReady')
+            ->willReturn($response);
 
         static::assertSame($expected, $this->pool->peekReady());
     }
@@ -341,14 +520,22 @@ class PoolTest extends TestCase
     public function testPeekReadyWithNoReadyJobs(): void
     {
         $this->expectException(NotFoundException::class);
-        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        // Test that the last connection exception is the one that is thrown
+        $this->expectExceptionMessage('error2');
         $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
 
-        $this->collection->expects(static::any())
-            ->method('sendToOne')
-            ->with('peekReady', [])
+        $this->connection1->expects(static::once())
+            ->method('peekReady')
             ->willThrowException(new NotFoundException(
-                NotFoundException::PEEK_STATUS_MSG,
+                // Deliberate non-standard message to track which exception is returned
+                'error1',
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
+        $this->connection2->expects(static::once())
+            ->method('peekReady')
+            ->willThrowException(new NotFoundException(
+                // Deliberate non-standard message to track which exception is returned
+                'error2',
                 NotFoundException::PEEK_STATUS_CODE,
             ));
 
@@ -357,7 +544,7 @@ class PoolTest extends TestCase
 
     public function testPeekDelayed(): void
     {
-        $host = 'host:123';
+        $server = self::NAME_CONN_2;
         $jobId = '123';
         $jobBody = 'jobBody';
         $response = [
@@ -365,18 +552,19 @@ class PoolTest extends TestCase
             'body' => $jobBody,
         ];
         $expected = [
-            'id' => "{$host}.{$jobId}",
+            'id' => "{$server}.{$jobId}",
             'body' => $jobBody,
         ];
-        $connection = $this->createMockConnection($host);
 
-        $this->collection->expects(static::any())
-            ->method('sendToOne')
-            ->with('peekDelayed', [])
-            ->willReturn([
-                'connection' => $connection,
-                'response' => $response,
-            ]);
+        $this->connection1->expects(static::once())
+            ->method('peekDelayed')
+            ->willThrowException(new NotFoundException(
+                NotFoundException::PEEK_STATUS_MSG,
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
+        $this->connection2->expects(static::once())
+            ->method('peekDelayed')
+            ->willReturn($response);
 
         static::assertSame($expected, $this->pool->peekDelayed());
     }
@@ -384,14 +572,22 @@ class PoolTest extends TestCase
     public function testPeekDelayedWithNoDelayedJobs(): void
     {
         $this->expectException(NotFoundException::class);
-        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        // Test that the last connection exception is the one that is thrown
+        $this->expectExceptionMessage('error2');
         $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
 
-        $this->collection->expects(static::any())
-            ->method('sendToOne')
-            ->with('peekDelayed', [])
+        $this->connection1->expects(static::once())
+            ->method('peekDelayed')
             ->willThrowException(new NotFoundException(
-                NotFoundException::PEEK_STATUS_MSG,
+                // Deliberate non-standard message to track which exception is returned
+                'error1',
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
+        $this->connection2->expects(static::once())
+            ->method('peekDelayed')
+            ->willThrowException(new NotFoundException(
+                // Deliberate non-standard message to track which exception is returned
+                'error2',
                 NotFoundException::PEEK_STATUS_CODE,
             ));
 
@@ -400,7 +596,7 @@ class PoolTest extends TestCase
 
     public function testPeekBuried(): void
     {
-        $host = 'host:123';
+        $server = self::NAME_CONN_2;
         $jobId = '123';
         $jobBody = 'jobBody';
         $response = [
@@ -408,18 +604,19 @@ class PoolTest extends TestCase
             'body' => $jobBody,
         ];
         $expected = [
-            'id' => "{$host}.{$jobId}",
+            'id' => "{$server}.{$jobId}",
             'body' => $jobBody,
         ];
-        $connection = $this->createMockConnection($host);
 
-        $this->collection->expects(static::any())
-            ->method('sendToOne')
-            ->with('peekBuried', [])
-            ->willReturn([
-                'connection' => $connection,
-                'response' => $response,
-            ]);
+        $this->connection1->expects(static::once())
+            ->method('peekBuried')
+            ->willThrowException(new NotFoundException(
+                NotFoundException::PEEK_STATUS_MSG,
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
+        $this->connection2->expects(static::once())
+            ->method('peekBuried')
+            ->willReturn($response);
 
         static::assertSame($expected, $this->pool->peekBuried());
     }
@@ -427,96 +624,163 @@ class PoolTest extends TestCase
     public function testPeekBuriedWithNoBuriedJobs(): void
     {
         $this->expectException(NotFoundException::class);
-        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        // Test that the last connection exception is the one that is thrown
+        $this->expectExceptionMessage('error2');
         $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
 
-        $this->collection->expects(static::any())
-            ->method('sendToOne')
-            ->with('peekBuried', [])
+        $this->connection1->expects(static::once())
+            ->method('peekBuried')
             ->willThrowException(new NotFoundException(
-                NotFoundException::PEEK_STATUS_MSG,
+                // Deliberate non-standard message to track which exception is returned
+                'error1',
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
+        $this->connection2->expects(static::once())
+            ->method('peekBuried')
+            ->willThrowException(new NotFoundException(
+                // Deliberate non-standard message to track which exception is returned
+                'error2',
                 NotFoundException::PEEK_STATUS_CODE,
             ));
 
         $this->pool->peekBuried();
     }
 
-    public function testStats(): void
+    /**
+     * @dataProvider kickDataProvider
+     */
+    public function testKick(array $kickValues, int $kickAmount, int $expected): void
     {
-        $noOfServers = 3;
-        $ready = 2;
-        $other = 8;
-        $response = [
-            'current-jobs-ready' => $ready,
-            'some-other' => $other,
+        $totalKicked = 0;
+        foreach ($kickValues as $index => $kickValue) {
+            $connection = 'connection' . ($index + 1);
+
+            $invocationStats = static::once();
+            $invocationKick = static::once();
+            if ($totalKicked >= $kickAmount) {
+                // Previous connections have exhausted the required number to kick, so no other calls should be made
+                $invocationStats = static::never();
+                $invocationKick = static::never();
+            } elseif ($kickValue === 0) {
+                // This connection reports it doesn't have any buried jobs, so it shouldn't be called to kick
+                $invocationKick = static::never();
+            }
+
+            $this->{$connection}->expects($invocationStats)
+                ->method('statsTube')
+                ->willReturn(['current-jobs-buried' => $kickValue]);
+
+            $this->{$connection}->expects($invocationKick)
+                ->method('kick')
+                ->willReturnCallback(function ($quantity) use ($kickValue) {
+                    return min($quantity, $kickValue);
+                });
+            $totalKicked += $kickValue;
+        }
+
+        static::assertSame($expected, $this->pool->kick($kickAmount));
+    }
+
+    public function kickDataProvider(): array
+    {
+        return [
+            'moreThanBuried' => [[1, 5], 100, 6],
+            'moreThanBuriedWithZero' => [[0, 5], 100, 5],
+            'zeroBuried' => [[0, 0], 100, 0],
+            'moreBuriedThanKicked' => [[60, 60], 100, 100],
+            'moreBuriedInFirstThanKicked' => [[120, 60], 100, 100],
         ];
-        $this->collection->expects(static::any())
-            ->method('sendToAll')
-            ->with('stats', [])
-            ->willReturnCallback(function ($command, $arguments, $success, $failure) use ($response, $noOfServers) {
-                for ($i = 0; $i < $noOfServers; $i++) {
-                    call_user_func($success, [
-                        'connection' => null,
-                        'response' => $response,
-                    ]);
-                }
-            });
-        static::assertSame(
-            [
-                'current-jobs-ready' => ($ready * $noOfServers),
-                'some-other' => ($other * $noOfServers),
-            ],
-            $this->pool->stats()
-        );
+    }
+
+    public function testKickSkipsConnectionErrors(): void
+    {
+        $kickValue = 100;
+
+        $this->connection1->expects(static::once())
+            ->method('statsTube')
+            ->willReturn(['current-jobs-buried' => $kickValue]);
+
+        $this->connection1->expects(static::once())
+            ->method('kick')
+            ->with($kickValue)
+            ->willThrowException(new RuntimeException('connection error'));
+
+        $this->connection2->expects(static::once())
+            ->method('statsTube')
+            ->willReturn(['current-jobs-buried' => $kickValue]);
+
+        $this->connection2->expects(static::once())
+            ->method('kick')
+            ->with($kickValue)
+            ->willReturn($kickValue);
+
+        $this->pool->kick($kickValue);
+    }
+
+    public function testKickSkipsConnectionErrorsInStats(): void
+    {
+        $kickValue = 100;
+
+        $this->connection1->expects(static::once())
+            ->method('statsTube')
+            ->willThrowException(new RuntimeException('connection error'));
+
+        $this->connection1->expects(static::never())
+            ->method('kick');
+
+        $this->connection2->expects(static::once())
+            ->method('statsTube')
+            ->willReturn(['current-jobs-buried' => $kickValue]);
+
+        $this->connection2->expects(static::once())
+            ->method('kick')
+            ->with($kickValue)
+            ->willReturn($kickValue);
+
+        $this->pool->kick($kickValue);
     }
 
     public function testStatsJob(): void
     {
-        $host = 'host:123';
+        $server = self::NAME_CONN_2;
         $jobId = '123';
-        $hostJobId = "{$host}.{$jobId}";
+        $poolJobId = "{$server}.{$jobId}";
         $jobBody = 'jobBody';
-        $connection = $this->createMockConnection($host);
         $response = [
             'id' => $jobId,
             'body' => $jobBody,
         ];
         $expected = [
-            'id' => $hostJobId,
+            'id' => $poolJobId,
             'body' => $jobBody,
         ];
 
-        $this->collection->expects(static::any())
-            ->method('sendToExact')
-            ->with(static::anything(), 'statsJob', [$jobId])
-            ->willReturn([
-                'connection' => $connection,
-                'response' => $response,
-            ]);
-        static::assertSame($expected, $this->pool->statsJob($hostJobId));
+        $this->connection2->expects(static::once())
+            ->method('statsJob')
+            ->with($jobId)
+            ->willReturn($response);
+
+        static::assertSame($expected, $this->pool->statsJob($poolJobId));
     }
 
     public function testStatsTube(): void
     {
         $tube = 'test-tube';
-        $noOfServers = 3;
+        $noOfServers = 2;
         $ready = 2;
         $other = 8;
         $response = [
             'current-jobs-ready' => $ready,
             'some-other' => $other,
         ];
-        $this->collection->expects(static::any())
-            ->method('sendToAll')
-            ->with('statsTube', [$tube])
-            ->willReturnCallback(function ($command, $arguments, $success, $failure) use ($response, $noOfServers) {
-                for ($i = 0; $i < $noOfServers; $i++) {
-                    call_user_func($success, [
-                        'connection' => null,
-                        'response' => $response,
-                    ]);
-                }
-            });
+
+        $this->connection1->expects(static::once())
+            ->method('statsTube')
+            ->willReturn($response);
+        $this->connection2->expects(static::once())
+            ->method('statsTube')
+            ->willReturn($response);
+
         static::assertSame(
             [
                 'current-jobs-ready' => ($ready * $noOfServers),
@@ -526,80 +790,103 @@ class PoolTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider kickDataProvider
-     */
-    public function testKick(array $kickValues, int $kickAmount, int $expected): void
+    public function testStatsTubeSkipsConnectionErrors(): void
     {
-        $connection = $this->createMockConnection('host:123');
+        $tube = sha1(uniqid('tube'));
+        $response = [
+            'current-jobs-ready' => rand(),
+            'some-other' => rand(),
+        ];
 
-        $nonZeroKicks = array_values(array_filter($kickValues));
-        $invocationRule = static::exactly(count($nonZeroKicks));
-        $connection->expects($invocationRule)
-            ->method('kick')
-            ->willReturnCallback(function ($quantity) use ($invocationRule, $nonZeroKicks) {
-                $index = $invocationRule->getInvocationCount() - 1;
-                if (!isset($nonZeroKicks[$index])) {
-                    throw new \InvalidArgumentException('Unexpected invocation');
-                }
-                $kickValue = $nonZeroKicks[$index];
-                return $quantity < $kickValue ? $quantity : $kickValue;
-            });
+        $this->connection1->expects(static::once())
+            ->method('statsTube')
+            ->with($tube)
+            ->willThrowException(new RuntimeException('connection error'));
 
-        $this->collection->expects(static::any())
-            ->method('sendToAll')
-            ->with('statsTube')
-            ->willReturnCallback(function ($command, $arguments, $success, $failure) use ($kickValues, $connection) {
-                foreach ($kickValues as $count) {
-                    $response = [
-                        'current-jobs-buried' => $count,
-                    ];
-                    call_user_func($success, [
-                        'connection' => $connection,
-                        'response' => $response,
-                    ]);
-                }
-            });
+        $this->connection2->expects(static::once())
+            ->method('statsTube')
+            ->with($tube)
+            ->willReturn($response);
 
-        static::assertSame($expected, $this->pool->kick($kickAmount));
+        $actual = $this->pool->statsTube($tube);
+        static::assertSame($response, $actual);
     }
 
-    public function kickDataProvider(): array
+    public function testStats(): void
     {
-        return [
-            'moreThanBuried' => [[1, 2, 4], 100, 7],
-            'moreThanBuriedWithZero' => [[1, 0, 4], 100, 5],
-            'zeroBuried' => [[0, 0, 0], 100, 0],
-            'moreBuriedThanKicked' => [[40, 40, 40], 100, 100],
-            'moreBuriedInFirstThanKicked' => [[120, 40, 40], 100, 100],
+        $noOfServers = 2;
+        $ready = 2;
+        $other = 8;
+        $response = [
+            'current-jobs-ready' => $ready,
+            'some-other' => $other,
         ];
+
+        $this->connection1->expects(static::once())
+            ->method('stats')
+            ->willReturn($response);
+        $this->connection2->expects(static::once())
+            ->method('stats')
+            ->willReturn($response);
+
+        static::assertSame(
+            [
+                'current-jobs-ready' => ($ready * $noOfServers),
+                'some-other' => ($other * $noOfServers),
+            ],
+            $this->pool->stats()
+        );
+    }
+
+    public function testStatsSkipsConnectionErrors(): void
+    {
+        $response = [
+            'current-jobs-ready' => rand(),
+            'some-other' => rand(),
+        ];
+
+        $this->connection1->expects(static::once())
+            ->method('stats')
+            ->willThrowException(new RuntimeException('connection error'));
+
+        $this->connection2->expects(static::once())
+            ->method('stats')
+            ->willReturn($response);
+
+        $actual = $this->pool->stats();
+        static::assertSame($response, $actual);
     }
 
     public function testListTubes(): void
     {
         $expected = ['test1', 'test2', 'test3', 'test4'];
 
-        $this->collection->expects(static::any())
-            ->method('sendToAll')
-            ->with('listTubes', [])
-            ->willReturnCallback(function ($command, $args, $success, $failure) use ($expected) {
-                $success([
-                    'connection' => null,
-                    'response' => array_slice($expected, 0, 2),
-                ]);
-                $success([
-                    'connection' => null,
-                    'response' => array_slice($expected, 2, 1),
-                ]);
-                $success([
-                    'connection' => null,
-                    'response' => array_slice($expected, 2, 2),
-                ]);
-            });
+        $this->connection1->expects(static::once())
+            ->method('listTubes')
+            ->willReturn(array_slice($expected, 0, 2));
+        $this->connection2->expects(static::once())
+            ->method('listTubes')
+            ->willReturn(array_slice($expected, 1));
 
         $actual = $this->pool->listTubes();
         sort($actual); // this is so they match
         static::assertSame($expected, $actual);
+    }
+
+    public function testListTubesSkipsConnectionErrors(): void
+    {
+        $tubes = [sha1(uniqid('tube'))];
+
+        $this->connection1->expects(static::once())
+            ->method('listTubes')
+            ->willThrowException(new RuntimeException('connection error'));
+
+        $this->connection2->expects(static::once())
+            ->method('listTubes')
+            ->willReturn($tubes);
+
+        $actual = $this->pool->listTubes();
+        static::assertSame($tubes, $actual);
     }
 
     public function testListTubeUsed(): void

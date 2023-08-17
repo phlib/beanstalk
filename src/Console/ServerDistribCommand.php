@@ -35,20 +35,15 @@ class ServerDistribCommand extends AbstractWatchCommand
         if (!$beanstalk instanceof Pool) {
             throw new RuntimeException('Command only works with a pool of beanstalk servers');
         }
-        $collection = $beanstalk->getCollection();
 
         $io = new SymfonyStyle($input, $output);
         $io->title('Server Distribution');
 
         $useTube = $input->getArgument('tube');
         $currentWorkers = 'current-workers';
-        $command = 'stats';
-        $args = [];
         if ($useTube) {
             $io->section('Tube: ' . $useTube);
             $currentWorkers = 'current-watching';
-            $command = 'statsTube';
-            $args = [$useTube];
         }
 
         $headers = ['Stat'];
@@ -62,10 +57,14 @@ class ServerDistribCommand extends AbstractWatchCommand
             6 => ['jobs-buried'],
         ];
 
-        $collection->sendToAll($command, $args, function (array $result) use (&$headers, &$rows, $currentWorkers) {
-            $headers[] = $result['connection']->getName();
+        foreach ($beanstalk->getConnections() as $connection) {
+            $headers[] = $connection->getName();
 
-            $stats = $result['response'];
+            if ($useTube) {
+                $stats = $connection->statsTube($useTube);
+            } else {
+                $stats = $connection->stats();
+            }
 
             $rows[0][] = $stats[$currentWorkers];
             $rows[1][] = $stats['current-waiting'];
@@ -79,7 +78,7 @@ class ServerDistribCommand extends AbstractWatchCommand
                 $buried = "<error>{$buried}</error>";
             }
             $rows[6][] = $buried;
-        });
+        };
 
         $table = $io->createTable();
         $table->setHeaders($headers);

@@ -19,8 +19,8 @@ class IntegrationPoolTest extends TestCase
     {
         parent::setUpBeforeClass();
 
-        // Declare a namespaced shuffle function, so its use in this test doesn't block its use in Pool\CollectionTest
-        PHPMock::defineFunctionMock('\Phlib\Beanstalk\Pool', 'shuffle');
+        // Declare a namespaced shuffle function, so its use in this test doesn't block its use in PoolTest
+        PHPMock::defineFunctionMock(__NAMESPACE__, 'shuffle');
     }
 
     protected function setUp(): void
@@ -34,7 +34,7 @@ class IntegrationPoolTest extends TestCase
             new Connection(getenv('BSTALK1_HOST'), (int)getenv('BSTALK1_PORT')),
             new Connection(getenv('BSTALK2_HOST'), (int)getenv('BSTALK2_PORT')),
         ];
-        $this->beanstalk = new Pool(new Pool\Collection($connections));
+        $this->beanstalk = new Pool($connections);
     }
 
     public function testReconnectingAfterDisconnect(): void
