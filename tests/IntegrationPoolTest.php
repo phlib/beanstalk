@@ -103,17 +103,20 @@ class IntegrationPoolTest extends TestCase
         $data = 'This is my data';
         $id = $this->beanstalk->put($data);
 
+        // Get raw job ID for comparison, as results may come back from either connection to the same server
+        $jobId = $this->getJobId($id);
+
         try {
             $peek = $this->beanstalk->peekReady();
         } catch (NotFoundException $e) {
             // Job should have been found
             static::fail('peekReady should show the job after touch');
         }
-        static::assertSame($id, $peek['id']);
+        static::assertSame($jobId, $this->getJobId($peek['id']));
         static::assertSame($data, $peek['body']);
 
         $jobData = $this->beanstalk->reserve();
-        static::assertSame($id, $jobData['id']);
+        static::assertSame($jobId, $this->getJobId($jobData['id']));
         static::assertSame($data, $jobData['body']);
 
         $this->beanstalk->touch($jobData['id']);
@@ -135,13 +138,16 @@ class IntegrationPoolTest extends TestCase
         $id = $this->beanstalk->put($data);
         $jobData = $this->beanstalk->reserve();
 
-        static::assertSame($id, $jobData['id']);
+        // Get raw job ID for comparison, as results may come back from either connection to the same server
+        $jobId = $this->getJobId($id);
+
+        static::assertSame($jobId, $this->getJobId($jobData['id']));
         static::assertSame($data, $jobData['body']);
 
         $this->beanstalk->bury($jobData['id']);
 
         $buriedData = $this->beanstalk->peekBuried();
-        static::assertSame($jobData['id'], $buriedData['id']);
+        static::assertSame($jobId, $this->getJobId($buriedData['id']));
 
         $this->beanstalk->kick(1);
         $this->beanstalk->delete($buriedData['id']);
@@ -165,5 +171,13 @@ class IntegrationPoolTest extends TestCase
         $this->beanstalk->useTube($tube);
         $this->beanstalk->watch($tube);
         $this->beanstalk->ignore('default');
+    }
+
+    private function getJobId(string $combinedId): int
+    {
+        $position = strrpos($combinedId, '.');
+        $jobId = (int)substr($combinedId, $position + 1);
+
+        return $jobId;
     }
 }
