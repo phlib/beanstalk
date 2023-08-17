@@ -5,6 +5,8 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [2.2.0] - 2023-08-17
 ### Added
 - Add `--watch` option to `beanstalk tube:stats` CLI command.
 - Add value to `--watch` CLI options, to specify the refresh interval.
