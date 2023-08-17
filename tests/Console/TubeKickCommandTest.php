@@ -19,8 +19,7 @@ class TubeKickCommandTest extends ConsoleTestCase
 
         $this->connection->expects(static::once())
             ->method('useTube')
-            ->with($tube)
-            ->willReturnSelf();
+            ->with($tube);
 
         $this->connection->expects(static::once())
             ->method('kick')

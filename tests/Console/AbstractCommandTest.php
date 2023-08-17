@@ -36,8 +36,7 @@ class AbstractCommandTest extends ConsoleTestCase
 
         // Add the basic command behaviour to avoid exceptions
         $this->connection->expects(static::once())
-            ->method('delete')
-            ->willReturnSelf();
+            ->method('delete');
 
         $this->commandTester->execute([
             'command' => $this->command->getName(),
@@ -68,8 +67,7 @@ class AbstractCommandTest extends ConsoleTestCase
 
         // Add the basic command behaviour to avoid exceptions
         $this->connection->expects(static::once())
-            ->method('delete')
-            ->willReturnSelf();
+            ->method('delete');
 
         $this->commandTester->execute([
             'command' => $this->command->getName(),

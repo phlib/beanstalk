@@ -19,8 +19,7 @@ class JobDeleteCommandTest extends ConsoleTestCase
 
         $this->connection->expects(static::once())
             ->method('delete')
-            ->with($jobId)
-            ->willReturnSelf();
+            ->with($jobId);
 
         $this->commandTester->execute([
             'command' => $this->command->getName(),

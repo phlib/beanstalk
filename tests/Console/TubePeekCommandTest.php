@@ -22,8 +22,7 @@ class TubePeekCommandTest extends ConsoleTestCase
 
         $this->connection->expects(static::once())
             ->method('useTube')
-            ->with($tube)
-            ->willReturnSelf();
+            ->with($tube);
 
         $this->connection->expects(static::once())
             ->method('peekBuried')
@@ -51,8 +50,7 @@ class TubePeekCommandTest extends ConsoleTestCase
 
         $this->connection->expects(static::once())
             ->method('useTube')
-            ->with($tube)
-            ->willReturnSelf();
+            ->with($tube);
 
         $this->connection->expects(static::once())
             ->method('peekDelayed')
@@ -80,8 +78,7 @@ class TubePeekCommandTest extends ConsoleTestCase
 
         $this->connection->expects(static::once())
             ->method('useTube')
-            ->with($tube)
-            ->willReturnSelf();
+            ->with($tube);
 
         $this->connection->expects(static::once())
             ->method('peekReady')
@@ -123,8 +120,7 @@ class TubePeekCommandTest extends ConsoleTestCase
 
         $this->connection->expects(static::once())
             ->method('useTube')
-            ->with($tube)
-            ->willReturnSelf();
+            ->with($tube);
 
         $this->connection->expects(static::once())
             ->method('peekBuried')
