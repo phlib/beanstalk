@@ -275,16 +275,18 @@ class PoolTest extends TestCase
         static::assertSame($expectedId, $combinedId);
     }
 
-    public function testPutTotalFailure(): void
+    public function testPutThrowsTheLastError(): void
     {
         $this->expectException(RuntimeException::class);
         $this->expectExceptionMessage('Failed to send command to one of the available servers in the pool');
 
         $this->connection1->method('put')
             ->with('myJobData')
+            // Deliberate non-standard message to track which exception is returned
             ->willThrowException(new RuntimeException('error1'));
         $this->connection2->method('put')
             ->with('myJobData')
+            // Deliberate non-standard message to track which exception is returned
             ->willThrowException(new RuntimeException('error2'));
 
         try {
@@ -294,6 +296,36 @@ class PoolTest extends TestCase
             $previous = $e->getPrevious();
             static::assertInstanceOf(RuntimeException::class, $previous);
             static::assertSame('error2', $previous->getMessage());
+            throw $e;
+        }
+    }
+
+    public function testPutThrowsExceptionWhenNoAvailableConnections(): void
+    {
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Failed to send command to one of the available servers in the pool');
+
+        // Force connection errors so ManagedConnection treats them as unavailable
+        $this->connection1->expects(static::once())
+            ->method('watch')
+            ->willThrowException(new RuntimeException());
+        $this->connection2->expects(static::once())
+            ->method('watch')
+            ->willThrowException(new RuntimeException());
+        $this->pool->watch('test');
+
+        // Command should not be sent to the unavailable connection
+        $this->connection1->expects(static::never())
+            ->method('put');
+        $this->connection2->expects(static::never())
+            ->method('put');
+
+        try {
+            $this->pool->put('myJobData');
+        } catch (RuntimeException $e) {
+            $previous = $e->getPrevious();
+            // No previous exception should be available, as no connection was called
+            static::assertNull($previous);
             throw $e;
         }
     }
@@ -490,7 +522,10 @@ class PoolTest extends TestCase
         $this->pool->peek("{$server}.{$jobId}");
     }
 
-    public function testPeekReady(): void
+    /**
+     * @dataProvider dataPeekStatus
+     */
+    public function testPeekStatus(string $command): void
     {
         $server = self::NAME_CONN_2;
         $jobId = '123';
@@ -505,19 +540,23 @@ class PoolTest extends TestCase
         ];
 
         $this->connection1->expects(static::once())
-            ->method('peekReady')
+            ->method($command)
             ->willThrowException(new NotFoundException(
                 NotFoundException::PEEK_STATUS_MSG,
                 NotFoundException::PEEK_STATUS_CODE,
             ));
         $this->connection2->expects(static::once())
-            ->method('peekReady')
+            ->method($command)
             ->willReturn($response);
 
-        static::assertSame($expected, $this->pool->peekReady());
+        $actual = $this->pool->{$command}();
+        static::assertSame($expected, $actual);
     }
 
-    public function testPeekReadyWithNoReadyJobs(): void
+    /**
+     * @dataProvider dataPeekStatus
+     */
+    public function testPeekStatusWithNoMatchingJobs(string $command): void
     {
         $this->expectException(NotFoundException::class);
         // Test that the last connection exception is the one that is thrown
@@ -525,125 +564,94 @@ class PoolTest extends TestCase
         $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
 
         $this->connection1->expects(static::once())
-            ->method('peekReady')
+            ->method($command)
             ->willThrowException(new NotFoundException(
                 // Deliberate non-standard message to track which exception is returned
                 'error1',
                 NotFoundException::PEEK_STATUS_CODE,
             ));
         $this->connection2->expects(static::once())
-            ->method('peekReady')
+            ->method($command)
             ->willThrowException(new NotFoundException(
                 // Deliberate non-standard message to track which exception is returned
                 'error2',
                 NotFoundException::PEEK_STATUS_CODE,
             ));
 
-        $this->pool->peekReady();
+        $this->pool->{$command}();
     }
 
-    public function testPeekDelayed(): void
+    /**
+     * @dataProvider dataPeekStatus
+     */
+    public function testPeekStatusThrowsTheLastError(string $command): void
     {
-        $server = self::NAME_CONN_2;
-        $jobId = '123';
-        $jobBody = 'jobBody';
-        $response = [
-            'id' => $jobId,
-            'body' => $jobBody,
-        ];
-        $expected = [
-            'id' => "{$server}.{$jobId}",
-            'body' => $jobBody,
-        ];
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Failed to send command to one of the available servers in the pool');
 
         $this->connection1->expects(static::once())
-            ->method('peekDelayed')
-            ->willThrowException(new NotFoundException(
-                NotFoundException::PEEK_STATUS_MSG,
-                NotFoundException::PEEK_STATUS_CODE,
-            ));
-        $this->connection2->expects(static::once())
-            ->method('peekDelayed')
-            ->willReturn($response);
+            ->method($command)
+            // Deliberate non-standard message to track which exception is returned
+            ->willThrowException(new RuntimeException('error1'));
 
-        static::assertSame($expected, $this->pool->peekDelayed());
+        $this->connection2->expects(static::once())
+            ->method($command)
+            // Deliberate non-standard message to track which exception is returned
+            ->willThrowException(new RuntimeException('error2'));
+
+        try {
+            $this->pool->{$command}();
+        } catch (RuntimeException $e) {
+            $previous = $e->getPrevious();
+            static::assertInstanceOf(RuntimeException::class, $previous);
+            static::assertSame('error2', $previous->getMessage());
+            throw $e;
+        }
     }
 
-    public function testPeekDelayedWithNoDelayedJobs(): void
+    /**
+     * @dataProvider dataPeekStatus
+     */
+    public function testPeekStatusThrowsExceptionWhenNoAvailableConnections(string $command): void
     {
-        $this->expectException(NotFoundException::class);
-        // Test that the last connection exception is the one that is thrown
-        $this->expectExceptionMessage('error2');
-        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+        $this->expectException(RuntimeException::class);
+        $this->expectExceptionMessage('Failed to send command to one of the available servers in the pool');
 
+        // Force connection errors so ManagedConnection treats them as unavailable
         $this->connection1->expects(static::once())
-            ->method('peekDelayed')
-            ->willThrowException(new NotFoundException(
-                // Deliberate non-standard message to track which exception is returned
-                'error1',
-                NotFoundException::PEEK_STATUS_CODE,
-            ));
+            ->method('watch')
+            ->willThrowException(new RuntimeException());
         $this->connection2->expects(static::once())
-            ->method('peekDelayed')
-            ->willThrowException(new NotFoundException(
-                // Deliberate non-standard message to track which exception is returned
-                'error2',
-                NotFoundException::PEEK_STATUS_CODE,
-            ));
+            ->method('watch')
+            ->willThrowException(new RuntimeException());
+        $this->pool->watch('test');
 
-        $this->pool->peekDelayed();
+        // Command should not be sent to the unavailable connection
+        $this->connection1->expects(static::never())
+            ->method($command);
+        $this->connection2->expects(static::never())
+            ->method($command);
+
+        try {
+            $this->pool->{$command}();
+        } catch (RuntimeException $e) {
+            $previous = $e->getPrevious();
+            // No previous exception should be available, as no connection was called
+            static::assertNull($previous);
+            throw $e;
+        }
     }
 
-    public function testPeekBuried(): void
+    public function dataPeekStatus(): array
     {
-        $server = self::NAME_CONN_2;
-        $jobId = '123';
-        $jobBody = 'jobBody';
-        $response = [
-            'id' => $jobId,
-            'body' => $jobBody,
+        return [
+            /* @see ConnectionInterface::peekBuried() Linked for static usage analysis */
+            'buried' => ['peekBuried'],
+            /* @see ConnectionInterface::peekDelayed() Linked for static usage analysis */
+            'delayed' => ['peekDelayed'],
+            /* @see ConnectionInterface::peekReady() Linked for static usage analysis */
+            'ready' => ['peekReady'],
         ];
-        $expected = [
-            'id' => "{$server}.{$jobId}",
-            'body' => $jobBody,
-        ];
-
-        $this->connection1->expects(static::once())
-            ->method('peekBuried')
-            ->willThrowException(new NotFoundException(
-                NotFoundException::PEEK_STATUS_MSG,
-                NotFoundException::PEEK_STATUS_CODE,
-            ));
-        $this->connection2->expects(static::once())
-            ->method('peekBuried')
-            ->willReturn($response);
-
-        static::assertSame($expected, $this->pool->peekBuried());
-    }
-
-    public function testPeekBuriedWithNoBuriedJobs(): void
-    {
-        $this->expectException(NotFoundException::class);
-        // Test that the last connection exception is the one that is thrown
-        $this->expectExceptionMessage('error2');
-        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
-
-        $this->connection1->expects(static::once())
-            ->method('peekBuried')
-            ->willThrowException(new NotFoundException(
-                // Deliberate non-standard message to track which exception is returned
-                'error1',
-                NotFoundException::PEEK_STATUS_CODE,
-            ));
-        $this->connection2->expects(static::once())
-            ->method('peekBuried')
-            ->willThrowException(new NotFoundException(
-                // Deliberate non-standard message to track which exception is returned
-                'error2',
-                NotFoundException::PEEK_STATUS_CODE,
-            ));
-
-        $this->pool->peekBuried();
     }
 
     /**
