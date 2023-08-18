@@ -11,14 +11,18 @@ class StatsTest extends TestCase
     private const LIST_STATS = [
         'pid',
         'version',
-        'hostname',
-        'name',
         'uptime',
         'binlog-current-index',
+        'draining',
+        'id',
+        'hostname',
+        'os',
+        'platform',
+        'name',
     ];
 
     private const MAX_STATS = [
-        'timeouts',
+        'max-job-size',
         'binlog-max-size',
         'binlog-oldest-index',
     ];
@@ -26,7 +30,7 @@ class StatsTest extends TestCase
     public function testToArrayReturnsOriginalData(): void
     {
         $data = [
-            'timeouts' => rand(),
+            'job-timeouts' => rand(),
             'binlog-max-size' => rand(),
         ];
         $stats = new Stats($data);
@@ -42,7 +46,7 @@ class StatsTest extends TestCase
     public function testIsEmptyWithData(): void
     {
         $stats = new Stats([
-            'timeouts' => rand(),
+            'job-timeouts' => rand(),
             'binlog-max-size' => rand(),
         ]);
         static::assertFalse($stats->isEmpty());
