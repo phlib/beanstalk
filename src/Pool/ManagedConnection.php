@@ -6,6 +6,8 @@ namespace Phlib\Beanstalk\Pool;
 
 use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\RuntimeException;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 /**
  * @package Phlib\Beanstalk
@@ -19,10 +21,20 @@ class ManagedConnection implements ConnectionInterface
 
     private int $retryAt;
 
-    public function __construct(ConnectionInterface $connection, int $retryDelay = 600)
-    {
+    private LoggerInterface $logger;
+
+    public function __construct(
+        ConnectionInterface $connection,
+        int $retryDelay = 600,
+        ?LoggerInterface $logger = null
+    ) {
         $this->connection = $connection;
         $this->retryDelay = $retryDelay;
+
+        if (!isset($logger)) {
+            $logger = new NullLogger();
+        }
+        $this->logger = $logger;
     }
 
     public function getConnection(): ConnectionInterface
@@ -211,5 +223,13 @@ class ManagedConnection implements ConnectionInterface
     private function delay(): void
     {
         $this->retryAt = time() + $this->retryDelay;
+        $this->logger->notice(
+            sprintf('Connection \'%s\' failed; delay for %ds', $this->getName(), $this->retryDelay),
+            [
+                'connectionName' => $this->getName(),
+                'retryDelay' => $this->retryDelay,
+                'retryAt' => $this->retryAt,
+            ]
+        );
     }
 }

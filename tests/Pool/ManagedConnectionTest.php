@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Pool;
 
+use ColinODell\PsrTestLogger\TestLogger;
 use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LogLevel;
 
 class ManagedConnectionTest extends TestCase
 {
@@ -37,6 +39,8 @@ class ManagedConnectionTest extends TestCase
         'listTubesWatched' => [['some result']],
     ];
 
+    private string $connectionName;
+
     /**
      * @var ConnectionInterface|MockObject
      */
@@ -47,7 +51,12 @@ class ManagedConnectionTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+
+        $this->connectionName = sha1(uniqid('name'));
         $this->connection = $this->createMock(ConnectionInterface::class);
+        $this->connection->method('getName')
+            ->willReturn($this->connectionName);
+
         $this->time = $this->getFunctionMock(__NAMESPACE__, 'time');
     }
 
@@ -59,14 +68,8 @@ class ManagedConnectionTest extends TestCase
 
     public function testGetName(): void
     {
-        $name = sha1(uniqid('name'));
-
-        $this->connection->expects(static::once())
-            ->method('getName')
-            ->willReturn($name);
-
         $managed = new ManagedConnection($this->connection);
-        static::assertSame($name, $managed->getName());
+        static::assertSame($this->connectionName, $managed->getName());
     }
 
     public function testIsAvailableTrueByDefault(): void
@@ -106,7 +109,9 @@ class ManagedConnectionTest extends TestCase
             ->method('watch')
             ->willThrowException(new RuntimeException());
 
-        $managed = new ManagedConnection($this->connection, $retryDelay);
+        $logger = new TestLogger();
+
+        $managed = new ManagedConnection($this->connection, $retryDelay, $logger);
         try {
             $managed->watch('tube');
         } catch (RuntimeException $e) {
@@ -114,6 +119,25 @@ class ManagedConnectionTest extends TestCase
         }
 
         static::assertTrue($managed->isAvailable());
+
+        // Expected log
+        $logMsg = sprintf(
+            'Connection \'%s\' failed; delay for %ds',
+            $this->connectionName,
+            $retryDelay,
+        );
+        $logCtxt = [
+            'connectionName' => $this->connectionName,
+            'retryDelay' => $retryDelay,
+            'retryAt' => $initialTime + $retryDelay,
+        ];
+        static::assertCount(1, $logger->records);
+        $log = $logger->records[0];
+        static::assertSame(LogLevel::NOTICE, $log['level']);
+        static::assertSame($logMsg, $log['message']);
+        foreach ($logCtxt as $key => $expectedCtxt) {
+            static::assertSame($expectedCtxt, $log['context'][$key]);
+        }
     }
 
     public function testIsAvailableBecomesAvailableAfterSuccessfulSend(): void

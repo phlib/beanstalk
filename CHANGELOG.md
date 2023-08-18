@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   Previously this threw `CommandException` which the new exception extends.
 - Add draining status to the `server:stats` CLI command.
 - Add constants with standardised codes and messages for `NotFoundException`.
+- Add support for a Logger to capture connection failures.
 ### Changed
 - Update commands to better reflect the protocol:
   - `watch()` returns integer of number of watched tubes.
