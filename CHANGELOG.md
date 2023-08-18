@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 - Add new `DrainingException` thrown by `put()` when the server is in draining
   mode and cannot accept new jobs.
   Previously this threw `CommandException` which the new exception extends.
+- Add draining status to the `server:stats` CLI command.
 - Add constants with standardised codes and messages for `NotFoundException`.
 ### Changed
 - Update commands to better reflect the protocol:

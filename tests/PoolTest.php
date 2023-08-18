@@ -822,28 +822,52 @@ class PoolTest extends TestCase
 
     public function testStats(): void
     {
-        $noOfServers = 2;
-        $ready = 2;
-        $other = 8;
-        $response = [
-            'current-jobs-ready' => $ready,
-            'some-other' => $other,
+        $response1 = [
+            'current-jobs-ready' => 2,
+            'some-other' => 8,
+            'version' => '"1.12"',
+            'uptime' => 440851,
+            'draining' => 'false',
+            'id' => '541ced2bff508923',
+            'hostname' => 'test-host.local',
+            'os' => '#1 SMP Debian 4.19.194-2 (2021-06-21)',
+            'platform' => 'x86_64',
+        ];
+        $response2 = [
+            'current-jobs-ready' => 5,
+            'some-other' => 3,
+            'version' => '"1.12"',
+            'uptime' => 34545,
+            'draining' => 'true',
+            'id' => '541ced2bff508924',
+            'hostname' => 'test-host2.local',
+            'os' => '#1 SMP Debian 4.19.194-2 (2021-06-21)',
+            'platform' => 'x86_64',
         ];
 
         $this->connection1->expects(static::once())
             ->method('stats')
-            ->willReturn($response);
+            ->willReturn($response1);
         $this->connection2->expects(static::once())
             ->method('stats')
-            ->willReturn($response);
+            ->willReturn($response2);
 
-        static::assertSame(
-            [
-                'current-jobs-ready' => ($ready * $noOfServers),
-                'some-other' => ($other * $noOfServers),
-            ],
-            $this->pool->stats()
-        );
+        $cumulative = fn(string $key) => $response1[$key] + $response2[$key];
+        $listOfValues = fn(string $key) => $response1[$key] . ',' . $response2[$key];
+        $expected = [
+            'current-jobs-ready' => $cumulative('current-jobs-ready'),
+            'some-other' => $cumulative('some-other'),
+            'version' => $response1['version'],
+            'uptime' => $listOfValues('uptime'),
+            'draining' => $listOfValues('draining'),
+            'id' => $listOfValues('id'),
+            'hostname' => $listOfValues('hostname'),
+            'os' => $response1['os'],
+            'platform' => $response1['platform'],
+        ];
+
+        $actual = $this->pool->stats();
+        static::assertSame($expected, $actual);
     }
 
     public function testStatsSkipsConnectionErrors(): void

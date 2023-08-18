@@ -74,6 +74,7 @@ class StatsServiceTest extends TestCase
         'rusage-utime',
         'rusage-stime',
         'uptime',
+        'draining',
         'id',
         'hostname',
     ];
