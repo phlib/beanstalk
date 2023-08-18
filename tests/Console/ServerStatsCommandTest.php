@@ -20,6 +20,7 @@ class ServerStatsCommandTest extends ConsoleTestCase
         'rusage-utime' => 326.282258,
         'rusage-stime' => 1082.901991,
         'uptime' => 440851,
+        'draining' => 'true',
         'id' => '541ced2bff508923',
         'hostname' => 'test-host.local',
     ];
@@ -136,6 +137,14 @@ class ServerStatsCommandTest extends ConsoleTestCase
                 'Jobs',
                 self::STATS_INFO['total-jobs'],
                 self::STATS_INFO['job-timeouts']
+            ),
+            $output
+        );
+        static::assertMatchesRegularExpression(
+            sprintf(
+                '|%s\\s+%s|',
+                'Draining',
+                self::STATS_INFO['draining'],
             ),
             $output
         );

@@ -60,12 +60,18 @@ class ServerStatsCommand extends AbstractStatsCommand
     {
         $info = $stats->getServerInfo();
 
+        $draining = $info['draining'];
+        if ($draining === 'true') {
+            $draining = sprintf('<error>%s</>', $draining);
+        }
+
         $io->section('Server Information');
         $io->definitionList(
             ['Host' => sprintf('%s (pid %d)', $info['hostname'], $info['pid'])],
             ['Beanstalk Version' => $info['version']],
             ['Resources' => sprintf('uptime/%d, connections/%d', $info['uptime'], $info['total-connections'])],
             ['Jobs' => sprintf('total/%d, timeouts/%d', $info['total-jobs'], $info['job-timeouts'])],
+            ['Draining' => $draining],
         );
     }
 
