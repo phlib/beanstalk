@@ -56,7 +56,10 @@ class Put implements CommandInterface
                 $jobId = (int)strtok(' ');
                 throw BuriedException::create($jobId);
             case 'DRAINING':
-                throw new DrainingException('Server in a draining status');
+                throw new DrainingException(
+                    DrainingException::PUT_MSG,
+                    DrainingException::PUT_CODE,
+                );
             case 'EXPECTED_CRLF':
             case 'JOB_TOO_BIG':
             default:

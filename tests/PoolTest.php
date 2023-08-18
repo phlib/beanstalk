@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk;
 
 use Phlib\Beanstalk\Exception\CommandException;
+use Phlib\Beanstalk\Exception\DrainingException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
@@ -272,6 +273,27 @@ class PoolTest extends TestCase
         $combinedId = $this->pool->put('myJobData');
 
         $expectedId = self::NAME_CONN_1 . '.' . $jobId;
+        static::assertSame($expectedId, $combinedId);
+    }
+
+    public function testPutSkipsDrainingServer(): void
+    {
+        $jobId = rand();
+
+        $this->connection1->method('put')
+            ->with('myJobData')
+            ->willThrowException(new DrainingException(
+                DrainingException::PUT_MSG,
+                DrainingException::PUT_CODE,
+            ));
+        $this->connection2->expects(static::once())
+            ->method('put')
+            ->with('myJobData')
+            ->willReturn($jobId);
+
+        $combinedId = $this->pool->put('myJobData');
+
+        $expectedId = self::NAME_CONN_2 . '.' . $jobId;
         static::assertSame($expectedId, $combinedId);
     }
 
