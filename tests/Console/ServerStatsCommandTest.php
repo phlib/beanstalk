@@ -104,20 +104,39 @@ class ServerStatsCommandTest extends ConsoleTestCase
         $output = $this->commandTester->getDisplay();
 
         // Headers
-        static::assertStringContainsString(
-            'Host: ' . self::STATS_INFO['hostname'] . ' (pid ' . self::STATS_INFO['pid'] . ')',
+        static::assertMatchesRegularExpression(
+            sprintf(
+                "|%s\\s+%s \(pid %d\)|",
+                'Host',
+                self::STATS_INFO['hostname'],
+                self::STATS_INFO['pid']
+            ),
             $output
         );
-        static::assertStringContainsString(
-            'Beanstalk Version: ' . self::STATS_INFO['version'],
+        static::assertMatchesRegularExpression(
+            sprintf(
+                '|%s\\s+%s|',
+                'Beanstalk Version',
+                self::STATS_INFO['version']
+            ),
             $output
         );
-        static::assertStringContainsString(
-            'Resources: uptime/' . self::STATS_INFO['uptime'] . ', connections/' . self::STATS_INFO['total-connections'],
+        static::assertMatchesRegularExpression(
+            sprintf(
+                '|%s\\s+uptime/%d, connections/%d|',
+                'Resources',
+                self::STATS_INFO['uptime'],
+                self::STATS_INFO['total-connections']
+            ),
             $output
         );
-        static::assertStringContainsString(
-            'Jobs: total/' . self::STATS_INFO['total-jobs'] . ', timeouts/' . self::STATS_INFO['job-timeouts'],
+        static::assertMatchesRegularExpression(
+            sprintf(
+                '|%s\\s+total/%d, timeouts/%d|',
+                'Jobs',
+                self::STATS_INFO['total-jobs'],
+                self::STATS_INFO['job-timeouts']
+            ),
             $output
         );
 
