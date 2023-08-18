@@ -45,7 +45,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
   socket are only for internal implementation.
   No impact to standard use of this package.
 
-## [2.x] - TBC
+## [2.2.0] - 2023-08-17
 - Add `--watch` option to `beanstalk tube:stats` CLI command.
 - Add value to `--watch` CLI options, to specify the refresh interval.
   Add info line to show the interval and current datetime.
