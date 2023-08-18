@@ -10,6 +10,7 @@ use Phlib\Beanstalk\Exception\NotFoundException;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Model\Stats;
 use Phlib\Beanstalk\Pool\ManagedConnection;
+use Psr\Log\LoggerInterface;
 
 /**
  * @package Phlib\Beanstalk
@@ -27,36 +28,35 @@ class Pool implements ConnectionInterface
         Connection::DEFAULT_TUBE => true,
     ];
 
-    private int $retryDelay;
-
     /**
      * @param ConnectionInterface[] $connections
      */
-    public function __construct(array $connections, int $retryDelay = 600)
-    {
-        $this->retryDelay = $retryDelay;
-
+    public function __construct(
+        array $connections,
+        int $retryDelay = 600,
+        ?LoggerInterface $logger = null
+    ) {
         if (empty($connections)) {
             throw new InvalidArgumentException('Connections for Pool are empty');
         }
-        $this->addConnections($connections);
+        $this->addConnections($connections, $retryDelay, $logger);
     }
 
-    private function addConnections(array $connections): void
+    private function addConnections(array $connections, int $retryDelay, ?LoggerInterface $logger): void
     {
         foreach ($connections as $connection) {
-            $this->addConnection($connection);
+            $this->addConnection($connection, $retryDelay, $logger);
         }
     }
 
-    private function addConnection(ConnectionInterface $connection): void
+    private function addConnection(ConnectionInterface $connection, int $retryDelay, ?LoggerInterface $logger): void
     {
         $key = $connection->getName();
         if (array_key_exists($key, $this->connections)) {
             throw new InvalidArgumentException("Specified connection '{$key}' already exists.");
         }
 
-        $this->connections[$key] = new ManagedConnection($connection, $this->retryDelay);
+        $this->connections[$key] = new ManagedConnection($connection, $retryDelay, $logger);
     }
 
     /**

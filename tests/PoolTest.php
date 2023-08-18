@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
+use ColinODell\PsrTestLogger\TestLogger;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\DrainingException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
@@ -12,6 +13,7 @@ use Phlib\Beanstalk\Exception\RuntimeException;
 use phpmock\phpunit\PHPMock;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\LogLevel;
 
 class PoolTest extends TestCase
 {
@@ -32,6 +34,10 @@ class PoolTest extends TestCase
      * @var Connection|MockObject
      */
     private Connection $connection2;
+
+    private int $retryDelay;
+
+    private TestLogger $logger;
 
     public static function setUpBeforeClass(): void
     {
@@ -59,7 +65,14 @@ class PoolTest extends TestCase
         $this->connection2->method('getName')
             ->willReturn(self::NAME_CONN_2);
 
-        $this->pool = new Pool([$this->connection1, $this->connection2]);
+        $this->retryDelay = 120;
+        $this->logger = new TestLogger();
+
+        $this->pool = new Pool(
+            [$this->connection1, $this->connection2],
+            $this->retryDelay,
+            $this->logger,
+        );
     }
 
     public function testConstructErrorWithNoConnections(): void
@@ -451,6 +464,17 @@ class PoolTest extends TestCase
             ->willReturn($response);
 
         static::assertSame($expected, $this->pool->reserve());
+
+        // Expected log
+        $logMsg = sprintf(
+            'Connection \'%s\' failed; delay for %ds',
+            self::NAME_CONN_1,
+            $this->retryDelay,
+        );
+        static::assertCount(1, $this->logger->records);
+        $log = $this->logger->records[0];
+        static::assertSame(LogLevel::NOTICE, $log['level']);
+        static::assertSame($logMsg, $log['message']);
     }
 
     public function testPoolIdWithInvalidFormat(): void

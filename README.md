@@ -61,6 +61,7 @@ $beanstalk->delete($job['id']);
 |----|----|--------|-------|-----------|
 |`connections`|*ConnectionInterface[]*|Yes| |Array of server connections.|
 |`retryDelay`|*Integer*|No|`600`|How long to delay retrying a connection for after an error.|
+|`logger`|*LoggerInterface*|No| |Optional Logger to capture connection failures.|
 
 ## Factory
 The factory allows for easy setup of the objects.
@@ -113,12 +114,29 @@ $connections = [
     new Connection('10.0.0.3'),
     new Connection('10.0.0.4'),
 ];
-$pool = new Pool($connections, 120);
+$logger = new MyLogger();
+$pool = new Pool($connections, 120, $logger);
 
 $pool->useTube('my-tube');
 $pool->put(array('my' => 'jobData1')); // )
 $pool->put(array('my' => 'jobData2')); // )-> distributed between random servers
 $pool->put(array('my' => 'jobData3')); // )
+```
+
+Alternative way to create a Pool, using the Factory to construct the
+connections:
+
+```php
+use Phlib\Beanstalk\Factory;
+use Phlib\Beanstalk\Pool;
+
+$connections = (new Factory())->createConnections([
+    ['host' => '10.0.0.1', 'enabled' => true],
+    ['host' => '10.0.0.2', 'enabled' => false],
+    ['host' => '10.0.0.3', 'enabled' => true],
+]);
+$logger = new MyLogger();
+$pool = new Pool($connections, 120, $logger);
 ```
 
 ## Command Line Script
