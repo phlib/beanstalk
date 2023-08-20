@@ -264,7 +264,9 @@ class ManagedConnectionTest extends TestCase
                 static::assertSame($jobId, $withJobId);
             });
 
-        $managed = new ManagedConnection($this->connection, 0);
+        $logger = new TestLogger();
+
+        $managed = new ManagedConnection($this->connection, 0, $logger);
 
         // Make the tube selections that should be repeated after failure
         $managed->useTube($useTube);
@@ -280,5 +282,24 @@ class ManagedConnectionTest extends TestCase
 
         // Call the command that should trigger the reinitialisation
         $managed->release($jobId);
+
+        // Expected retry log
+        $logMsg = sprintf(
+            'Replay tube selections for connection \'%s\'',
+            $this->connectionName,
+        );
+        $logCtxt = [
+            'connectionName' => $this->connectionName,
+            'using' => $useTube,
+            'watching' => [$watchTube],
+            'ignoring' => [$ignoreTube],
+        ];
+        static::assertCount(2, $logger->records);
+        $log = $logger->records[1];
+        static::assertSame(LogLevel::DEBUG, $log['level']);
+        static::assertSame($logMsg, $log['message']);
+        foreach ($logCtxt as $key => $expectedCtxt) {
+            static::assertSame($expectedCtxt, $log['context'][$key]);
+        }
     }
 }

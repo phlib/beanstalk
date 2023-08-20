@@ -241,6 +241,16 @@ class ManagedConnection implements ConnectionInterface
 
     private function replayTubes(): void
     {
+        $this->logger->debug(
+            sprintf('Replay tube selections for connection \'%s\'', $this->getName()),
+            [
+                'connectionName' => $this->getName(),
+                'using' => $this->using,
+                'watching' => array_keys($this->watching),
+                'ignoring' => array_keys($this->ignoring),
+            ]
+        );
+
         $this->connection->useTube($this->using);
 
         foreach (array_keys($this->watching) as $watchTube) {
