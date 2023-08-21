@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+Major versions may make incompatible API changes or remove features.
+The backward compatibility promise has the following exceptions:
+* Any classes not in the package's root namespace (i.e. files directly in the `src` directory);
+* Units of code that are annotated with `@internal`.
+
 ## [Unreleased]
 ### Added
 - Add new `BuriedException` thrown by `put()` and `release()` when the server
