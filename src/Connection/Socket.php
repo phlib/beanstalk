@@ -65,7 +65,7 @@ class Socket
         }
     }
 
-    public function write(string $data): self
+    public function write(string $data): void
     {
         $this->connect();
 
@@ -77,8 +77,6 @@ class Socket
             $this->disconnect();
             throw new SocketException('Failed to write data');
         }
-
-        return $this;
     }
 
     public function read(int $length = null): string
