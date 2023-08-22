@@ -10,6 +10,8 @@ The backward compatibility promise has the following exceptions:
 * Units of code that are annotated with `@internal`.
 
 ## [Unreleased]
+
+## [3.0.0] - 2023-08-22
 ### Added
 - Add new `BuriedException` thrown by `put()` and `release()` when the server
   returns this error. This is a minor **BC break** because these commands
