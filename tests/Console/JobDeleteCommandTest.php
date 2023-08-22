@@ -19,8 +19,7 @@ class JobDeleteCommandTest extends ConsoleTestCase
 
         $this->connection->expects(static::once())
             ->method('delete')
-            ->with($jobId)
-            ->willReturnSelf();
+            ->with($jobId);
 
         $this->commandTester->execute([
             'command' => $this->command->getName(),
@@ -33,14 +32,16 @@ class JobDeleteCommandTest extends ConsoleTestCase
 
     public function testJobNotFound(): void
     {
-        $this->expectException(NotFoundException::class);
-
         $jobId = rand();
+        $message = sha1(uniqid('xMsg'));
+
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage($message);
 
         $this->connection->expects(static::once())
             ->method('delete')
             ->with($jobId)
-            ->willThrowException(new NotFoundException('job not found'));
+            ->willThrowException(new NotFoundException($message));
 
         $this->commandTester->execute([
             'command' => $this->command->getName(),

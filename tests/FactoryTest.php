@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\Pool\RandomStrategy;
-use Phlib\Beanstalk\Pool\RoundRobinStrategy;
 use PHPUnit\Framework\TestCase;
 
 class FactoryTest extends TestCase
@@ -15,7 +12,7 @@ class FactoryTest extends TestCase
     public function testCreate(): void
     {
         $factory = new Factory();
-        static::assertInstanceOf(ConnectionInterface::class, $factory->createBC('localhost'));
+        static::assertInstanceOf(ConnectionInterface::class, $factory->create('localhost'));
     }
 
     /**
@@ -24,89 +21,33 @@ class FactoryTest extends TestCase
     public function testCreateFromArray(string $expectedClass, array $config): void
     {
         $factory = new Factory();
-        static::assertInstanceOf($expectedClass, $factory->createFromArrayBC($config));
+        static::assertInstanceOf($expectedClass, $factory->createFromArray($config));
     }
 
     public function createFromArrayDataProvider(): array
     {
-        $connectionClass = Connection::class;
-        $poolClass = Pool::class;
-        $defaultHost = [
-            'host' => 'localhost',
-        ];
-
         return [
             'local' => [
-                $connectionClass,
-                $defaultHost,
+                Connection::class,
+                [
+                    'host' => 'localhost',
+                ],
             ],
             'localWithPort' => [
-                $connectionClass,
+                Connection::class,
                 [
                     'host' => 'localhost',
                     'port' => 123456,
                 ],
             ],
-            'localArray' => [
-                $connectionClass,
-                [
-                    'server' => $defaultHost,
-                ],
-            ],
             'pool' => [
-                $poolClass,
+                Pool::class,
                 [
-                    'servers' => [$defaultHost, $defaultHost],
+                    ['host' => 'localhost1'],
+                    ['host' => 'localhost2'],
                 ],
             ],
         ];
-    }
-
-    /**
-     * @dataProvider creatingPoolUsesStrategyDataProvider
-     */
-    public function testCreatingPoolUsesStrategy(string $strategyClass): void
-    {
-        $hostConfig = [
-            'host' => 'localhost',
-        ];
-        $poolConfig = [
-            'servers' => [$hostConfig, $hostConfig],
-            'strategyClass' => $strategyClass,
-        ];
-
-        $factory = new Factory();
-        /** @var Pool $pool */
-        $pool = $factory->createFromArrayBC($poolConfig);
-
-        /** @var Pool\Collection $collection */
-        $collection = $pool->getCollection();
-
-        static::assertInstanceOf($strategyClass, $collection->getSelectionStrategy());
-    }
-
-    public function creatingPoolUsesStrategyDataProvider(): array
-    {
-        return [
-            [RoundRobinStrategy::class],
-            [RandomStrategy::class],
-        ];
-    }
-
-    public function testCreatingPoolFailsWithInvalidStrategyClass(): void
-    {
-        $this->expectException(InvalidArgumentException::class);
-
-        $hostConfig = [
-            'host' => 'localhost',
-        ];
-        $poolConfig = [
-            'servers' => [$hostConfig, $hostConfig],
-            'strategyClass' => '\Some\RandomClass\ThatDoesnt\Exist',
-        ];
-
-        $factory = new Factory();
-        $factory->createFromArrayBC($poolConfig);
     }
 
     public function testCreateFromArrayFailsWhenEmpty(): void
@@ -114,7 +55,7 @@ class FactoryTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
 
         $factory = new Factory();
-        $factory->createFromArrayBC([]);
+        $factory->createFromArray([]);
     }
 
     public function testCreateConnections(): void
@@ -125,7 +66,7 @@ class FactoryTest extends TestCase
         ];
 
         $factory = new Factory();
-        $connections = $factory->createConnectionsBC([$config, $config, $config]);
+        $connections = $factory->createConnections([$config, $config, $config]);
         foreach ($connections as $connection) {
             $result = $result && $connection instanceof Connection;
         }

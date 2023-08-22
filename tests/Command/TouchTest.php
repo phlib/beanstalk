@@ -27,17 +27,21 @@ class TouchTest extends CommandTestCase
             ->willReturn('TOUCHED');
 
         $touch = new Touch($id);
-        static::assertInstanceOf(Touch::class, $touch->process($this->socket));
+        $touch->process($this->socket);
     }
 
     public function testErrorThrowsException(): void
     {
+        $jobId = rand();
+
         $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(sprintf(NotFoundException::JOB_ID_MSG_F, $jobId));
+        $this->expectExceptionCode(NotFoundException::JOB_ID_CODE);
 
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_TOUCHED');
-        (new Touch(123))->process($this->socket);
+        (new Touch($jobId))->process($this->socket);
     }
 
     public function testUnknownStatusThrowsException(): void

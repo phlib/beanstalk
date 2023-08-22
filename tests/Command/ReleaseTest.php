@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\ConnectionInterface;
+use Phlib\Beanstalk\Exception\BuriedException;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
@@ -47,17 +48,39 @@ class ReleaseTest extends CommandTestCase
             ->willReturn('RELEASED');
 
         $release = new Release($id, $priority, $delay);
-        static::assertInstanceOf(Release::class, $release->process($this->socket));
+        $release->process($this->socket);
     }
 
     public function testNotFoundThrowsException(): void
     {
+        $jobId = rand();
+
         $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(sprintf(NotFoundException::JOB_ID_MSG_F, $jobId));
+        $this->expectExceptionCode(NotFoundException::JOB_ID_CODE);
 
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_FOUND');
-        (new Release(123, 456, 789))->process($this->socket);
+        (new Release($jobId, 456, 789))->process($this->socket);
+    }
+
+    public function testBuriedThrowsException(): void
+    {
+        $this->expectException(BuriedException::class);
+
+        $jobId = rand();
+
+        $this->socket->expects(static::any())
+            ->method('read')
+            ->willReturn('BURIED');
+
+        try {
+            (new Release($jobId, 456, 789))->process($this->socket);
+        } catch (BuriedException $e) {
+            self::assertSame($jobId, $e->getJobId());
+            throw $e;
+        }
     }
 
     public function testUnknownStatusThrowsException(): void

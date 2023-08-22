@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 
@@ -25,17 +25,20 @@ class Touch implements CommandInterface
         return sprintf('touch %d', $this->id);
     }
 
-    public function process(SocketInterface $socket): self
+    public function process(Socket $socket): void
     {
         $socket->write($this->getCommand());
 
         $status = $socket->read();
         switch ($status) {
             case 'TOUCHED':
-                return $this;
+                return;
 
             case 'NOT_TOUCHED':
-                throw new NotFoundException("Job id '{$this->id}' could not be found.");
+                throw new NotFoundException(
+                    sprintf(NotFoundException::JOB_ID_MSG_F, $this->id),
+                    NotFoundException::JOB_ID_CODE,
+                );
 
             default:
                 throw new CommandException("Touch id '{$this->id}' failed '{$status}'");

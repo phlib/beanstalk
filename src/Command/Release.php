@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\BuriedException;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\NotFoundException;
-use Phlib\Beanstalk\ValidateTrait;
 
 /**
  * @package Phlib\Beanstalk
@@ -37,19 +37,21 @@ class Release implements CommandInterface
         return sprintf('release %d %d %d', $this->id, $this->priority, $this->delay);
     }
 
-    public function process(SocketInterface $socket): self
+    public function process(Socket $socket): void
     {
         $socket->write($this->getCommand());
 
         $response = $socket->read();
         switch ($response) {
             case 'RELEASED':
+                return;
             case 'BURIED':
-                return $this;
-
+                throw BuriedException::create($this->id);
             case 'NOT_FOUND':
-                throw new NotFoundException("Job id '{$this->id}' could not be found.");
-
+                throw new NotFoundException(
+                    sprintf(NotFoundException::JOB_ID_MSG_F, $this->id),
+                    NotFoundException::JOB_ID_CODE,
+                );
             default:
                 throw new CommandException("Release '{$this->id}' failed '{$response}'");
         }

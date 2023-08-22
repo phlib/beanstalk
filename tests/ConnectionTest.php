@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
 use Phlib\Beanstalk\Exception\NotFoundException;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -16,20 +16,41 @@ class ConnectionTest extends TestCase
     /**
      * @var Socket|MockObject
      */
-    protected MockObject $socket;
+    private Socket $socket;
 
-    protected Connection $beanstalk;
+    private Connection $beanstalk;
 
     protected function setUp(): void
     {
         $this->socket = $this->createMock(Socket::class);
-        $this->beanstalk = new Connection($this->socket);
+        $this->beanstalk = new Connection(
+            'hostname',
+            Socket::DEFAULT_PORT,
+            [],
+            fn() => $this->socket,
+        );
         parent::setUp();
     }
 
     public function testImplementsInterface(): void
     {
         static::assertInstanceOf(ConnectionInterface::class, $this->beanstalk);
+    }
+
+    public function testGetName(): void
+    {
+        $hostname = sha1(uniqid('hostname'));
+        $port = rand(10000, 15000);
+
+        $connection = new Connection(
+            $hostname,
+            $port,
+            [],
+            fn() => $this->socket,
+        );
+
+        $expected = $hostname . ':' . $port;
+        static::assertSame($expected, $connection->getName());
     }
 
     public function testDisconnectCallsSocket(): void
@@ -146,14 +167,19 @@ class ConnectionTest extends TestCase
     public function testWatch(): void
     {
         $tube = 'test-tube';
-        $this->execute("watch {$tube}", "WATCHING {$tube}", 'watch', [$tube]);
+        $actual = $this->execute("watch {$tube}", 'WATCHING 2', 'watch', [$tube]);
+        static::assertSame(2, $actual);
     }
 
     public function testWatchForExistingWatchedTube(): void
     {
         $tube = 'test-tube';
-        $this->execute("watch {$tube}", 'WATCHING 123', 'watch', [$tube]);
-        $this->beanstalk->watch($tube);
+
+        $actual1 = $this->execute("watch {$tube}", 'WATCHING 123', 'watch', [$tube]);
+        static::assertSame(2, $actual1);
+
+        $actual2 = $this->beanstalk->watch($tube);
+        static::assertSame(2, $actual2);
     }
 
     public function testIgnore(): void
@@ -162,8 +188,11 @@ class ConnectionTest extends TestCase
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('WATCHING 123');
-        $this->beanstalk->watch($tube);
-        $this->execute("ignore {$tube}", 'WATCHING 123', 'ignore', [$tube]);
+        $before = $this->beanstalk->watch($tube);
+        static::assertSame(2, $before);
+
+        $after = $this->execute("ignore {$tube}", 'WATCHING 123', 'ignore', [$tube]);
+        static::assertSame(1, $after);
     }
 
     public function testIgnoreDoesNothingWhenNotWatching(): void
@@ -171,12 +200,16 @@ class ConnectionTest extends TestCase
         $tube = 'test-tube';
         $this->socket->expects(static::never())
             ->method('write');
-        $this->beanstalk->ignore($tube);
+        $actual = $this->beanstalk->ignore($tube);
+        static::assertSame(1, $actual);
     }
 
-    public function testIgnoreDoesNothingWhenOnlyHasOneTube(): void
+    public function testIgnoreExceptionWhenOnlyHasOneTube(): void
     {
-        static::assertNull($this->beanstalk->ignore('default'));
+        $this->expectException(CommandException::class);
+        $this->expectExceptionMessage('Cannot ignore the only tube in the watch list');
+
+        $this->beanstalk->ignore('default');
     }
 
     public function testPeek(): void
@@ -202,25 +235,40 @@ class ConnectionTest extends TestCase
 
     public function testPeekNotFound(): void
     {
-        $this->expectException(NotFoundException::class);
+        $jobId = rand();
 
-        $id = 245;
-        static::assertFalse($this->execute("peek {$id}", 'NOT_FOUND', 'peek', [$id]));
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(sprintf(NotFoundException::JOB_ID_MSG_F, $jobId));
+        $this->expectExceptionCode(NotFoundException::JOB_ID_CODE);
+
+        $this->execute("peek {$jobId}", 'NOT_FOUND', 'peek', [$jobId]);
     }
 
     public function testPeekReadyNotFound(): void
     {
-        static::assertNull($this->execute('peek-ready', 'NOT_FOUND', 'peekReady'));
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+
+        $this->execute('peek-ready', 'NOT_FOUND', 'peekReady');
     }
 
     public function testPeekDelayedNotFound(): void
     {
-        static::assertNull($this->execute('peek-delayed', 'NOT_FOUND', 'peekDelayed'));
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+
+        $this->execute('peek-delayed', 'NOT_FOUND', 'peekDelayed');
     }
 
     public function testPeekBuriedNotFound(): void
     {
-        static::assertNull($this->execute('peek-buried', 'NOT_FOUND', 'peekBuried'));
+        $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(NotFoundException::PEEK_STATUS_MSG);
+        $this->expectExceptionCode(NotFoundException::PEEK_STATUS_CODE);
+
+        $this->execute('peek-buried', 'NOT_FOUND', 'peekBuried');
     }
 
     public function testKick(): void
@@ -284,7 +332,7 @@ class ConnectionTest extends TestCase
      * @param mixed $response
      * @return mixed
      */
-    protected function execute(string $command, $response, string $method, array $arguments = [])
+    private function execute(string $command, $response, string $method, array $arguments = [])
     {
         $this->socket->expects(static::once())
             ->method('write')

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Console;
 
-use Phlib\Beanstalk\StatsService;
+use Phlib\Beanstalk\Console\Service\StatsService;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class ServerTubesCommandTest extends ConsoleTestCase
@@ -41,7 +41,7 @@ class ServerTubesCommandTest extends ConsoleTestCase
     /**
      * @var StatsService|MockObject
      */
-    private MockObject $statsService;
+    private StatsService $statsService;
 
     protected function setUpCommand(): AbstractCommand
     {

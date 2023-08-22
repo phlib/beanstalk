@@ -4,10 +4,55 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
+Major versions may make incompatible API changes or remove features.
+The backward compatibility promise has the following exceptions:
+* Any classes not in the package's root namespace (i.e. files directly in the `src` directory);
+* Units of code that are annotated with `@internal`.
+
 ## [Unreleased]
+### Added
+- Add new `BuriedException` thrown by `put()` and `release()` when the server
+  returns this error. This is a minor **BC break** because these commands
+  previously returned a positive response for this error.
+- Add new `DrainingException` thrown by `put()` when the server is in draining
+  mode and cannot accept new jobs.
+  Previously this threw `CommandException` which the new exception extends.
+- Add draining status to the `server:stats` CLI command.
+- Add constants with standardised codes and messages for `NotFoundException`.
+- Add support for a Logger to capture connection failures.
+### Changed
+- Update commands to better reflect the protocol:
+  - `watch()` returns integer of number of watched tubes.
+  - `ignore()` throws `CommandException` if trying to ignore the final tube.
+  - `useTube()`, `touch()`, `release()`, `bury()`, `delete()`
+    have void return type.
+- Status is a required argument for the `tube:peek` CLI command.
+- **BC break**: `Pool` is constructed directly with an array of `Connection`;
+  does not use `Collection`. See updated examples.
+- **BC break**: `reserve()` throws `NotFoundException` if no jobs available,
+  rather than return null.
+- **BC break**: `peekBuried()`, `peekDelayed()` & `peekReady()` throw
+  `NotFoundException` if there are no matching jobs, rather than return null.
+- **BC break**: Change `Collection::getConnection()` to throw
+  `InvalidArgumentException` instead of `NotFoundException` if the given
+  connection key does not exist in the pool.
+- **BC break**: Constructor for `Connection` no longer needs a `Socket`.
+  Pass the same parameters directly to `Connection`.
+- **BC break**: Move core `ConnectionInterface` up to package root namespace.
+- **BC break**: Deprecated static Factory methods are now instance-based.
+- **BC break**: Move `ValidateTrait` and `StatsService` out of root namespace.
+  No impact to standard use of this package.
+### Removed
+- **BC break**: Strategy options are removed. Server choice is random when
+  picking one.
+- **BC break**: Config format no longer supports nesting under `servers` key.
+- **BC break**: Remove `Socket::getUniqueIdentifier()` and `Socket::connect()`
+  only needed internally. No impact to standard use of this package.
+- **BC break**: Remove `SocketInterface`. The details of a connection's
+  socket are only for internal implementation.
+  No impact to standard use of this package.
 
 ## [2.2.0] - 2023-08-17
-### Added
 - Add `--watch` option to `beanstalk tube:stats` CLI command.
 - Add value to `--watch` CLI options, to specify the refresh interval.
   Add info line to show the interval and current datetime.

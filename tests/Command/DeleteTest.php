@@ -25,17 +25,23 @@ class DeleteTest extends CommandTestCase
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('DELETED');
-        static::assertInstanceOf(Delete::class, (new Delete($id))->process($this->socket));
+
+        $delete = new Delete($id);
+        $delete->process($this->socket);
     }
 
     public function testNotFoundThrowsException(): void
     {
+        $jobId = rand();
+
         $this->expectException(NotFoundException::class);
+        $this->expectExceptionMessage(sprintf(NotFoundException::JOB_ID_MSG_F, $jobId));
+        $this->expectExceptionCode(NotFoundException::JOB_ID_CODE);
 
         $this->socket->expects(static::any())
             ->method('read')
             ->willReturn('NOT_FOUND');
-        (new Delete(123))->process($this->socket);
+        (new Delete($jobId))->process($this->socket);
     }
 
     public function testUnknownStatusThrowsException(): void

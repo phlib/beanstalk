@@ -25,7 +25,7 @@ abstract class ConsoleTestCase extends TestCase
     /**
      * @var Connection|MockObject
      */
-    protected MockObject $connection;
+    protected Connection $connection;
 
     final protected function setUp(): void
     {
@@ -35,7 +35,7 @@ abstract class ConsoleTestCase extends TestCase
             ->willReturn(sha1(uniqid()));
 
         $this->factory = $this->createMock(Factory::class);
-        $this->factory->method('createFromArrayBC')
+        $this->factory->method('createFromArray')
             ->willReturn($this->connection);
 
         $this->command = $this->setUpCommand();

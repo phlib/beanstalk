@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
-use Phlib\Beanstalk\ValidateTrait;
 
 /**
  * @package Phlib\Beanstalk
@@ -28,16 +27,19 @@ class UseTube implements CommandInterface
         return sprintf('use %s', $this->tube);
     }
 
-    public function process(SocketInterface $socket): string
+    public function process(Socket $socket): string
     {
         $socket->write($this->getCommand());
-
         $status = strtok($socket->read(), ' ');
-        switch ($status) {
-            case 'USING':
-                return strtok(' '); // tube name
-            default:
-                throw new CommandException("Use tube '{$this->tube}' failed '{$status}'");
+
+        if ($status !== 'USING') {
+            throw new CommandException("Use tube '{$this->tube}' failed '{$status}'");
         }
+
+        $tubeName = strtok(' ');
+        if ($tubeName === false) {
+            return '';
+        }
+        return $tubeName;
     }
 }

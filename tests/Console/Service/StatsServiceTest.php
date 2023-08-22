@@ -2,8 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Phlib\Beanstalk;
+namespace Phlib\Beanstalk\Console\Service;
 
+use Phlib\Beanstalk\Connection;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -73,6 +74,7 @@ class StatsServiceTest extends TestCase
         'rusage-utime',
         'rusage-stime',
         'uptime',
+        'draining',
         'id',
         'hostname',
     ];
@@ -142,7 +144,7 @@ class StatsServiceTest extends TestCase
     /**
      * @var Connection|MockObject
      */
-    private MockObject $connection;
+    private Connection $connection;
 
     private StatsService $statsService;
 

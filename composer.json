@@ -19,13 +19,15 @@
     ],
     "require": {
         "php": "^7.4|^8.0",
-        "symfony/console": "^5",
-        "phlib/console-configuration": "^2"
+        "phlib/console-configuration": "^2",
+        "psr/log": "^1 || ^2 || ^3",
+        "symfony/console": "^5.4"
     },
     "require-dev": {
+        "colinodell/psr-testlogger": "^1",
         "phpunit/phpunit": "^9",
         "php-mock/php-mock-phpunit": "^2",
-        "symplify/easy-coding-standard": "^11"
+        "symplify/easy-coding-standard": "^12"
     },
     "autoload": {
         "psr-4": {
@@ -36,6 +38,9 @@
         "psr-4": {
             "Phlib\\Beanstalk\\": "tests/"
         }
+    },
+    "suggest": {
+        "psr/log-implementation": "Optional Logger can capture connection failures"
     },
     "bin": ["bin/beanstalk"],
     "scripts": {

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Console;
 
+use Phlib\Beanstalk\Console\Service\StatsService;
 use Phlib\Beanstalk\Factory;
-use Phlib\Beanstalk\StatsService;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 

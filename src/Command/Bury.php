@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
 use Phlib\Beanstalk\Exception\NotFoundException;
-use Phlib\Beanstalk\ValidateTrait;
 
 /**
  * @package Phlib\Beanstalk
@@ -33,17 +32,20 @@ class Bury implements CommandInterface
         return sprintf('bury %d %d', $this->id, $this->priority);
     }
 
-    public function process(SocketInterface $socket): self
+    public function process(Socket $socket): void
     {
         $socket->write($this->getCommand());
 
         $response = $socket->read();
         switch ($response) {
             case 'BURIED':
-                return $this;
+                return;
 
             case 'NOT_FOUND':
-                throw new NotFoundException("Job id '{$this->id}' could not be found.");
+                throw new NotFoundException(
+                    sprintf(NotFoundException::JOB_ID_MSG_F, $this->id),
+                    NotFoundException::JOB_ID_CODE,
+                );
 
             default:
                 throw new CommandException("Bury id '{$this->id}' failed '{$response}'");

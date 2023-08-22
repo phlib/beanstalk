@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Console;
 
+use Phlib\Beanstalk\Console\Service\StatsService;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\StatsService;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class TubeStatsCommandTest extends ConsoleTestCase
@@ -29,7 +29,7 @@ class TubeStatsCommandTest extends ConsoleTestCase
     /**
      * @var StatsService|MockObject
      */
-    private MockObject $statsService;
+    private StatsService $statsService;
 
     protected function setUpCommand(): AbstractCommand
     {

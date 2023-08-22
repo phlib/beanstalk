@@ -10,7 +10,7 @@
         <env name="BSTALK_ENABLED" value="0" />
         <env name="BSTALK1_HOST" value="127.0.0.1" />
         <env name="BSTALK1_PORT" value="11300" />
-        <env name="BSTALK2_HOST" value="127.0.0.1" />
+        <env name="BSTALK2_HOST" value="localhost" />
         <env name="BSTALK2_PORT" value="11300" />
     </php>
 

@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
-use Phlib\Beanstalk\ValidateTrait;
 
 /**
  * @package Phlib\Beanstalk
@@ -28,7 +27,7 @@ class Ignore implements CommandInterface
         return sprintf('ignore %s', $this->tube);
     }
 
-    public function process(SocketInterface $socket): int
+    public function process(Socket $socket): int
     {
         $socket->write($this->getCommand());
 
@@ -38,7 +37,7 @@ class Ignore implements CommandInterface
                 return (int)strtok(' ');
 
             case 'NOT_IGNORED':
-                throw new CommandException('Can not ignore only tube currently watching.');
+                throw new CommandException('Cannot ignore the only tube in the watch list');
 
             default:
                 throw new CommandException("Ignore tube '{$this->tube}' failed '{$status}'");

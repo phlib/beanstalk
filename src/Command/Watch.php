@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
-use Phlib\Beanstalk\ValidateTrait;
 
 /**
  * @package Phlib\Beanstalk
@@ -28,17 +27,15 @@ class Watch implements CommandInterface
         return sprintf('watch %s', $this->tube);
     }
 
-    public function process(SocketInterface $socket): int
+    public function process(Socket $socket): int
     {
         $socket->write($this->getCommand());
-
         $status = strtok($socket->read(), ' ');
-        switch ($status) {
-            case 'WATCHING':
-                return (int)strtok(' ');
 
-            default:
-                throw new CommandException("Watch tube '{$this->tube}' failed '{$status}'");
+        if ($status !== 'WATCHING') {
+            throw new CommandException("Watch tube '{$this->tube}' failed '{$status}'");
         }
+
+        return (int)strtok(' ');
     }
 }

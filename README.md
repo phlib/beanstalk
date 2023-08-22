@@ -21,10 +21,9 @@ $ composer require phlib/beanstalk
 ``` php
 <?php
 use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\Connection\Socket;
 
 // producer
-$beanstalk = new Connection(new Socket('127.0.0.1'));
+$beanstalk = new Connection('127.0.0.1');
 $beanstalk->useTube('my-tube');
 $beanstalk->put(array('my' => 'jobData'));
 ```
@@ -32,10 +31,9 @@ $beanstalk->put(array('my' => 'jobData'));
 ``` php
 <?php
 use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\Connection\Socket;
 
 // consumer
-$beanstalk = new Connection(new Socket('127.0.0.1'));
+$beanstalk = new Connection('127.0.0.1');
 $beanstalk->watch('my-tube')
     ->ignore('default');
 $job = $beanstalk->reserve();
@@ -43,7 +41,7 @@ $myJobData = $job['body'];
 $beanstalk->delete($job['id']);
 ```
 
-## Configuration
+## Connection configuration
 
 |Name|Type|Required|Default|Description|
 |----|----|--------|-------|-----------|
@@ -56,6 +54,14 @@ $beanstalk->delete($job['id']);
 |Name|Type|Default|Description|
 |----|----|-------|-----------|
 |`timeout`|*Integer*|`60`|The connection timeout.|
+
+## Pool configuration
+
+|Name|Type|Required|Default|Description|
+|----|----|--------|-------|-----------|
+|`connections`|*ConnectionInterface[]*|Yes| |Array of server connections.|
+|`retryDelay`|*Integer*|No|`600`|How long to delay retrying a connection for after an error.|
+|`logger`|*LoggerInterface*|No| |Optional Logger to capture connection failures.|
 
 ## Factory
 The factory allows for easy setup of the objects.
@@ -74,17 +80,24 @@ $beanstalk = $factory->createFromArray([
 ]);
 
 $beanstalk = $factory->createFromArray([
-    'server' => ['host' => 'localhost'],
+    ['host' => '10.0.0.1'],
+    ['host' => '10.0.0.2'],
+    ['host' => '10.0.0.3'],
 ]);
+```
+
+### Factory Configuration
+The configuration options are as specified above.
+With the exception that when creating a pool there is an optional `enabled`.
+
+```php
+$factory = new \Phlib\Beanstalk\Factory();
 
 $beanstalk = $factory->createFromArray([
-    'servers' => [
-        ['host' => '10.0.0.1'],
-        ['host' => '10.0.0.2'],
-        ['host' => '10.0.0.3'],
-    ],
+    ['host' => '10.0.0.1', 'enabled' => true],
+    ['host' => '10.0.0.2', 'enabled' => false],
+    ['host' => '10.0.0.3', 'enabled' => true],
 ]);
-
 ```
 
 ## Pool
@@ -93,24 +106,37 @@ The pool implements the connection interface.
 
 ```php
 use Phlib\Beanstalk\Connection;
-use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Pool;
-use Phlib\Beanstalk\Pool\Collection;
-use Phlib\Beanstalk\Pool\RoundRobinStrategy;
 
-$servers = [
-    new Connection(new Socket('10.0.0.1')),
-    new Connection(new Socket('10.0.0.2')),
-    new Connection(new Socket('10.0.0.3')),
-    new Connection(new Socket('10.0.0.4'))
+$connections = [
+    new Connection('10.0.0.1'),
+    new Connection('10.0.0.2'),
+    new Connection('10.0.0.3'),
+    new Connection('10.0.0.4'),
 ];
-$strategy = new RoundRobinStrategy
-$pool = new Pool(new Collection($servers, $strategy, ['retry_delay' => '120']));
+$logger = new MyLogger();
+$pool = new Pool($connections, 120, $logger);
 
 $pool->useTube('my-tube');
-$pool->put(array('my' => 'jobData1')); // <- sent to server 1
-$pool->put(array('my' => 'jobData2')); // <- sent to server 2
-$pool->put(array('my' => 'jobData3')); // <- sent to server 3
+$pool->put(array('my' => 'jobData1')); // )
+$pool->put(array('my' => 'jobData2')); // )-> distributed between random servers
+$pool->put(array('my' => 'jobData3')); // )
+```
+
+Alternative way to create a Pool, using the Factory to construct the
+connections:
+
+```php
+use Phlib\Beanstalk\Factory;
+use Phlib\Beanstalk\Pool;
+
+$connections = (new Factory())->createConnections([
+    ['host' => '10.0.0.1', 'enabled' => true],
+    ['host' => '10.0.0.2', 'enabled' => false],
+    ['host' => '10.0.0.3', 'enabled' => true],
+]);
+$logger = new MyLogger();
+$pool = new Pool($connections, 120, $logger);
 ```
 
 ## Command Line Script
@@ -143,32 +169,21 @@ return [
 ```
 
 ```php
-return [
-    'server' => [
-        'host' => '10.0.0.1',
-        'port' => 11300
-    ]
-];
-```
-
-```php
 // pool configuration
 return [
-    'servers' => [
-        [
-            'host' => '10.0.0.1',
-            'port' => 11300
-        ],
-        [
-            'host' => '10.0.0.2',
-            'port' => 11300
-        ],
-        [
-            'host' => '10.0.0.3',
-            'port' => 11300,
-            'enabled' => false
-        ]
-    ]
+    [
+        'host' => '10.0.0.1',
+        'port' => 11300,
+    ],
+    [
+        'host' => '10.0.0.2',
+        'port' => 11300,
+    ],
+    [
+        'host' => '10.0.0.3',
+        'port' => 11300,
+        'enabled' => false,
+    ],
 ];
 ```
 

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Phlib\Beanstalk;
+namespace Phlib\Beanstalk\Console\Service;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\ConnectionInterface;
 
 /**
  * @package Phlib\Beanstalk
@@ -34,17 +34,18 @@ class StatsService
     ];
 
     private const INFO_KEYS = [
-        'pid',
-        'hostname',
-        'id',
-        'version',
-        'uptime',
-        'total-jobs',
         'job-timeouts',
+        'total-jobs',
         'max-job-size',
         'total-connections',
+        'pid',
+        'version',
         'rusage-utime',
         'rusage-stime',
+        'uptime',
+        'draining',
+        'id',
+        'hostname',
     ];
 
     private const SERVER_KEYS = [

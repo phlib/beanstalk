@@ -4,12 +4,11 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Console;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
+use Phlib\Beanstalk\ConnectionInterface;
+use Phlib\Beanstalk\Console\Service\StatsService;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Phlib\Beanstalk\Factory;
 use Phlib\Beanstalk\Pool;
-use Phlib\Beanstalk\Pool\Collection;
-use Phlib\Beanstalk\StatsService;
 use PHPUnit\Framework\MockObject\MockObject;
 
 class ServerDistribCommandTest extends ConsoleTestCase
@@ -36,7 +35,7 @@ class ServerDistribCommandTest extends ConsoleTestCase
         $this->expectExceptionMessage('Command only works with a pool of beanstalk servers');
 
         // Use standard non-Pool connection
-        $this->factory->method('createFromArrayBC')
+        $this->factory->method('createFromArray')
             ->willReturn($this->connection);
 
         $this->commandTester->execute([
@@ -51,44 +50,29 @@ class ServerDistribCommandTest extends ConsoleTestCase
     {
         $pool = $this->createMock(Pool::class);
 
-        $this->factory->method('createFromArrayBC')
+        $this->factory->method('createFromArray')
             ->willReturn($pool);
 
-        $connections = [
-            $this->createConnectionStats(array_keys($expectedStats)),
-            $this->createConnectionStats(array_keys($expectedStats)),
-        ];
-
-        $method = 'stats';
-        $args = [];
-        if (isset($tubeName)) {
-            $method = 'statsTube';
-            $args = [$tubeName];
-        }
-
-        $collection = $this->createMock(Collection::class);
-        $collection->expects(static::once())
-            ->method('sendToAll')
-            ->with($method, $args)
-            ->willReturnCallback(function ($command, $arguments, $success) use ($connections) {
-                foreach ($connections as $details) {
-                    call_user_func($success, [
-                        'connection' => $details['connection'],
-                        'response' => $details['stats'],
-                    ]);
-                }
-            });
-
-        $pool->expects(static::once())
-            ->method('getCollection')
-            ->willReturn($collection);
-
+        $statsMethod = 'stats';
+        $statsArgs = [];
         $execInput = [
             'command' => $this->command->getName(),
         ];
         if (isset($tubeName)) {
+            $statsMethod = 'statsTube';
+            $statsArgs = [$tubeName];
             $execInput['tube'] = $tubeName;
         }
+
+        $connections = [
+            $this->createConnectionStats(array_keys($expectedStats), $statsMethod, $statsArgs),
+            $this->createConnectionStats(array_keys($expectedStats), $statsMethod, $statsArgs),
+        ];
+
+        $pool->expects(static::once())
+            ->method('getConnections')
+            ->willReturn(array_column($connections, 'connection'));
+
         $this->commandTester->execute($execInput);
 
         $output = $this->commandTester->getDisplay();
@@ -135,7 +119,7 @@ class ServerDistribCommandTest extends ConsoleTestCase
         ];
     }
 
-    private function createConnectionStats(array $statNames): array
+    private function createConnectionStats(array $statNames, string $statsMethod, array $statsArgs): array
     {
         $connectionName = sha1(uniqid('name'));
         $connection = $this->createMock(ConnectionInterface::class);
@@ -146,6 +130,11 @@ class ServerDistribCommandTest extends ConsoleTestCase
         foreach ($statNames as $statName) {
             $stats[$statName] = rand(1, 1024);
         }
+
+        $connection->expects(static::once())
+            ->method($statsMethod)
+            ->with(...$statsArgs)
+            ->willReturn($stats);
 
         return [
             'connectionName' => $connectionName,

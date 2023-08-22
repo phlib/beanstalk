@@ -4,13 +4,12 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Console;
 
+use Phlib\Beanstalk\Console\Service\StatsService;
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
-use Phlib\Beanstalk\StatsService;
-use Symfony\Component\Console\Helper\FormatterHelper;
-use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 /**
  * @package Phlib\Beanstalk
@@ -31,10 +30,15 @@ class ServerStatsCommand extends AbstractStatsCommand
         $stat = $input->getOption('stat');
         $service = $this->getStatsService();
 
-        $this->outputDetectedConfig($output);
+        $io = new SymfonyStyle($input, $output);
+
+        if ($output->isVerbose()) {
+            $this->outputDetectedConfig($io);
+        }
+
         if (empty($stat)) {
-            $this->outputInfo($service, $output);
-            $this->outputStats($service, $output);
+            $this->outputInfo($service, $io);
+            $this->outputStats($service, $io);
         } else {
             $this->outputStat($service, $stat, $output);
         }
@@ -42,49 +46,42 @@ class ServerStatsCommand extends AbstractStatsCommand
         return 0;
     }
 
-    protected function outputDetectedConfig(OutputInterface $output): void
+    private function outputDetectedConfig(SymfonyStyle $io): void
     {
-        if (!$output->isVerbose()) {
-            return;
-        }
         $configPath = $this->getHelper('configuration')->getConfigPath();
         if ($configPath === '[default]') {
             $configPath = '[default fallback localhost]';
         }
 
-        $output->writeln('Configuration: ' . $configPath);
+        $io->comment('Configuration: ' . $configPath);
     }
 
-    protected function outputInfo(StatsService $stats, OutputInterface $output): void
+    private function outputInfo(StatsService $stats, SymfonyStyle $io): void
     {
         $info = $stats->getServerInfo();
 
-        /** @var FormatterHelper $formatter */
-        $formatter = $this->getHelper('formatter');
-        $block = $formatter->formatBlock(
-            [
-                "Host: {$info['hostname']} (pid {$info['pid']})",
-                "Beanstalk Version: {$info['version']}",
-                "Resources: uptime/{$info['uptime']}, connections/{$info['total-connections']}",
-                "Jobs: total/{$info['total-jobs']}, timeouts/{$info['job-timeouts']}",
-            ],
-            'info',
-            true
-        );
+        $draining = $info['draining'];
+        if ($draining === 'true') {
+            $draining = sprintf('<error>%s</>', $draining);
+        }
 
-        $output->writeln('<info>Server Information</info>');
-        $output->writeln($block);
+        $io->section('Server Information');
+        $io->definitionList(
+            ['Host' => sprintf('%s (pid %d)', $info['hostname'], $info['pid'])],
+            ['Beanstalk Version' => $info['version']],
+            ['Resources' => sprintf('uptime/%d, connections/%d', $info['uptime'], $info['total-connections'])],
+            ['Jobs' => sprintf('total/%d, timeouts/%d', $info['total-jobs'], $info['job-timeouts'])],
+            ['Draining' => $draining],
+        );
     }
 
-    protected function outputStats(StatsService $stats, OutputInterface $output): void
+    private function outputStats(StatsService $stats, SymfonyStyle $io): void
     {
         $binlog = $stats->getServerStats(StatsService::SERVER_BINLOG);
         $command = $stats->getServerStats(StatsService::SERVER_COMMAND);
         $current = $stats->getServerStats(StatsService::SERVER_CURRENT);
 
-        $table = new Table($output);
-        $table->setStyle('borderless');
-        $table->setHeaders(['Current', 'Stat', 'Command', 'Stat', 'Binlog', 'Stat']);
+        $headers = ['Current', 'Stat', 'Command', 'Stat', 'Binlog', 'Stat'];
 
         $binlogKeys = array_keys($binlog);
         $binlogValues = array_values($binlog);
@@ -93,6 +90,7 @@ class ServerStatsCommand extends AbstractStatsCommand
         $currentKeys = array_keys($current);
         $currentValues = array_values($current);
 
+        $rows = [];
         $maxRows = max(count($binlog), count($command), count($current));
         for ($i = 0; $i < $maxRows; $i++) {
             $row = [
@@ -103,16 +101,16 @@ class ServerStatsCommand extends AbstractStatsCommand
                 $binlogKeys[$i] ?? '',
                 $binlogValues[$i] ?? '',
             ];
-            $table->addRow($row);
+            $rows[] = $row;
         }
 
-        $output->writeln('<info>Server Statistics</info>');
-        $table->render();
+        $io->section('Server Statistics');
+        $io->table($headers, $rows);
     }
 
-    protected function outputStat(StatsService $service, string $stat, OutputInterface $output): void
+    private function outputStat(StatsService $service, string $stat, OutputInterface $output): void
     {
-        $stats = $service->getServerStats(StatsService::SERVER_ALL) + $service->getServerInfo();
+        $stats = array_merge($service->getServerStats(StatsService::SERVER_ALL), $service->getServerInfo());
         if (!isset($stats[$stat])) {
             throw new InvalidArgumentException("Specified statistic '{$stat}' is not valid.");
         }

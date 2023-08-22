@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Command;
 
-use Phlib\Beanstalk\Connection\SocketInterface;
+use Phlib\Beanstalk\Connection\Socket;
 use Phlib\Beanstalk\Exception\CommandException;
 
 /**
@@ -17,16 +17,15 @@ class ListTubeUsed implements CommandInterface
         return 'list-tube-used';
     }
 
-    public function process(SocketInterface $socket): string
+    public function process(Socket $socket): string
     {
         $socket->write('list-tube-used');
         $status = strtok($socket->read(), ' ');
-        switch ($status) {
-            case 'USING':
-                return strtok(' ');
 
-            default:
-                throw new CommandException("List tube used failed '{$status}'");
+        if ($status !== 'USING') {
+            throw new CommandException("List tube used failed '{$status}'");
         }
+
+        return strtok(' ');
     }
 }

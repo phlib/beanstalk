@@ -5,41 +5,13 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk\Console;
 
 use Phlib\Beanstalk\Exception\InvalidArgumentException;
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 class TubePeekCommandTest extends ConsoleTestCase
 {
     protected function setUpCommand(): AbstractCommand
     {
         return new TubePeekCommand($this->factory);
-    }
-
-    public function testTubePeekDefault(): void
-    {
-        $tube = sha1(uniqid());
-        $jobId = rand();
-        $body = sha1(uniqid());
-
-        $this->connection->expects(static::once())
-            ->method('useTube')
-            ->with($tube)
-            ->willReturnSelf();
-
-        $this->connection->expects(static::once())
-            ->method('peekBuried')
-            ->willReturn([
-                'id' => $jobId,
-                'body' => $body,
-            ]);
-
-        // No '--status'
-        $this->commandTester->execute([
-            'command' => $this->command->getName(),
-            'tube' => $tube,
-        ]);
-
-        $output = $this->commandTester->getDisplay();
-        static::assertStringContainsString("Job ID: {$jobId}", $output);
-        static::assertStringContainsString($body, $output);
     }
 
     public function testTubePeekBuried(): void
@@ -50,8 +22,7 @@ class TubePeekCommandTest extends ConsoleTestCase
 
         $this->connection->expects(static::once())
             ->method('useTube')
-            ->with($tube)
-            ->willReturnSelf();
+            ->with($tube);
 
         $this->connection->expects(static::once())
             ->method('peekBuried')
@@ -63,7 +34,7 @@ class TubePeekCommandTest extends ConsoleTestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             'tube' => $tube,
-            '--status' => 'buried',
+            'status' => 'buried',
         ]);
 
         $output = $this->commandTester->getDisplay();
@@ -79,8 +50,7 @@ class TubePeekCommandTest extends ConsoleTestCase
 
         $this->connection->expects(static::once())
             ->method('useTube')
-            ->with($tube)
-            ->willReturnSelf();
+            ->with($tube);
 
         $this->connection->expects(static::once())
             ->method('peekDelayed')
@@ -92,7 +62,7 @@ class TubePeekCommandTest extends ConsoleTestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             'tube' => $tube,
-            '--status' => 'delayed',
+            'status' => 'delayed',
         ]);
 
         $output = $this->commandTester->getDisplay();
@@ -108,8 +78,7 @@ class TubePeekCommandTest extends ConsoleTestCase
 
         $this->connection->expects(static::once())
             ->method('useTube')
-            ->with($tube)
-            ->willReturnSelf();
+            ->with($tube);
 
         $this->connection->expects(static::once())
             ->method('peekReady')
@@ -121,7 +90,7 @@ class TubePeekCommandTest extends ConsoleTestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             'tube' => $tube,
-            '--status' => 'ready',
+            'status' => 'ready',
         ]);
 
         $output = $this->commandTester->getDisplay();
@@ -141,7 +110,7 @@ class TubePeekCommandTest extends ConsoleTestCase
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             'tube' => $tube,
-            '--status' => sha1(uniqid()),
+            'status' => sha1(uniqid()),
         ]);
     }
 
@@ -151,16 +120,19 @@ class TubePeekCommandTest extends ConsoleTestCase
 
         $this->connection->expects(static::once())
             ->method('useTube')
-            ->with($tube)
-            ->willReturnSelf();
+            ->with($tube);
 
         $this->connection->expects(static::once())
             ->method('peekBuried')
-            ->willReturn(null);
+            ->willThrowException(new NotFoundException(
+                NotFoundException::PEEK_STATUS_MSG,
+                NotFoundException::PEEK_STATUS_CODE,
+            ));
 
         $this->commandTester->execute([
             'command' => $this->command->getName(),
             'tube' => $tube,
+            'status' => 'buried',
         ]);
 
         $output = $this->commandTester->getDisplay();

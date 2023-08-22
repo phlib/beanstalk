@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Phlib\Beanstalk\Connection;
+namespace Phlib\Beanstalk;
+
+use Phlib\Beanstalk\Exception\NotFoundException;
 
 /**
  * @package Phlib\Beanstalk
@@ -29,7 +31,7 @@ interface ConnectionInterface
 
     public function disconnect(): bool;
 
-    public function useTube(string $tube): self;
+    public function useTube(string $tube): void;
 
     /**
      * @return string|int
@@ -41,45 +43,58 @@ interface ConnectionInterface
         int $ttr = self::DEFAULT_TTR
     );
 
-    public function reserve(?int $timeout = null): ?array;
+    /**
+     * @throws NotFoundException when no jobs available to reserve within timeout
+     */
+    public function reserve(?int $timeout = null): array;
 
     /**
      * @param string|int $id
      */
-    public function touch($id): self;
+    public function touch($id): void;
 
     /**
      * @param string|int $id
      */
-    public function release($id, int $priority = self::DEFAULT_PRIORITY, int $delay = self::DEFAULT_DELAY): self;
+    public function release($id, int $priority = self::DEFAULT_PRIORITY, int $delay = self::DEFAULT_DELAY): void;
 
     /**
      * @param string|int $id
      */
-    public function bury($id, int $priority = self::DEFAULT_PRIORITY): self;
+    public function bury($id, int $priority = self::DEFAULT_PRIORITY): void;
 
     /**
      * @param string|int $id
      */
-    public function delete($id): self;
+    public function delete($id): void;
 
-    public function watch(string $tube): self;
+    public function watch(string $tube): int;
 
     /**
      * @return int|null Number of tubes being watched or null when last tube cannot be ignored
      */
-    public function ignore(string $tube): ?int;
+    public function ignore(string $tube): int;
 
     /**
      * @param string|int $id
+     * @throws NotFoundException when the job cannot be found
      */
     public function peek($id): array;
 
-    public function peekReady(): ?array;
+    /**
+     * @throws NotFoundException when no jobs to peek in the 'ready' status
+     */
+    public function peekReady(): array;
 
-    public function peekDelayed(): ?array;
+    /**
+     * @throws NotFoundException when no jobs to peek in the 'delayed' status
+     */
+    public function peekDelayed(): array;
 
-    public function peekBuried(): ?array;
+    /**
+     * @throws NotFoundException when no jobs to peek in the 'buried' status
+     */
+    public function peekBuried(): array;
 
     public function kick(int $quantity): int;
 
@@ -88,9 +103,9 @@ interface ConnectionInterface
      */
     public function statsJob($id): array;
 
-    public function statsTube(string $tube): ?array;
+    public function statsTube(string $tube): array;
 
-    public function stats(): ?array;
+    public function stats(): array;
 
     public function listTubes(): array;
 

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Console;
 
-use Phlib\Beanstalk\Connection\ConnectionInterface;
 use Phlib\Beanstalk\Connection\Socket;
+use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Factory;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -61,7 +61,7 @@ abstract class AbstractCommand extends Command
             $config = $this->getHelper('configuration')->fetch();
         }
 
-        $this->beanstalk = $this->factory->createFromArrayBC($config);
+        $this->beanstalk = $this->factory->createFromArray($config);
     }
 
     final protected function getBeanstalk(): ConnectionInterface
