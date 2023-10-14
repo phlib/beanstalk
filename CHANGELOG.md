@@ -10,6 +10,8 @@ The backward compatibility promise has the following exceptions:
 * Units of code that are annotated with `@internal`.
 
 ## [Unreleased]
+
+## [3.0.1] - 2023-10-14
 ### Changed
 - Allow Symfony v6 dependencies
 
