@@ -21,7 +21,7 @@
         "php": "^7.4|^8.0",
         "phlib/console-configuration": "^2",
         "psr/log": "^1 || ^2 || ^3",
-        "symfony/console": "^5.4"
+        "symfony/console": "^5.4 || ^6"
     },
     "require-dev": {
         "colinodell/psr-testlogger": "^1",
