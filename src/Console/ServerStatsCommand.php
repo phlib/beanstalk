@@ -115,6 +115,6 @@ class ServerStatsCommand extends AbstractStatsCommand
             throw new InvalidArgumentException("Specified statistic '{$stat}' is not valid.");
         }
 
-        $output->writeln($stats[$stat]);
+        $output->writeln((string)$stats[$stat]);
     }
 }
