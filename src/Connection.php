@@ -222,7 +222,7 @@ class Connection implements ConnectionInterface
     }
 
     /**
-     * @param string|int
+     * @param string|int $id
      */
     private function filterJobId($id): int
     {

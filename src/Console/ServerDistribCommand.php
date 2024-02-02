@@ -78,7 +78,7 @@ class ServerDistribCommand extends AbstractWatchCommand
                 $buried = "<error>{$buried}</error>";
             }
             $rows[6][] = $buried;
-        };
+        }
 
         $table = $io->createTable();
         $table->setHeaders($headers);

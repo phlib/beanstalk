@@ -35,10 +35,8 @@ class Ignore implements CommandInterface
         switch ($status) {
             case 'WATCHING':
                 return (int)strtok(' ');
-
             case 'NOT_IGNORED':
                 throw new CommandException('Cannot ignore the only tube in the watch list');
-
             default:
                 throw new CommandException("Ignore tube '{$this->tube}' failed '{$status}'");
         }
