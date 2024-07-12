@@ -10,6 +10,8 @@ The backward compatibility promise has the following exceptions:
 * Units of code that are annotated with `@internal`.
 
 ## [Unreleased]
+### Fixed
+- Add a retry delay to a Pool connection when `useTube()` fails.
 
 ## [3.0.1] - 2023-10-14
 ### Changed

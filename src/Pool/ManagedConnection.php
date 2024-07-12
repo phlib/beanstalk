@@ -54,7 +54,9 @@ class ManagedConnection implements ConnectionInterface
 
     public function useTube(string $tube): void
     {
-        $this->connection->useTube($tube);
+        $this->tryCommand(
+            fn() => $this->connection->useTube($tube)
+        );
     }
 
     public function put(
