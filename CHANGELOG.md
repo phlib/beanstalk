@@ -13,6 +13,10 @@ The backward compatibility promise has the following exceptions:
 ### Added
 - Replay tube selections when reconnecting a failed Pool connection.
 
+## [3.0.2] - 2024-07-12
+### Fixed
+- Add a retry delay to a Pool connection when `useTube()` fails.
+
 ## [3.0.1] - 2023-10-14
 ### Changed
 - Allow Symfony v6 dependencies
