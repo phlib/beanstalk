@@ -10,6 +10,8 @@ The backward compatibility promise has the following exceptions:
 * Units of code that are annotated with `@internal`.
 
 ## [Unreleased]
+
+## [3.1.0] - 2025-01-30
 ### Changed
 - Allow phlib/console-configuration v3 dependency.
 - Allow Symfony v7 dependencies.
