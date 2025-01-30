@@ -12,6 +12,7 @@ The backward compatibility promise has the following exceptions:
 ## [Unreleased]
 ### Changed
 - Allow phlib/console-configuration v3 dependency.
+- Allow Symfony v7 dependencies.
 
 ## [3.0.2] - 2024-07-12
 ### Fixed
