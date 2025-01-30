@@ -13,6 +13,8 @@ use PHPUnit\Framework\TestCase;
  */
 class IntegrationPoolTest extends TestCase
 {
+    use PHPMock;
+
     private Pool $beanstalk;
 
     public static function setUpBeforeClass(): void
@@ -20,7 +22,7 @@ class IntegrationPoolTest extends TestCase
         parent::setUpBeforeClass();
 
         // Declare a namespaced shuffle function, so its use in this test doesn't block its use in PoolTest
-        PHPMock::defineFunctionMock(__NAMESPACE__, 'shuffle');
+        static::defineFunctionMock(__NAMESPACE__, 'shuffle');
     }
 
     protected function setUp(): void

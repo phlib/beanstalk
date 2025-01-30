@@ -45,7 +45,7 @@ class PoolTest extends TestCase
 
         // Declare the namespaced function early, so it's available after being used in other tests
         // @see https://github.com/php-mock/php-mock-phpunit#restrictions
-        PHPMock::defineFunctionMock(__NAMESPACE__, 'shuffle');
+        static::defineFunctionMock(__NAMESPACE__, 'shuffle');
     }
 
     protected function setUp(): void
