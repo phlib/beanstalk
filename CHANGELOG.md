@@ -10,6 +10,8 @@ The backward compatibility promise has the following exceptions:
 * Units of code that are annotated with `@internal`.
 
 ## [Unreleased]
+### Added
+- Replay tube selections when reconnecting a failed Pool connection.
 
 ## [3.1.0] - 2025-01-30
 ### Changed

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Phlib\Beanstalk\Pool;
 
+use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use Psr\Log\LoggerInterface;
@@ -17,11 +18,19 @@ class ManagedConnection implements ConnectionInterface
 {
     private ConnectionInterface $connection;
 
+    private LoggerInterface $logger;
+
     private int $retryDelay;
 
     private int $retryAt;
 
-    private LoggerInterface $logger;
+    private bool $hasFailed = false;
+
+    private string $using = Connection::DEFAULT_TUBE;
+
+    private array $watching = [Connection::DEFAULT_TUBE => true];
+
+    private array $ignoring = [];
 
     public function __construct(
         ConnectionInterface $connection,
@@ -54,6 +63,8 @@ class ManagedConnection implements ConnectionInterface
 
     public function useTube(string $tube): void
     {
+        $this->using = $tube;
+
         $this->tryCommand(
             fn() => $this->connection->useTube($tube)
         );
@@ -105,6 +116,9 @@ class ManagedConnection implements ConnectionInterface
 
     public function watch(string $tube): int
     {
+        unset($this->ignoring[$tube]);
+        $this->watching[$tube] = true;
+
         return $this->tryCommand(
             fn() => $this->connection->watch($tube)
         );
@@ -112,6 +126,9 @@ class ManagedConnection implements ConnectionInterface
 
     public function ignore(string $tube): int
     {
+        unset($this->watching[$tube]);
+        $this->ignoring[$tube] = true;
+
         return $this->tryCommand(
             fn() => $this->connection->ignore($tube)
         );
@@ -200,6 +217,11 @@ class ManagedConnection implements ConnectionInterface
     private function tryCommand(\Closure $commandFn)
     {
         try {
+            if ($this->hasFailed) {
+                // Trying to reconnect; need to replay tube selections
+                $this->replayTubes();
+            }
+
             $result = $commandFn();
             $this->reset();
 
@@ -217,13 +239,38 @@ class ManagedConnection implements ConnectionInterface
         return !isset($this->retryAt) || $this->retryAt <= time();
     }
 
+    private function replayTubes(): void
+    {
+        $this->logger->debug(
+            sprintf('Replay tube selections for connection \'%s\'', $this->getName()),
+            [
+                'connectionName' => $this->getName(),
+                'using' => $this->using,
+                'watching' => array_keys($this->watching),
+                'ignoring' => array_keys($this->ignoring),
+            ]
+        );
+
+        $this->connection->useTube($this->using);
+
+        foreach (array_keys($this->watching) as $watchTube) {
+            $this->connection->watch($watchTube);
+        }
+
+        foreach (array_keys($this->ignoring) as $ignoreTube) {
+            $this->connection->ignore($ignoreTube);
+        }
+    }
+
     private function reset(): void
     {
         unset($this->retryAt);
+        $this->hasFailed = false;
     }
 
     private function delay(): void
     {
+        $this->hasFailed = true;
         $this->retryAt = time() + $this->retryDelay;
         $this->logger->notice(
             sprintf('Connection \'%s\' failed; delay for %ds', $this->getName(), $this->retryDelay),
