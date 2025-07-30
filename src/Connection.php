@@ -32,7 +32,7 @@ class Connection implements ConnectionInterface
         string $host,
         int $port = Socket::DEFAULT_PORT,
         array $options = [],
-        \Closure $createSocket = null
+        ?\Closure $createSocket = null
     ) {
         if (isset($createSocket)) {
             $this->socket = $createSocket($host, $port, $options);
