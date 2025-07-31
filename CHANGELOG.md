@@ -11,6 +11,10 @@ The backward compatibility promise has the following exceptions:
 
 ## [Unreleased]
 
+## [3.1.1] - 2025-07-31
+### Fixed
+- PHP 8.4 deprecation warnings.
+
 ## [3.1.0] - 2025-01-30
 ### Changed
 - Allow phlib/console-configuration v3 dependency.
