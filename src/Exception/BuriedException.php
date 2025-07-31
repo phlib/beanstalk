@@ -13,7 +13,7 @@ class BuriedException extends CommandException
 
     private int $jobId;
 
-    public function __construct(int $jobId, string $message, int $code = 0, \Exception $previous = null)
+    public function __construct(int $jobId, string $message, int $code = 0, ?\Exception $previous = null)
     {
         $this->jobId = $jobId;
         parent::__construct($message, $code, $previous);

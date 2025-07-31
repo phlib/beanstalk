@@ -79,7 +79,7 @@ class Socket
         }
     }
 
-    public function read(int $length = null): string
+    public function read(?int $length = null): string
     {
         $this->connect();
 
