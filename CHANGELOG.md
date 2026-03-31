@@ -10,6 +10,8 @@ The backward compatibility promise has the following exceptions:
 * Units of code that are annotated with `@internal`.
 
 ## [Unreleased]
+
+## [3.2.0] - 2026-03-31
 ### Fixed
 - Handle quoted YAML, added in beanstalkd v1.13
 
