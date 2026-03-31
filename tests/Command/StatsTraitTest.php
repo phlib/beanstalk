@@ -95,6 +95,13 @@ class StatsTraitTest extends CommandTestCase
                     'key3' => 'value3',
                 ],
             ],
+            'quotedValues' => [
+                "key1: \"value1\"\r\nkey2: value2",
+                [
+                    'key1' => 'value1',
+                    'key2' => 'value2',
+                ],
+            ],
         ];
     }
 

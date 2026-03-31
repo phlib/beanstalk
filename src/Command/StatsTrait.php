@@ -53,7 +53,7 @@ trait StatsTrait
             } else {
                 $key = strtok($line, ': ');
                 if ($key) {
-                    $value = trim(strtok(''));
+                    $value = trim(trim(strtok('')), '"');
 
                     if (is_numeric($value)) {
                         $value += 0;
