@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Phlib\Beanstalk\Pool;
 
 use ColinODell\PsrTestLogger\TestLogger;
+use Phlib\Beanstalk\Connection;
 use Phlib\Beanstalk\ConnectionInterface;
 use Phlib\Beanstalk\Exception\RuntimeException;
 use phpmock\phpunit\PHPMock;
@@ -206,6 +207,99 @@ class ManagedConnectionTest extends TestCase
          */
         foreach (self::COMMAND_PASS_THROUGH as $command => $map) {
             yield $command => [$command, $map];
+        }
+    }
+
+    public function testConnectionGetsRestored(): void
+    {
+        $useTube = sha1(uniqid('use'));
+        $watchTube = sha1(uniqid('watch'));
+        $ignoreTube = Connection::DEFAULT_TUBE;
+        $jobId = rand();
+
+        $releaseCalled = false;
+
+        $this->connection->expects(static::exactly(2))
+            ->method('useTube')
+            ->with($useTube)
+            ->willReturnCallback(function () use (&$releaseCalled) {
+                if ($releaseCalled) {
+                    // This should be called its second time to re-select, before the primary command is called
+                    self::fail('Command was called before connection was reinitialised');
+                }
+            });
+
+        $this->connection->expects(static::exactly(2))
+            ->method('watch')
+            ->with($watchTube)
+            ->willReturnCallback(function () use (&$releaseCalled) {
+                if ($releaseCalled) {
+                    // This should be called its second time to re-select, before the primary command is called
+                    self::fail('Command was called before connection was reinitialised');
+                }
+                return 1;
+            });
+
+        $this->connection->expects(static::exactly(2))
+            ->method('ignore')
+            ->with($ignoreTube)
+            ->willReturnCallback(function () use (&$releaseCalled) {
+                if ($releaseCalled) {
+                    // This should be called its second time to re-select, before the primary command is called
+                    self::fail('Command was called before connection was reinitialised');
+                }
+                return 1;
+            });
+
+        // Force a connection error so it is treated as unavailable
+        $this->connection->expects(static::once())
+            ->method('stats')
+            ->willThrowException(new RuntimeException('connection error'));
+
+        // Command should only be called on the connection after the tube selections are replayed
+        $this->connection->expects(static::once())
+            ->method('release')
+            ->willReturnCallback(function (int $withJobId) use (&$releaseCalled, $jobId): void {
+                $releaseCalled = true;
+                static::assertSame($jobId, $withJobId);
+            });
+
+        $logger = new TestLogger();
+
+        $managed = new ManagedConnection($this->connection, 0, $logger);
+
+        // Make the tube selections that should be repeated after failure
+        $managed->useTube($useTube);
+        $managed->watch($watchTube);
+        $managed->ignore($ignoreTube);
+
+        try {
+            // Trigger the connection error
+            $managed->stats();
+        } catch (RuntimeException $e) {
+            // ignore
+        }
+
+        // Call the command that should trigger the reinitialisation
+        $managed->release($jobId);
+
+        // Expected retry log
+        $logMsg = sprintf(
+            'Replay tube selections for connection \'%s\'',
+            $this->connectionName,
+        );
+        $logCtxt = [
+            'connectionName' => $this->connectionName,
+            'using' => $useTube,
+            'watching' => [$watchTube],
+            'ignoring' => [$ignoreTube],
+        ];
+        static::assertCount(2, $logger->records);
+        $log = $logger->records[1];
+        static::assertSame(LogLevel::DEBUG, $log['level']);
+        static::assertSame($logMsg, $log['message']);
+        foreach ($logCtxt as $key => $expectedCtxt) {
+            static::assertSame($expectedCtxt, $log['context'][$key]);
         }
     }
 }
